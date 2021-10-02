@@ -26,14 +26,35 @@ const readCommands = dir => {
 }
 readCommands(path.join(__dirname, '../schemas'))
 
+async function handle(name, id) {
+    if(!data)
+    var changed = false
+    switch(name) {
+        case 'userdata': 
+            if(data.banned && data.banned.timestamp && data.banned.timestamp < Date.now()) {
+                delete global.cache.get(name).get(id).banned
+                changed = true
+            }
+            if(changed) await require('./update')('userdata', id, global.cache.get(name).get(id))
+    }
+}
+
+/**
+ * 
+ * @param {string} name Name des Tables
+ * @param {string} id Discord ID des Objekts
+ * @returns {Promise<object>} Zu ladende Daten
+ */
 module.exports = async function(name, id) {
     /** @type {Model} */
     let model = schemas.get(name)
     if(!model) return new Error('404: Model not found')
-    if(global.cache.get(name).has(id)) return global.cache.get(name).get(id)
+    if(global.cache.get(name).has(id)) {
+        await handle(name, id)
+        return global.cache.get(name).get(id)
+    }
     let database = await db()
     try {
-        console.log(1)
         let data = await model.findById(id)
         global.cache.get(name).set(id, data)
         return data

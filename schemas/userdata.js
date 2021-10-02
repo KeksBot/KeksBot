@@ -19,6 +19,11 @@ var userdataSchema = mongoose.Schema({
         dev: Boolean,
         mod: Boolean,
         beta: Boolean
+    },
+    banned: {
+        timestamp: Number,
+        reason: String,
+        mentioned: Boolean
     }
 })
 

@@ -7,7 +7,13 @@ var serverdataSchema = mongoose.Schema({
     level: Number,
     thismin: Number,
     partner: Boolean,
-    verified: Boolean
+    verified: Boolean,
+    theme: {
+        red: String,
+        yellow: String,
+        lime: String,
+        normal: String
+    }
 })
 
 module.exports = mongoose.model('serverdata', serverdataSchema)

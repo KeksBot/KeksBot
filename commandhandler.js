@@ -48,6 +48,7 @@ const validatePermissions = (command, permissions) => {
 }
 
 const getcolors = require('./subcommands/getcolor')
+const getData = require('./db/getData')
 
 module.exports = async (client) => {
     client.commands = new discord.Collection()
@@ -104,7 +105,18 @@ module.exports = async (client) => {
 
     client.on('interactionCreate', ita => {
         if(!ita.isCommand()) return
-        
+        let command = client.commands.get(ita.commandName)
+        if(!command) {
+            return embeds.error(ita, 'Fehler', 'Der Befehl wurde nicht gefunden.', true, true)
+        }
+        var args = {}
+        ita.options._hoistedOptions.forEach(option => args[option.name] = option.value)
+        ita.user.data = getData('userdata', ita.user.id).then(data => {
+            
+        })
+        ita.guild.data = getData('serverdata', ita.guild.id).then(data => {
+
+        })
     })
 
     // client.on('message', async msg => {

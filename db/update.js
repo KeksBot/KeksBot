@@ -23,22 +23,19 @@ const readCommands = dir => {
 readCommands(path.join(__dirname, '../schemas'))
 /**
  * 
- * @param {String} model Name des Schemas
+ * @param {String} name Name des Schemas
+ * @param {String} id Discord ID
  * @param {Object} value Datenwerte
  */
-module.exports = async function(sname, value) {
+module.exports = async function(name, id, value) {
     /** @type {Model} */
-    let model = schemas.get(sname)
+    let model = schemas.get(name)
     if(!model) return new Error('404: Model not found')
-    let primary = {}
-    for (const key in value) {
-        if(key.startsWith('_')) {
-            primary[key] = value[key]
-        }
-    }
     let database = await db()
     try {
-        await model.findOneAndUpdate(primary, value, {
+        await model.findOneAndUpdate({
+            _id: id
+        }, value, {
             upsert: true
         })
         if(global.cache.get(model.modelName).has(value._id)) {
