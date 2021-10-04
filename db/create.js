@@ -46,7 +46,7 @@ module.exports = async function(name, id, data) {
         return global.cache.get(name).get(id)
     } catch (error) {
         return error
-    } finally {
-        database.connection.close()
-    }
+    } //finally {
+    //     database.connection.close()
+    // }
 }

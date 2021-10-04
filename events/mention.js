@@ -5,7 +5,7 @@ const delay = require('delay')
 
 module.exports = {
     name: 'Mention',
-    event: 'message',
+    event: 'messageCreate',
     async on(msg, client) {
         const serverdata = require('../serverdata.json')
         const color = getColor(msg, serverdata)

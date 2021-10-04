@@ -48,7 +48,7 @@ module.exports = async function(name, id, value) {
         }
     } catch (error) {
         return error
-    } finally {
-        database.connection.close()
-    }
+    } //finally {
+    //     database.connection.close()
+    // }
 }

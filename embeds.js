@@ -122,8 +122,8 @@ module.exports = {
         let embeds = [new discord.MessageEmbed()
             .setColor(color.red)
             .setTitle(`${emotes.denied} ${title}`)
-            .setDescription(`${description}`)
-            .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))]
+            .setDescription(`${description}`)]
+        if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
         if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
         else await ita.reply({ embeds, ephemeral })
         if(!ephemeral && del) {
@@ -140,7 +140,7 @@ module.exports = {
      * @param {boolean} keep 
      * @returns discord.Message
      */
-    async needperms(msg, permission, edit, keep) {
+    async needpermsMessage(msg, permission, edit, keep) {
         permission = translatepermission(permission)
         const color = await getColors(msg)
         var embed = new discord.MessageEmbed()
@@ -156,6 +156,29 @@ module.exports = {
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
+    },
+    /**
+     * 
+     * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
+     * @param {string} permission Titel des Embeds
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
+     * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
+     */
+    async needperms(ita, permission, ephemeral, del) {
+        const color = await getColors(ita.guild)
+        let embeds = [new discord.MessageEmbed()
+            .setColor(color.red)
+            .setTitle(`${emotes.denied} `)
+            .setDescription(`${description}`)]
+        if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
+        else await ita.reply({ embeds, ephemeral })
+        if(!ephemeral && del) {
+            await delay(7500)
+            await ita.deleteReply().catch()
+        }
+        return Promise.resolve(ita)
     },
     /**
      * 

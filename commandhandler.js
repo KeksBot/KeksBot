@@ -161,19 +161,21 @@ module.exports = async (client) => {
         getData('userdata', ita.user.id).then(async function(data) {
             if(!data) data = await require('./db/create')('userdata', ita.user.id)
             ita.user.data = data
+            console.log(data)
             if(data.banned) {
                 ita.user.data = -2
                 if(!data.banned.mentioned && (!data.banned.timestamp || data.banned.timestamp < Date.now())) {
                     let reason = '_Es liegt keine Begründung vor._'
                     if(data.banned.reason) reason = `Begründung: _${data.banned.reason}_`
                     let timestamp = ''
-                    if(data.banned.timestamp) timestamp = `\n\nDer Bann wird <t:${Math.round(data.banned.timestamp / 1000)}:R> aufgehoben.`
+                    if(data.banned.timestamp && data.banned.timestamp != Infinity) timestamp = `\n\nDer Bann wird <t:${Math.round(data.banned.timestamp / 1000)}:R> aufgehoben.`
                     while(!ita.color) {}
                     embeds.error(ita, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
                     return update('userdata', ita.user.id, { banned: { mentioned: true }})
                 }
                 if(data.banned.timestamp && data.banned.timestamp < Date.now()) {
                     delete data.banned
+                    ita.user.data = data
                     await update('userdata', ita.user.id, data)
                 }
             }
@@ -185,7 +187,7 @@ module.exports = async (client) => {
             if(!status.user) status.user = -1
             if(!status.server) status.server = -1
         }, 10000)
-        while(!status.user && !status.server) {}
+        while(!status.user && !status.server) {await delay(50)}
         clearTimeout(cancel)
         if(!ita.guild.available) return
         if(ita.user.data == -2) return
@@ -215,8 +217,15 @@ module.exports = async (client) => {
 
         //Execute
         try {
-            await command.execute(ita, client)
+            let argsarray = []
+            for (const item in args) {
+                argsarray.push(args[item])
+            }
+            let d = new Date()
+            console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | [ ${argsarray.join(', ')} ]`)
+            await command.execute(ita, args, client)
         } catch (error) {
+            console.error(error)
             return embeds.error(ita, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)
         }
     })

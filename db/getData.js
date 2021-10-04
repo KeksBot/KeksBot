@@ -23,7 +23,7 @@ const readCommands = dir => {
 readCommands(path.join(__dirname, '../schemas'))
 
 async function handle(name, id) {
-    if(!data)
+    data = global.cache.get(name).get(id)
     var changed = false
     switch(name) {
         case 'userdata': 
@@ -49,14 +49,15 @@ module.exports = async function(name, id) {
         await handle(name, id)
         return global.cache.get(name).get(id)
     }
-    let database = await db()
+    // let database = await db()
     try {
         let data = await model.findById(id)
         global.cache.get(name).set(id, data)
+        await handle(name, id)
         return data
     } catch (error) {
         return error
-    } finally {
-        database.connection.close()
-    }
+    } //finally {
+    //     database.connection.close()
+    // }
 }

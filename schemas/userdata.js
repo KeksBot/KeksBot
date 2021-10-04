@@ -13,7 +13,7 @@ var userdataSchema = mongoose.Schema({
     giftdm: Number,
     thismin: Number,
     badges: {
-        partner: Boolean,
+        partner: Number,
         verified: Boolean,
         team: Boolean,
         dev: Boolean,
@@ -24,7 +24,8 @@ var userdataSchema = mongoose.Schema({
         timestamp: Number,
         reason: String,
         mentioned: Boolean
-    }
+    },
+    tan: String
 })
 
 module.exports = mongoose.model('userdata', userdataSchema)
