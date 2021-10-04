@@ -6,7 +6,7 @@ const emotes = require('../emotes.json')
 
 module.exports = {
     name: 'KeksBox',
-    event: 'message',
+    event: 'messageCreate',
     async on(msg, client) {
         if(msg.author.bot || msg.author.system || !msg.guild) return
         const serverdata = require('../serverdata.json')

@@ -38,17 +38,17 @@ module.exports = async function(name, id, value) {
         }, value, {
             upsert: true
         })
-        if(global.cache.get(model.modelName).has(value._id)) {
-            let data = global.cache.get(model.modelName).get(value._id)
-            for (const key of value) {
+        if(global.cache.get(model.modelName).has(id)) {
+            let data = global.cache.get(model.modelName).get(id)
+            for (const key in value) {
                 data[key] = value[key]
             }
-            global.cache.get(model.modelName).set(value._id, data)
+            global.cache.get(model.modelName).set(id, data)
+            return data
         }
     } catch (error) {
         return error
     } finally {
         database.connection.close()
     }
-    console.log('yay?')
 }

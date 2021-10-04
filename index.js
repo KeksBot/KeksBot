@@ -10,7 +10,7 @@ var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
 
 client.once('ready', async () => { //Status
-    await client.user.setStatus('idle')
+    client.user.setStatus('idle')
     client.restarting = 0
     var start = Date.now()
     console.log(`[${client.user.username}]: Client geladen.`)
@@ -21,11 +21,11 @@ client.once('ready', async () => { //Status
     mongoose.connection.close()
     await commandhandler(client)
     await eventhandler(client)
-    await automod(client)
+    //await automod(client)
     var end = Date.now()
     console.log(`[${client.user.username}]: System aktiv.`)
     console.log(`[${client.user.username}]: Startzeit betrug ${end - start} ms.`)
-    await client.user.setStatus('online')
+    client.user.setStatus('online')
 })
 
 client.login(config.token)

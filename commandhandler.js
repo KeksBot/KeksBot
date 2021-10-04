@@ -6,7 +6,7 @@ const delay = require('delay')
 const config = require('./config.json')
 const { Model } = require('mongoose')
 
-const validatePermissions = (command, permissions) => {
+const validatePermissions = (command) => {
     const validPermissions = [
         'ADMINISTRATOR',
         'CREATE_INSTANT_INVITE',
@@ -38,17 +38,20 @@ const validatePermissions = (command, permissions) => {
         'MANAGE_NICKNAMES',
         'MANAGE_ROLES',
         'MANAGE_WEBHOOKS',
-        'MANAGE_EMOJIS',
+        'MANAGE_EMOJIS_AND_STICKERS',
+        'USE_APPLICATION_COMMANDS',
+        'REQUEST_TO_SPEAK',
+        'MANAGE_THREADS',
+        'USE_PUBLIC_THREADS',
+        'USE_PRIVATE_THREADS',
+        'USE_EXTERNAL_STICKERS'
     ]
-    for (const permission of permissions) {
-        if(!validPermissions.includes(permission)) {
-            throw new Error(`Unbekannte Berechtigung: ${permission}\nBefehl: ${command.name}`)
-        }
-    }
+    if(!validPermissions.includes(command.permission)) throw new Error(`Unbekannte Permission "${command.permission} bei "${command.name}"`)
 }
 
 const getcolors = require('./subcommands/getcolor')
 const getData = require('./db/getData')
+const update = require('./db/update')
 
 module.exports = async (client) => {
     client.commands = new discord.Collection()
@@ -63,7 +66,10 @@ module.exports = async (client) => {
             } else {
                 if(file.endsWith('.js') && !file.startsWith('subcmd' || 'subcommand')) {
                     var command = require(path.join(__dirname, dir, file))
-                    if(command.permission) command.defaultPermission = true
+                    if(command.permission) {
+                        command.defaultPermission = false
+                        command.permission = command.permission.toUpperCase()
+                    }
                     client.commands.set(command.name, command)
                     console.log(`[${client.user.username}]: ${command.name} wurde geladen.`)
                 }
@@ -89,21 +95,54 @@ module.exports = async (client) => {
      *     }
      * }*/
     await client.guilds.fetch()
-    let LoadingBar = require('./classes/LoadingBar')
-    let pb = new LoadingBar(100)
-    pb.start()
     var progress = 0
     var failedguilds = 0
-    client.guilds.cache.array().forEach(async guild => {
-        try {await guild.commands.set(client.commands.array())} catch {failedguilds++}
-        progress++
-        pb.set(Math.round(progress / client.guilds.cache.size))
+    var end = false
+    await client.guilds.cache.array().forEach(async guild => {
+        try {
+            let commands = await guild.commands.set(client.commands.array())
+            await guild.roles.fetch()
+            commands.array().forEach(async function(command) {
+                if(client.commands.find(c => c.name === command.name).permission) {
+                    var permissions = []
+                    var length = guild.roles.cache
+                        .filter(r => !r.tags || (!r.tags.botId && r.tags.integrationId))
+                        .filter(r => r.permissions.has(client.commands.find(c => c.name === command.name).permission)).size
+                    var counter = 0
+                    var accepted = 0
+                    guild.roles.cache
+                        .filter(r => !r.tags || (!r.tags.botId && r.tags.integrationId))
+                        .filter(r => r.permissions.has(client.commands.find(c => c.name === command.name).permission))
+                        .array()
+                        .forEach(async function (role) {
+                            permissions.push({
+                                id: role.id,
+                                type: 'ROLE',
+                                permission: true
+                            })
+                            accepted ++
+                            counter ++
+                            if(accepted == 10 || counter == length - 1) {
+                                try {await command.permissions.add({permissions})} catch {}
+                                permissions = []
+                                accepted = 0
+                            }
+                        })
+                }
+            })
+        } catch (error) {
+            failedguilds++
+        } finally {
+            progress ++
+            if(progress == client.guilds.cache.size) end = true
+        }
     })
-
-    pb.end('Initialisierung abgeschlossen.')
+    while(!end) {await delay(500)}
+    console.log(`[${client.user.username}]: Initialisierung abgeschlossen.`)
     if(failedguilds) console.log('Commands wurden auf ' + failedguilds + ' Servern NICHT geladen.')
 
-    client.on('interactionCreate', ita => {
+    client.on('interactionCreate', async function(ita) {
+        //Commandhandling
         if(!ita.isCommand()) return
         let command = client.commands.get(ita.commandName)
         if(!command) {
@@ -111,16 +150,79 @@ module.exports = async (client) => {
         }
         var args = {}
         ita.options._hoistedOptions.forEach(option => args[option.name] = option.value)
-        ita.user.data = getData('userdata', ita.user.id).then(data => {
-            
-        })
-        ita.guild.data = getData('serverdata', ita.guild.id).then(data => {
 
+        //Daten laden
+        var status = {user: false, server: false}
+        getData('serverdata', ita.guild.id).then(async function(data) {
+            if(!data) data = await require('./db/create')('serverdata', ita.guild.id)
+            ita.guild.data = data
+            ita.color = await getcolors(ita.guild, data)
+            status.server = true
         })
+        getData('userdata', ita.user.id).then(async function(data) {
+            if(!data) data = await require('./db/create')('userdata', ita.user.id)
+            ita.user.data = data
+            if(data.banned) {
+                ita.user.data = -2
+                if(!data.banned.mentioned && (!data.banned.timestamp || data.banned.timestamp < Date.now())) {
+                    let reason = '_Es liegt keine Begründung vor._'
+                    if(data.banned.reason) reason = `Begründung: _${data.banned.reason}_`
+                    let timestamp = ''
+                    if(data.banned.timestamp) timestamp = `\n\nDer Bann wird <t:${Math.round(data.banned.timestamp / 1000)}:R> aufgehoben.`
+                    while(!ita.color) {}
+                    embeds.error(ita, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
+                    return update('userdata', ita.user.id, { banned: { mentioned: true }})
+                }
+                if(data.banned.timestamp && data.banned.timestamp < Date.now()) {
+                    delete data.banned
+                    await update('userdata', ita.user.id, data)
+                }
+            }
+            status.user = true
+        })
+
+        //Commandhandling
+        let cancel = setTimeout(function(status) {
+            if(!status.user) status.user = -1
+            if(!status.server) status.server = -1
+        }, 10000)
+        while(!status.user && !status.server) {}
+        clearTimeout(cancel)
+        if(!ita.guild.available) return
+        if(ita.user.data == -2) return
+        if(ita.user.data == -1 || ita.guild.data == -1) return embeds.error(ita, 'Fehler', 'Timeout der beim Laden erforderlichen Daten. Bitte probiere es später erneut.', true).catch()
+
+        //Cooldown
+        const { cooldowns } = client
+        if(!cooldowns.has(command.name)) {
+            cooldowns.set(command.name, new discord.Collection())
+        }
+        
+        const now = Date.now()
+        const timestamps = cooldowns.get(command.name)
+        const cooldownAmount = (command.cooldown || 1) * 1000
+    
+        if(timestamps.has(ita.user.id)) {
+            const expirationTime = timestamps.get(ita.user.id) + cooldownAmount
+        
+            if(now < expirationTime) {
+                const timeLeft = Math.floor(expirationTime / 1000)
+                return embeds.error(ita, 'Cooldown', `Du kannst den ${command.name} Befehl erst wieder ${timeLeft} benutzen.`, true)
+            }
+        }
+        
+        timestamps.set(ita.user.id, now)
+        setTimeout(() => timestamps.delete(ita.user.id), cooldownAmount)
+
+        try {
+            await command.execute(ita, client)
+        } catch (error) {
+            return embeds.error(ita, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)
+        }
     })
 
     // client.on('message', async msg => {
-    //     if(msg.author.bot || msg.author.system || !msg.guild) return
+    //     if(ita.user.bot || ita.user.system || !msg.guild) return
     //     const serverdata = require('./serverdata.json')
     //     const userdata = require('./userdata.json')
     //     const emotes = require('./emotes.json')
@@ -137,7 +239,7 @@ module.exports = async (client) => {
     //     const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.commands && cmd.commands.includes(commandName))
     //     if(!command) return
 
-    //     if(userdata[msg.author.id] && userdata[msg.author.id].banned) return
+    //     if(userdata[ita.user.id] && userdata[ita.user.id].banned) return
 
     //     if(client.restarting && client.restarting >= 6000) return
     //     if(client.restarting) return embeds.error(msg, 'Neustart eingeleitet', 'Ein Neustart wird gerade initialisiert.\nDer Befehl wurde nicht ausgeführt.')
@@ -151,12 +253,12 @@ module.exports = async (client) => {
     //         })
     //     }
 
-    //     if(command.modonly && !config.mods.includes(msg.author.id)) {
+    //     if(command.modonly && !config.mods.includes(ita.user.id)) {
     //         if(!msg.deleted) msg.delete().catch()
     //         return embeds.needperms(msg, 'KeksBot-Moderator')
     //     }
 
-    //     if(command.devonly && !config.devs.includes(msg.author.id)) {
+    //     if(command.devonly && !config.devs.includes(ita.user.id)) {
     //         if(!msg.deleted) msg.delete().catch()
     //         return embeds.needperms(msg, 'KeksBot-Developer')
     //     }
@@ -171,6 +273,16 @@ module.exports = async (client) => {
     //         return embeds.error(msg, 'Syntaxfehler', `Du hast zu viele Argumente angegeben.\nBitte verwende diese Syntax:\n\`${prefix}${command.name} ${command.expectedArgs}\``)
     //     }
 
+
+
+
+
+
+
+
+
+
+
     //     const { cooldowns } = client
         
     //     if(!cooldowns.has(command.name)) {
@@ -181,8 +293,8 @@ module.exports = async (client) => {
     //     const timestamps = cooldowns.get(command.name)
     //     const cooldownAmount = (command.cooldown || 0) * 1000
     
-    //     if(timestamps.has(msg.author.id)) {
-    //         const expirationTime = timestamps.get(msg.author.id) + cooldownAmount
+    //     if(timestamps.has(ita.user.id)) {
+    //         const expirationTime = timestamps.get(ita.user.id) + cooldownAmount
         
     //         if(now < expirationTime) {
     //             const timeLeft = (expirationTime - now) / 1000
@@ -208,8 +320,8 @@ module.exports = async (client) => {
     //         }
     //     }
         
-    //     timestamps.set(msg.author.id, now)
-    //     setTimeout(() => timestamps.delete(msg.author.id), cooldownAmount)
+    //     timestamps.set(ita.user.id, now)
+    //     setTimeout(() => timestamps.delete(ita.user.id), cooldownAmount)
         
     //     if(serverdata[msg.guild.id]) {
     //         var color = getcolors(msg, serverdata)
@@ -236,10 +348,10 @@ module.exports = async (client) => {
     //     }
 
     //     try {
-    //         console.log(`${msg.author.tag}: ${command.name} | ${args} | ${msg.content}`)
+    //         console.log(`${ita.user.tag}: ${command.name} | ${args} | ${msg.content}`)
     //         await command.callback(msg, args, client, serverdata, userdata, config, emotes, color, embeds)
     //     } catch (err) {
-    //         console.log(`Beim Ausführen von ${command.name} durch ${msg.author.tag} ist ein Fehler aufgetreten:\n${err}\n----------------------------`)
+    //         console.log(`Beim Ausführen von ${command.name} durch ${ita.user.tag} ist ein Fehler aufgetreten:\n${err}\n----------------------------`)
     //         embeds.error(msg, 'Oh oh', `Beim Ausführen des ${command.name} Commands ist ein unbekannter Fehler aufgetreten D:\nBitte probiere es später erneut.`)
     //         return
     //     }

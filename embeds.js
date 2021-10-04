@@ -42,14 +42,19 @@ const translatepermission = (p) => {
     else if(p === 'MANAGE_NICKNAMES') p = 'Nicknames verwalten'
     else if(p === 'MANAGE_ROLES') p = 'Rollen verwalten'
     else if(p === 'MANAGE_WEBHOOKS') p = 'WebHooks verwalten'
-    else if(p === 'MANAGE_EMOJIS') p = 'Emojis verwalten'
-
+    else if(p === 'MANAGE_EMOJIS_AND_STICKERS') p = 'Emojis verwalten'
+    else if(p === 'USE_APPLICATION_COMMANDS') p = 'Anwendungsbefehle verwenden'
+    else if(p === 'REQUEST_TO_SPEAK') p = 'Redeanfrage'
+    else if(p === 'MANAGE_THREADS') p = 'Threads verwalten'
+    else if(p === 'USE_PUBLIC_THREADS') p = 'Öffentliche Threads verwenden'
+    else if(p === 'USE_PRIVATE_THREADS') p = 'Private Threads verwenden'
+    else if(p === 'USE_EXTERNAL_STICKERS') p = 'Externe Sticker verwenden'
     return p
 }
 
 const getColors = async (guild) => {
     const guilddata = await require('./db/getData')('serverdata', guild.id)
-    if(guilddata && serverdata.theme) {
+    if(guilddata && guilddata.theme) {
         let {
             red = 0xff0000,
             lightblue = 0x3498db,
@@ -108,8 +113,8 @@ module.exports = {
      * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
      * @param {string} title Titel des Embeds
      * @param {string} description Textinhalt des Embeds
-     * @param {boolean} ephemeral Ob die Nachricht nur an den Nutzer gesendet werden soll
-     * @param {boolean} del Ob die Nachricht am Ende gelöscht werden soll
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
      * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
      */
     async error(ita, title, description, ephemeral, del) {

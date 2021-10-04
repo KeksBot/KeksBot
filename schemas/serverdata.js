@@ -6,8 +6,8 @@ var serverdataSchema = mongoose.Schema({
     xp: Number,
     level: Number,
     thismin: Number,
-    partner: Boolean,
-    verified: Boolean,
+    partner: Number,
+    verified: Number,
     theme: {
         red: String,
         yellow: String,
