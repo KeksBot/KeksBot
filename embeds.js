@@ -167,10 +167,11 @@ module.exports = {
      */
     async needperms(ita, permission, ephemeral, del) {
         const color = await getColors(ita.guild)
+        permission = translatepermission(permission)
         let embeds = [new discord.MessageEmbed()
             .setColor(color.red)
-            .setTitle(`${emotes.denied} `)
-            .setDescription(`${description}`)]
+            .setTitle(`${emotes.denied} Zugriff verweigert`)
+            .setDescription(`Um diesen Befehl anzuwenden, benötigst du die Berechtigung \`${permission}\``)]
         if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
         if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
         else await ita.reply({ embeds, ephemeral })
@@ -189,7 +190,7 @@ module.exports = {
      * @param {boolean} keep 
      * @returns discord.Message
      */
-    async success(msg, title, text, edit, keep) {
+    async successMessage(msg, title, text, edit, keep) {
         const color = await getColors(msg)
         var embed = new discord.MessageEmbed()
             .setColor(color.lime)
@@ -204,6 +205,30 @@ module.exports = {
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
     },
+    /**
+     * 
+     * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
+     * @param {string} title Titel des Embeds
+     * @param {string} description Textinhalt des Embeds
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
+     * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
+     */
+         async success(ita, title, description, ephemeral, del) {
+            const color = ita.color || await getColors(ita.guild)
+            let embeds = [new discord.MessageEmbed()
+                .setColor(color.lime)
+                .setTitle(`${emotes.accept} ${title}`)
+                .setDescription(`${description}`)]
+            if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+            if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
+            else await ita.reply({ embeds, ephemeral })
+            if(!ephemeral && del) {
+                await delay(7500)
+                await ita.deleteReply().catch()
+            }
+            return Promise.resolve(ita)
+        },
     /**
      * 
      * @param {discord.Message} msg 

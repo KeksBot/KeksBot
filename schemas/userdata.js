@@ -1,10 +1,5 @@
 const mongoose = require('mongoose')
 
-const reqNum = {
-    type: Number,
-    required: true
-}
-
 var userdataSchema = mongoose.Schema({
     _id: { type: String, required: true },
     xp: Number,
@@ -21,11 +16,10 @@ var userdataSchema = mongoose.Schema({
         beta: Boolean
     },
     banned: {
-        timestamp: Number,
-        reason: String,
-        mentioned: Boolean
+        time: Number,
+        reason: String
     },
     tan: String
-})
+}, { strict: false })
 
 module.exports = mongoose.model('userdata', userdataSchema)

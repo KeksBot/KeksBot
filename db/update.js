@@ -31,12 +31,13 @@ module.exports = async function(name, id, value) {
     /** @type {Model} */
     let model = schemas.get(name)
     if(!model) return new Error('404: Model not found')
-    let database = await db()
+    await db()
     try {
         await model.findOneAndUpdate({
             _id: id
         }, value, {
-            upsert: true
+            upsert: true,
+            strict: false
         })
         if(global.cache.get(model.modelName).has(id)) {
             let data = global.cache.get(model.modelName).get(id)
@@ -48,7 +49,5 @@ module.exports = async function(name, id, value) {
         }
     } catch (error) {
         return error
-    } //finally {
-    //     database.connection.close()
-    // }
+    }
 }

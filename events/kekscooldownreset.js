@@ -11,6 +11,12 @@ module.exports = {
             try {
                 await usermodel.updateMany({ "thismin": { $ne: 0 } }, { thismin: 0 })
                 await servermodel.updateMany({ "thismin": { $ne: 0 } }, { thismin: 0 })
+                global.cache.get('userdata').filter(u => u.thismin).array().forEach(function (data) {
+                    data.thismin = 0
+                })
+                global.cache.get('serverdata').filter(g => g.thismin).array().forEach(function (data) {
+                    data.thismin = 0
+                })
             } catch (error) {
                 console.error
             }

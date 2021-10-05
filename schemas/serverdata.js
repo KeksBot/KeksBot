@@ -6,14 +6,19 @@ var serverdataSchema = mongoose.Schema({
     xp: Number,
     level: Number,
     thismin: Number,
-    partner: Number,
-    verified: Number,
+    partner: Number, /*
+        2: Antrag gestellt
+        1: Partner
+        0: Kein Partner/Antrag
+        -1: Kein Partner/blockiert
+    */
+    verified: Boolean,
     theme: {
         red: String,
         yellow: String,
         lime: String,
         normal: String
     }
-})
+}, { strict: false })
 
 module.exports = mongoose.model('serverdata', serverdataSchema)

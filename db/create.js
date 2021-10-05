@@ -32,7 +32,7 @@ module.exports = async function(name, id, data) {
     /** @type {Model} */
     let model = schemas.get(name)
     if(!model) return new Error('404: Model not found')
-    let database = await db()
+    await db()
     try {
         let exists = await model.findById(id)
         if(exists) {
@@ -46,7 +46,5 @@ module.exports = async function(name, id, data) {
         return global.cache.get(name).get(id)
     } catch (error) {
         return error
-    } //finally {
-    //     database.connection.close()
-    // }
+    }
 }
