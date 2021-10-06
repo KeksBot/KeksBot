@@ -1,10 +1,10 @@
 const discord = require('discord.js')
-const embeds = require('../../embeds.js')
-const update = require('../../db/update.js')
+const embeds = require('../../embeds')
+const update = require('../../db/update')
 
 module.exports = {
     name: 'addserver',
-    description: 'Fügt dem Server Kekse als Erfahrungspunkte hinzu.',
+    description: 'Fügt dem Server Kekse als Erfahrungspunkte hinzu',
     options: [
         {
             name: 'count',
@@ -15,13 +15,16 @@ module.exports = {
     ],
     async execute(ita, args, client) {
         var { guild, user, color } = ita
-        if(args.count < 0) return embeds.error(ita, 'Syntaxfehler', 'Du darfst keine Kekse klauen. bitte gib eine positive Zahl an.', true)
+        if(args.count < 0) return embeds.error(ita, 'Syntaxfehler', 'Du darfst keine Kekse klauen, bitte gib eine positive Zahl an.', true)
 
         if(!guild.data.xp) guild.data.xp = 0
         if(!guild.data.level) guild.data.level = 1
         if(!user.data.cookies) user.data.cookies = 0
         
         if(args.count > user.data.cookies) args.count = user.data.cookies
+
+        if(!args.count && user.data.cookies) return embeds.success(ita, 'Keine Kekse übertragen', 'Du hast dem Server keine Erfahrungspunkte gegeben. Jetzt ist er traurig :c', true)
+        else if(!user.data.cookies) return embeds.success(ita, 'Fehler', 'Du hast keine Kekse D:\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
 
         guild.data.xp += args.count
         user.data.cookies -= args.count

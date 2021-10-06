@@ -37,6 +37,7 @@ module.exports = {
 
         if(maxguild == 0) return embeds.error(ita, 'Limit erreicht', 'Dieser Server ist hat sein zugewiesenes Limit diese Minute bereits erreicht.\nFüge mehr Kekse mit `/addserver` hinzu, um das Limit zu erhöhen.', true)
         if(maxuser == 0) return embeds.error(ita, 'Limit erreicht', 'Du hast dein zugewiesenes Limit diese Minute bereits erreicht.\nBitte warte einen Moment, bevor du mehr Kekse isst.', true)
+        if(args.count == 0) return embeds.success(ita, 'Keine Kekse ausgeliefert', 'Herzlichen Glückwunsch, du hast keine Kekse bekommen.', true)
 
         user.data.cookies += args.count
         user.data.thismin += args.count
@@ -46,7 +47,7 @@ module.exports = {
 
         let embed = new discord.MessageEmbed()
             .setColor(ita.color.normal)
-            .setTitle(`${require('../../emotes.json').cookie} Kekse ausgeliefert.`)
+            .setTitle(`${require('../../emotes.json').cookie} Kekse ausgeliefert`)
             .setDescription(`${args.count} Kekse wurden in deinem Lager zwischengespeichert.\nDu hast aktuell ${user.data.cookies} Kekse.`)
         return await ita.reply({ embeds: [embed], ephemeral: true })
     }

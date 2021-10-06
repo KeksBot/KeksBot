@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 var userdataSchema = mongoose.Schema({
     _id: { type: String, required: true },
     xp: Number,
-    lv: Number,
+    level: Number,
     cookies: Number,
     giftdm: Number,
     thismin: Number,
