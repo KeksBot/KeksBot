@@ -5,17 +5,17 @@ const update = require('../../db/update')
 
 module.exports = {
     name: 'gift',
-    description: 'Schenk jemandem Kekse.',
+    description: 'Schenk jemandem Kekse',
     options: [
         {
             name: 'user',
-            description: 'Der Nutzer, dem du Kekse schenken willst.',
+            description: 'Der Nutzer, dem du Kekse schenken willst',
             type: 'USER',
             required: true
         }, 
         {
             name: 'count',
-            description: 'Anzahl der Kekse, die du verschenken willst.',
+            description: 'Anzahl der Kekse, die du verschenken willst',
             type: 'INTEGER',
             required: true
         }

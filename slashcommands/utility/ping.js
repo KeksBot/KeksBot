@@ -2,7 +2,7 @@ const discord = require('discord.js')
 
 module.exports = {
     name: 'ping',
-    description: 'Zeigt die Latenz vom Bot an.',
+    description: 'Zeigt die Latenz vom Bot an',
     async execute(ita, args, client) {
         const { color } = ita
         var discordping = client.ws.ping

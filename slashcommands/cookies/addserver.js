@@ -8,7 +8,7 @@ module.exports = {
     options: [
         {
             name: 'count',
-            description: 'Anzahl der Kekse, die du dem Server geben willst.',
+            description: 'Anzahl der Kekse, die du dem Server geben willst',
             required: true,
             type: 'INTEGER'
         }

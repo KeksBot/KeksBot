@@ -3,11 +3,11 @@ const embeds = require('../../embeds')
 
 module.exports = {
     name: 'eat',
-    description: 'Konvertiert deine Kekse zu Erfahrungspunkten.',
+    description: 'Konvertiert deine Kekse zu Erfahrungspunkten',
     options: [
         {
             name: 'count',
-            description: 'Anzahl der Kekse, die du essen willst.',
+            description: 'Anzahl der Kekse, die du essen willst',
             type: 'INTEGER',
             required: true
         }
