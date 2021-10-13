@@ -23,7 +23,7 @@ module.exports = {
         if(args.count > user.data.cookies) args.count = user.data.cookies
 
         if(!args.count && user.data.cookies) return embeds.success(ita, 'NomNom', 'Oder auch nicht.', true)
-        else if(user.data.cookies) return embeds.error(ita, 'Fehler', 'Du kannst keine Kekse essen D:\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
+        else if(!user.data.cookies) return embeds.error(ita, 'Fehler', 'Du kannst keine Kekse essen D:\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
 
         user.data.xp += args.count
         user.data.cookies -= args.count
