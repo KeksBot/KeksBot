@@ -72,7 +72,8 @@ const setup = async () => {
             mPartnerNeed: 10,
             support: 1,
             avatarURL: "https://cdn.discordapp.com/avatars/774885703929561089/ecd2914a28f52fba1962c962165877ae.webp",
-            tan: "0000-0000"
+            tan: "0000-0000",
+            uptimeurl: "https://youruptimeurlping"
         }
         await fs.writeFile('config.json', JSON.stringify(config, null, 2))
         console.log('✅ Datei angelegt.')
