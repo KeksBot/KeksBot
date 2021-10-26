@@ -25,7 +25,7 @@ module.exports = {
         if(!channel.permissionsFor(member).has('MANAGE_MESSAGES')) return embeds.needperms(ita, 'MANAGE_MESSAGES', true)
         if(args.count <= 0) return embeds.error(ita, 'Syntaxfehler', 'Bitte gib eine positive Zahl an.', true)
         if(args.count > 100) args.count = 100
-        await channel.messages.fetch({ limit: 100 })
+        await channel.messages.fetch({ limit: 100, force: true })
         var messages
         var filter = true
         await guild.members.fetch()

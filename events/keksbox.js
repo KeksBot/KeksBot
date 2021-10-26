@@ -9,9 +9,9 @@ module.exports = {
     async on(msg, client) {
         if(!msg.guild || msg.author.bot || msg.author.system) return
         var serverdata = await require('../db/getData')('serverdata', msg.guild.id)
-        var spawnrate = 1
+        var spawnrate = 100
         if(serverdata && serverdata.keksbox) {
-            spawnrate = serverdata.keksbox.spawnrate || 1
+            spawnrate = serverdata.keksbox.spawnrate || 100
             if(serverdata.keksbox.channels && serverdata.keksbox.channels.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
         }
         if(!Math.floor(Math.random() * spawnrate)) {
