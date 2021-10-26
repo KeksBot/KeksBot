@@ -101,9 +101,9 @@ module.exports = {
             .setDescription(text)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send({embeds: [embed]})
+            var message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit({embeds: [embed]}).catch()
+        else var message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
@@ -198,9 +198,9 @@ module.exports = {
             .setDescription(text)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send({embeds: [embed]})
+            var message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit({embeds: [embed]}).catch()
+        else var message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)

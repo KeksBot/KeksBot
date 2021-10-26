@@ -18,6 +18,12 @@ var serverdataSchema = mongoose.Schema({
         yellow: String,
         lime: String,
         normal: String
+    },
+    keksbox: {
+        spawnrate: Number, //Durchschnittliche Anzahl zw. KeksBoxen
+        channels: Array, //Channel Whitelist
+        message: String, //Nachricht vom Paket
+        multiplier: Number //Für besondere KeksBoxen
     }
 }, { strict: false })
 
