@@ -35,7 +35,7 @@ module.exports = {
             if(filter.user) messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).filter(m => m.author.id === filter.id).sort((a, b) => b.createdAt - a.createdAt)
             else messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).filter(m => m.member.roles.cache.has(filter.id)).sort((a, b) => b.createdAt - a.createdAt)
         } else messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).sort((a, b) => b.createdAt - a.createdAt)
-        messages = messages.first(args.count)
+        messages = messages.filter(m => !m.deleted && !m.interaction && !m.pinned).first(args.count)
         let embed = new discord.MessageEmbed()
             .setColor(color.yellow)
             .setTitle(`${require('../../emotes.json').pinging} Nachrichten werden glöscht`)
@@ -46,7 +46,7 @@ module.exports = {
         if(deleted) {deleted = deleted.size || false} else deleted = false 
         if(!deleted) return embeds.error(ita, 'Fehler', 'Es wurden keine Nachrichten gelöscht.\nMöglicherweise sind sie zu alt oder keine der letzten 100 Nachrichten stimmt mit dem Filter überein.', true)
         return embeds.success(ita, `${deleted} Nachricht${(function() {if(deleted != 1) return 'en'})()} gelöscht`.replaceAll('undefined', ''), `Es wurden erfolgreich ${deleted} Nachricht${(function() {if(deleted != 1) return 'en'})()} `.replaceAll('undefined', '') + 
-            (function() {if(args.filter) {if(filter.user) {return `von <@!${filter.id}> `} else return `von Nutzern mit der <@&${filter.id}> Rolle `}})() +
+            (function() {if(args.filter) {if(filter.user) {return `von <@!${filter.id}> `} else return `von Nutzern mit der <@&${filter.id}> Rolle `} else {return ''}})() +
             'gelöscht.', true
         )
     }

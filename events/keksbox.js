@@ -78,6 +78,7 @@ module.exports = {
                 content *= serverdata.keksbox.multiplier
                 embeds.successMessage(message, 'Paket eingesammelt', `<@!${ita.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, false)
                 var userdata = await require('../db/getData')('userdata', ita.user.id)
+                if(!userdata) userdata = await require('../db/create')('userdata', ita.user.id)
                 if(!userdata.cookies) userdata.cookies = 0
                 userdata.cookies += content
                 let { keksbox } = serverdata
