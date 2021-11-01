@@ -124,7 +124,7 @@ module.exports = {
             .setTitle(`${emotes.denied} ${title}`)
             .setDescription(`${description}`)]
         if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
-        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
         else await ita.reply({ embeds, ephemeral })
         if(!ephemeral && del) {
             await delay(7500)
@@ -173,7 +173,7 @@ module.exports = {
             .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl anzuwenden, benötigst du die Berechtigung \`${permission}\``)]
         if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
-        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
         else await ita.reply({ embeds, ephemeral })
         if(!ephemeral && del) {
             await delay(7500)
@@ -221,7 +221,7 @@ module.exports = {
                 .setTitle(`${emotes.accept} ${title}`)
                 .setDescription(`${description}`)]
             if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
-            if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
+            if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
             else await ita.reply({ embeds, ephemeral })
             if(!ephemeral && del) {
                 await delay(7500)
