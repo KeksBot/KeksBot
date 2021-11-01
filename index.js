@@ -5,8 +5,8 @@ const commandhandler = require('./commandhandler')
 const eventhandler = require('./eventhandler')
 discord.Collection.prototype.array = function() {return [...this.values()]}
 
-const uptimemonitoring = require('./uptimemonitoring')
-uptimemonitoring(config.uptimeurl)
+// const uptimemonitoring = require('./uptimemonitoring')
+// uptimemonitoring(config.uptimeurl)
 
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)

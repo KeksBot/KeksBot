@@ -146,7 +146,7 @@ module.exports = {
         var embed = new discord.MessageEmbed()
             .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
             .setColor(color.red)
-            .setTitle(`${emotes.denied} Zugriff verweigert!`)
+            .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl auszuführen, benötigst du \`${permission}\`.`)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
@@ -170,7 +170,7 @@ module.exports = {
         permission = translatepermission(permission)
         let embeds = [new discord.MessageEmbed()
             .setColor(color.red)
-            .setTitle(`${emotes.denied} Zugriff verweigert`)
+            .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl anzuwenden, benötigst du die Berechtigung \`${permission}\``)]
         if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
         if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral })
