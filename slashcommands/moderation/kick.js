@@ -153,5 +153,6 @@ module.exports = {
                 })()
             )
         await ita.editReply({ embeds: [embed] })
+        return
     }
 }
