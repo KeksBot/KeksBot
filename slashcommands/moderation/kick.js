@@ -27,7 +27,7 @@ module.exports = {
             choices: [
                 {
                     name: 'Ja',
-                    value: 'true'
+                    value: 'ja'
                 },
                 {
                     name: 'Nein',
@@ -60,6 +60,8 @@ module.exports = {
         if(!member) return embeds.error(ita, 'Fehler', 'Der gesuchte Nutzer konnte nicht gefunden werden.', true)
         if(member.roles.highest.comparePositionTo(ita.member.roles.highest) >= 0 && !guild.member) return embeds.error(ita, 'Fehlende Berechtigungen', `Deine aktuelle Rollenkonfiguration erlaubt es dir nicht, <@!${member.id}> zu kicken.`, true)
         if(!member.kickable) return embeds.error(ita, 'Fehlende Berechtigung', `Meine aktuelle Rollenkonfiguration erlaubt es nicht, <@!${member.id}> zu kicken.`, true)
+        if(!guild.data.warns) guild.data.warns = []
+        if(!guild.data.modactions) guild.data.modactions = 0
         var embed
         if(!args.instant) {
             embed = new discord.MessageEmbed()
@@ -67,7 +69,7 @@ module.exports = {
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Kicken" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
                 .setTitle(`${require('../../emotes.json').pinging} ${member.displayName} wird gekickt [Schritt 1/2]`)
                 .setFooter('Du willst dieses Fenster nicht mehr sehen und direkt kicken? Verwende /kick instant:Ja, um die Überprüfung zu überspringen.')
-                .addField('Nutzer', `<@!${member.id}>\nAccount erstellt <t:${Math.floor(member.user.createdAt / 1000)}:R>\nBeigetreten <t:${Math.floor(member.joinedAt / 1000)}:R>`, true)
+                .addField('Nutzer', `<@!${member.id}>\nAccount erstellt <t:${Math.floor(member.user.createdAt / 1000)}:R>\nBeigetreten <t:${Math.floor(member.joinedAt / 1000)}:R>\nWarnungen: ${guild.data.warns.filter(object => object.user === member.id).length}`, true)
                 .addField('Begründung', (function() {
                     if(args.reason) return args.reason
                     else return '_Es liegt keine Begründung vor._'
@@ -138,13 +140,15 @@ module.exports = {
         else await ita.editReply({ embeds: [embed], components: [] })
         var kicked
         try {
-            if(args.reason) kicked = await member.kick(args.reason)
-            else kicked = await member.kick()
+            if(args.reason && !member.kicked) kicked = await member.kick(args.reason)
+            else if(!member.kicked) kicked = await member.kick()
         } catch {}
         if(!kicked) return embeds.error(ita, 'Fehler', 'Ein unbekannter Fehler ist aufgetreten.\nBitte probiere es später erneut.', true)
+        guild.data.modactions ++
+        await require('../../db/update')('serverdata', guild.id, { modactions: guild.data.modactions })
         embed = new discord.MessageEmbed()
             .setColor(color.lime)
-            .setTitle(`${member.user.username} wurde gekickt.`)
+            .setTitle(`${member.user.username} wurde gekickt (Fall #${guild.data.modactions})`)
             .setDescription(
                 `<@${args.member}> wurde erfolgreich gekickt.` + 
                 (function() {
