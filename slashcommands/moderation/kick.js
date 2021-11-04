@@ -31,7 +31,7 @@ module.exports = {
                 },
                 {
                     name: 'Nein',
-                    value: ''
+                    value: 'nein'
                 }
             ]
         }
