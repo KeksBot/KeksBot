@@ -43,6 +43,7 @@ module.exports = {
         var member
         try { member = await guild.members.fetch(args.member) } catch {}
         if(!member) return embeds.error(ita, 'Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
+        if(member.roles.highest.comparePositionTo(ita.member.roles.highest) > 0 && !guild.ownerId == user.id) return embeds.error(ita, 'Fehlende Berechtigungen', `Deine aktuelle Rollenkonfiguration erlaubt es dir nicht, <@!${member.id}> zu warnen.`, true)
         if(!guild.data.modactions) guild.data.modactions = 0
         let warning = {}
         guild.data.modactions ++
@@ -51,7 +52,7 @@ module.exports = {
         if(args.reason) warning.reason = args.reason
         warning.responsible = user.id
         var embed
-        if(!args.instant) {
+        if(!args.instant || args.instant === 'nein') {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Warnen" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')

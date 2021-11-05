@@ -33,6 +33,13 @@ var serverdataSchema = mongoose.Schema({
             responsible: String,
             _id: false
         }
+    ],
+    tempbans: [
+        {
+            user: String,
+            time: Date,
+            _id: false
+        }
     ]
 }, { strict: false })
 

@@ -44,9 +44,8 @@ module.exports = {
      * @returns 
      */
     async execute(ita, args, client) {
-        var { memberPermissions, guild, color } = ita
+        var { guild, color } = ita
         if(!guild.me.permissions.has('KICK_MEMBERS')) return embeds.error(ita, 'Fehlende Berechtigung', 'Um diese Aktion durchzuführen, benötige ich die "Mitglieder kicken" Berechtigung.', true)
-        if(!memberPermissions.has('MANAGE_MESSAGES')) return embeds.needperms(ita, 'KICK_MEMBERS', true)
         let member
         try { member = await guild.members.fetch(args.member) } catch {}
         if(member.id == ita.member.id) return (async function() {
@@ -58,12 +57,12 @@ module.exports = {
             ita.reply({ embeds: [embed], ephemeral: true })
         })()
         if(!member) return embeds.error(ita, 'Fehler', 'Der gesuchte Nutzer konnte nicht gefunden werden.', true)
-        if(member.roles.highest.comparePositionTo(ita.member.roles.highest) >= 0 && !guild.member) return embeds.error(ita, 'Fehlende Berechtigungen', `Deine aktuelle Rollenkonfiguration erlaubt es dir nicht, <@!${member.id}> zu kicken.`, true)
+        if(member.roles.highest.comparePositionTo(ita.member.roles.highest) > 0 && !guild.ownerId == ita.user.id) return embeds.error(ita, 'Fehlende Berechtigungen', `Deine aktuelle Rollenkonfiguration erlaubt es dir nicht, <@!${member.id}> zu kicken.`, true)
         if(!member.kickable) return embeds.error(ita, 'Fehlende Berechtigung', `Meine aktuelle Rollenkonfiguration erlaubt es nicht, <@!${member.id}> zu kicken.`, true)
         if(!guild.data.warns) guild.data.warns = []
         if(!guild.data.modactions) guild.data.modactions = 0
         var embed
-        if(!args.instant) {
+        if(!args.instant || args.instant === 'nein') {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Kicken" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
