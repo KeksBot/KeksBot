@@ -3,13 +3,13 @@ const embeds = require('../../embeds')
 const delay = require('delay')
 
 module.exports = {
-    name: 'kick',
-    description: 'Kickt den ausgewählten Nutzer',
-    permission: 'KICK_MEMBERS',
+    name: 'ban',
+    description: 'Bannt den ausgewählten Nutzer',
+    permission: 'BAN_MEMBERS',
     options: [
         {
             name: 'member',
-            description: 'Der zu kickende Nutzer',
+            description: 'Der zu bannende Nutzer',
             type: 'USER',
             required: true,
         },
@@ -21,7 +21,7 @@ module.exports = {
         },
         {
             name: 'reason',
-            description: 'Begründung für den Kick',
+            description: 'Begründung für den Ban',
             type: 'STRING',
             required: false,
         },
@@ -186,11 +186,13 @@ module.exports = {
         if(!banned) return embeds.error(ita, 'Fehler', 'Ein unbekannter Fehler ist aufgetreten.\nBitte probiere es später erneut.', true)
         guild.data.modactions ++
         if(!guild.data.tempbans) guild.data.tempbans = []
-        let ban = {
-            user: member.user,
+        var ban
+        if(time) ban = {
+            user: member.id,
             time
         }
-        await require('../../db/update')('serverdata', guild.id, { modactions: guild.data.modactions })
+        if(ban) guild.data.tempbans.push(ban)
+        await require('../../db/update')('serverdata', guild.id, { modactions: guild.data.modactions, tempbans: guild.data.tempbans })
         embed = new discord.MessageEmbed()
             .setColor(color.lime)
             .setTitle(`${member.user.username} wurde gebannt (Fall #${guild.data.modactions})`)
@@ -206,6 +208,10 @@ module.exports = {
                 else return `_${member.user.username} wird nicht automatisch entbannt._`
             })(), true)
         await ita.editReply({ embeds: [embed] })
+        if(time < Date.now() + 3600000) setTimeout(async function() {
+            if(!await guild.bans.fetch(member.user.id)) return
+            try { guild.bans.remove(member.user.id, 'Automatische Aufhebung des Bans') } catch {}
+        }, time - Date.now())
         return
     }
 }
