@@ -1,6 +1,6 @@
 {
   "name": "keksbot",
-  "version": "3.6.3",
+  "version": "1.2",
   "description": "NomNom",
   "main": "index.js",
   "scripts": {
