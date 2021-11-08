@@ -35,10 +35,21 @@ const setup = async () => {
         console.log('')
     })
 
+    var data = await fs.access('data.json').catch(async err => {
+        console.log('data.json wird angelegt...')
+        data = {
+            case: 0,
+            request: 0
+        }
+        await fs.writeFile('data.json', JSON.stringify(data, null, 2))
+        console.log('✅ Datei angelegt.')
+        console.log('')
+    })
+
     //config Setup
     var config = await fs.access('config.json').catch(async err => {
         console.log('config.json wird angelegt...')
-        var config = {
+        config = {
             token: "Hier Token einfügen",
             prefix: "-",
             mods: [],
@@ -61,7 +72,8 @@ const setup = async () => {
             mPartnerNeed: 10,
             support: 1,
             avatarURL: "https://cdn.discordapp.com/avatars/774885703929561089/ecd2914a28f52fba1962c962165877ae.webp",
-            tan: "0000-0000"
+            tan: "0000-0000",
+            uptimeurl: "https://youruptimeurlping"
         }
         await fs.writeFile('config.json', JSON.stringify(config, null, 2))
         console.log('✅ Datei angelegt.')

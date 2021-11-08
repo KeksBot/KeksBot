@@ -8,7 +8,7 @@ Wenn wer dagegen verstößt, greifen dieselben Sanktionen wie auf dem Support Se
 
 Das KeksBot Team übernimmt keinerlei Verantwortung für Inhalte, die andere Personen (nicht Teammitglieder) hier veröffentlichen.
 Sollten wir in diesen Inhalten Probleme sehen, werden wir sie löschen.
-Wir sind ausschließlich für den Code und das KeksBot Wiki verantwortlich.
+Wir sind ausschließlich für den Code und das KeksBot Wiki (ähm. Wenn das irgendwann kommt...) verantwortlich.
 Wir haben das Recht, Kommentare, Issues und andere Einträge von Nutzern, 
 die damit gegen unsere KeksBot Regeln verstoßen, 
 zu löschen und die Nutzer temporär oder permanent zu bannen.

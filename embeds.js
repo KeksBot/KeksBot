@@ -42,27 +42,32 @@ const translatepermission = (p) => {
     else if(p === 'MANAGE_NICKNAMES') p = 'Nicknames verwalten'
     else if(p === 'MANAGE_ROLES') p = 'Rollen verwalten'
     else if(p === 'MANAGE_WEBHOOKS') p = 'WebHooks verwalten'
-    else if(p === 'MANAGE_EMOJIS') p = 'Emojis verwalten'
-
+    else if(p === 'MANAGE_EMOJIS_AND_STICKERS') p = 'Emojis verwalten'
+    else if(p === 'USE_APPLICATION_COMMANDS') p = 'Anwendungsbefehle verwenden'
+    else if(p === 'REQUEST_TO_SPEAK') p = 'Redeanfrage'
+    else if(p === 'MANAGE_THREADS') p = 'Threads verwalten'
+    else if(p === 'USE_PUBLIC_THREADS') p = 'Öffentliche Threads verwenden'
+    else if(p === 'USE_PRIVATE_THREADS') p = 'Private Threads verwenden'
+    else if(p === 'USE_EXTERNAL_STICKERS') p = 'Externe Sticker verwenden'
     return p
 }
 
-const getColors = async (msg) => {
-    const serverdata = require('./serverdata.json')
-    if(serverdata[msg.guild.id] && serverdata[msg.guild.id].theme) {
+const getColors = async (guild) => {
+    const guilddata = await require('./db/getData')('serverdata', guild.id)
+    if(guilddata && guilddata.theme) {
         let {
             red = 0xff0000,
             lightblue = 0x3498db,
             lime = 0x2ecc71,
             yellow = 0xf1c40f,
             normal = 0x00b99b
-        } = serverdata[msg.guild.id].theme
+        } = guilddata.theme
         const color = {
-            red: red,
-            yellow: yellow,
-            lime: lime,
-            normal: normal,
-            lightblue: lightblue
+            red,
+            yellow,
+            lime,
+            normal,
+            lightblue
         }
         return color
     } else {
@@ -81,13 +86,13 @@ module.exports = {
     /**
      * 
      * @param {discord.Message} msg 
-     * @param {String} title 
-     * @param {String} text 
+     * @param {string} title 
+     * @param {string} text 
      * @param {boolean} edit 
      * @param {boolean} keep 
      * @returns discord.Message
      */
-    async error(msg, title, text, edit, keep) {
+    async errorMessage(msg, title, text, edit, keep) {
         const color = await getColors(msg)
         var embed = new discord.MessageEmbed()
             .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
@@ -96,48 +101,96 @@ module.exports = {
             .setDescription(text)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send(embed)
+            var message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit(embed).catch()
+        else var message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
     },
     /**
      * 
+     * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
+     * @param {string} title Titel des Embeds
+     * @param {string} description Textinhalt des Embeds
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
+     * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
+     */
+    async error(ita, title, description, ephemeral, del) {
+        const color = await getColors(ita.guild)
+        let embeds = [new discord.MessageEmbed()
+            .setColor(color.red)
+            .setTitle(`${emotes.denied} ${title}`)
+            .setDescription(`${description}`)]
+        if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
+        else await ita.reply({ embeds, ephemeral })
+        if(!ephemeral && del) {
+            await delay(7500)
+            await ita.deleteReply().catch()
+        }
+        return Promise.resolve(ita)
+    },
+    /**
+     * 
      * @param {discord.Message} msg 
-     * @param {discord.PermissionString} permission 
+     * @param {discord.Permissionstring} permission 
      * @param {boolean} edit 
      * @param {boolean} keep 
      * @returns discord.Message
      */
-    async needperms(msg, permission, edit, keep) {
+    async needpermsMessage(msg, permission, edit, keep) {
         permission = translatepermission(permission)
         const color = await getColors(msg)
         var embed = new discord.MessageEmbed()
             .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
             .setColor(color.red)
-            .setTitle(`${emotes.denied} Zugriff verweigert!`)
+            .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl auszuführen, benötigst du \`${permission}\`.`)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send(embed)
+            var message = await msg.channel.send({embeds: [embed]})
         }
-        else var message = await msg.edit(embed).catch()
+        else var message = await msg.edit({embeds: [embed]}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
     },
     /**
      * 
+     * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
+     * @param {string} permission Titel des Embeds
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
+     * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
+     */
+    async needperms(ita, permission, ephemeral, del) {
+        const color = await getColors(ita.guild)
+        permission = translatepermission(permission)
+        let embeds = [new discord.MessageEmbed()
+            .setColor(color.red)
+            .setTitle(`${emotes.denied} Fehlende Berechtigung`)
+            .setDescription(`Um diesen Befehl anzuwenden, benötigst du die Berechtigung \`${permission}\``)]
+        if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
+        else await ita.reply({ embeds, ephemeral })
+        if(!ephemeral && del) {
+            await delay(7500)
+            await ita.deleteReply().catch()
+        }
+        return Promise.resolve(ita)
+    },
+    /**
+     * 
      * @param {discord.Message} msg 
-     * @param {String} title 
-     * @param {String} text 
+     * @param {string} title 
+     * @param {string} text 
      * @param {boolean} edit 
      * @param {boolean} keep 
      * @returns discord.Message
      */
-    async success(msg, title, text, edit, keep) {
+    async successMessage(msg, title, text, edit, keep) {
         const color = await getColors(msg)
         var embed = new discord.MessageEmbed()
             .setColor(color.lime)
@@ -145,17 +198,41 @@ module.exports = {
             .setDescription(text)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send(embed)
+            var message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit(embed).catch()
+        else var message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
     },
     /**
      * 
+     * @param {discord.Interaction} ita Die Interaction, auf die geantwortet werden soll
+     * @param {string} title Titel des Embeds
+     * @param {string} description Textinhalt des Embeds
+     * @param {boolean} [ephemeral] Ob die Nachricht nur an den Nutzer gesendet werden soll
+     * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
+     * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
+     */
+         async success(ita, title, description, ephemeral, del) {
+            const color = ita.color || await getColors(ita.guild)
+            let embeds = [new discord.MessageEmbed()
+                .setColor(color.lime)
+                .setTitle(`${emotes.accept} ${title}`)
+                .setDescription(`${description}`)]
+            if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+            if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
+            else await ita.reply({ embeds, ephemeral })
+            if(!ephemeral && del) {
+                await delay(7500)
+                await ita.deleteReply().catch()
+            }
+            return Promise.resolve(ita)
+        },
+    /**
+     * 
      * @param {discord.Message} msg 
-     * @param {String} syntax 
+     * @param {string} syntax 
      * @param {boolean} edit 
      * @param {boolean} keep 
      * @returns discord.Message
@@ -168,9 +245,9 @@ module.exports = {
             .setDescription(`Bitte verwende diese Syntax:\n\`${syntax}\``)
         if(!edit) {
             embed.setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
-            var message = await msg.channel.send(embed)
+            var message = await msg.channel.send({embeds: [embed]})
         }
-        else var message = await msg.edit(embed).catch()
+        else var message = await msg.edit({embeds: [embed]}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)

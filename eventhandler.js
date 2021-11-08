@@ -12,7 +12,6 @@ module.exports = async (client, reload) => {
             } else {
                 if(file.endsWith('.js') && !file.startsWith('subevent')) {
                     var event = require(path.join(__dirname, dir, file))
-                    if(event.event) event.event = event.event.toLowerCase()
                     event.path = path.join(__dirname, dir, file)
                     if(event.name && event.on && event.event) {
                         console.log(`[${client.user.username}]: Event ${event.name} (${event.event}) wird geladen...`)
@@ -29,7 +28,9 @@ module.exports = async (client, reload) => {
     events.forEach(event => {
         if(event.event !== 'ready') {
             if(event.once) {client.once(event.event, (...args) => event.on(...args, client))}
-            else {client.on(event.event, (...args) => event.on(...args, client))}
+            else {client.on(event.event, (...args) => {
+                event.on(...args, client)
+            })}
         } else if(!reload) event.on(client)
     })
 }

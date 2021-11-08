@@ -5,19 +5,21 @@ module.exports = {
     event: 'ready',
     once: true,
     on() {
-        setInterval(() => {
-            var userdata = require('../userdata.json')
-            for (var k in userdata) {
-                var key = k
-                userdata[key].thismin = 0
+        setInterval(async function() {
+            const servermodel = require('../schemas/serverdata')
+            const usermodel = require('../schemas/userdata')
+            try {
+                await usermodel.updateMany({ "thismin": { $ne: 0 } }, { thismin: 0 })
+                await servermodel.updateMany({ "thismin": { $ne: 0 } }, { thismin: 0 })
+                global.cache.get('userdata').filter(u => u.thismin).array().forEach(function (data) {
+                    data.thismin = 0
+                })
+                global.cache.get('serverdata').filter(g => g.thismin).array().forEach(function (data) {
+                    data.thismin = 0
+                })
+            } catch (error) {
+                console.error
             }
-            var serverdata = require('../serverdata.json')
-            for (var k in serverdata) {
-                var key = k
-                serverdata[key].thismin = 0
-            }
-            fs.writeFileSync('userdata.json', JSON.stringify(userdata, null, 2))
-            fs.writeFileSync('serverdata.json', JSON.stringify(serverdata, null, 2))
-        }, 60000)
+        }, 10000)
     } 
 }

@@ -1,63 +1,90 @@
 const discord = require('discord.js')
-const fs = require('fs')
 const getcolor = require('../subcommands/getcolor')
-const config = require('../config.json')
 const emotes = require('../emotes.json')
+const embeds = require('../embeds')
 
 module.exports = {
     name: 'KeksBox',
-    event: 'message',
+    event: 'messageCreate',
     async on(msg, client) {
-        if(msg.author.bot || msg.author.system || !msg.guild) return
-        const serverdata = require('../serverdata.json')
-        if(!serverdata[msg.guild.id]) return
-        var color = getcolor(msg, serverdata)
-        if(!msg.content.startsWith(serverdata[msg.guild.id].prefix) && !serverdata[msg.guild.id].gift) {
-            var count = 100
-            if(serverdata[msg.guild.id].kbq) count = serverdata[msg.guild.id].kbq
-            var x = Math.floor(Math.random() * count)
-            if(x == 0) {
-                if(serverdata[msg.guild.id].cwl && !serverdata[msg.guild.id].cwl.includes(msg.channel.id)) return
-                if(Math.random() < 0.05) serverdata[msg.guild.id].gifttype = 1
-                else if(Math.random() < 0.025) serverdata[msg.guild.id].gifttype = 2
-                if(serverdata[msg.guild.id].gifttype == 1) {
+        if(!msg.guild || msg.author.bot || msg.author.system) return
+        var serverdata = await require('../db/getData')('serverdata', msg.guild.id)
+        var spawnrate = 100
+        if(serverdata && serverdata.keksbox) {
+            spawnrate = serverdata.keksbox.spawnrate || 100
+            if(serverdata.keksbox.channels && serverdata.keksbox.channels.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
+        }
+        if(!Math.floor(Math.random() * spawnrate)) {
+            if(!serverdata) serverdata = await require('../db/create')('serverdata', msg.guild.id)
+            const color = await getcolor(msg.guild.id, serverdata)
+            var keksbox = serverdata.keksbox || {}
+            if(keksbox.message) return
+            switch(Math.floor(Math.random() * 50)) {
+                case 0:
+                case 1:
                     var embed = new discord.MessageEmbed()
                         .setColor(color.lime)
                         .setTitle(':deciduous_tree: Bio Kekse')
-                        .setDescription(`Eine genz besondere Packung mit ökologischen Keksen ist aufgetaucht. Ohne Palmöl.\nGib \`${serverdata[msg.guild.id].prefix}claim\` ein, um das Paket einzusammeln.`)
-                        .setFooter(`KeksBot ${config.version}`, client.user.avatarURL())
-                } else if(serverdata[msg.guild.id].gifttype == 2) {
+                        .setDescription('Eine ganz besondere Packung mit ökologischen Keksen ist aufgetaucht.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.')
+                    keksbox.multiplier = 2
+                    break
+                case 2: 
                     var embed = new discord.MessageEmbed()
                         .setColor(color.yellow)
-                        .setTitle(`${emotes.cookie} ${emotes.cookie} ${emotes.cookie}`)
-                        .setDescription(`Eine riesige Keks Lieferung ist gerade angekommen.\nGib \`${serverdata[msg.guild.id].prefix}claim\` ein, um das Paket einzusammeln.`)
-                        .setFooter(`KeksBot ${config.version}`, client.user.avatarURL())
-                } else {
-                    let y = Math.floor(Math.random * 3)
-                    if(y == 1) {
-                        var embed = new discord.MessageEmbed()
-                            .setColor(color.normal)
-                            .setTitle('Huch!')
-                            .setDescription(`Ein Paket voller Keksen erscheint! Los, Pikachu!\nGib \`${serverdata[msg.guild.id].prefix}claim\` ein, um es einzusammeln.`)
-                            .setFooter(`KeksBot ${config.version}`, client.user.avatarURL())
-                    } else if(y == 2) {
-                        var embed = new discord.MessageEmbed()
-                            .setColor(color.normal)
-                            .setTitle('Die Lieferung ist da!')
-                            .setDescription(`Ein leckeres Kekspaket ist gerade angekommen.\nGib \`${serverdata[msg.guild.id].prefix}claim\` ein, um es einzusammeln.`)
-                            .setFooter(`KeksBot ${config.version}`, client.user.avatarURL())
-                    } else {
-                        var embed = new discord.MessageEmbed()
-                            .setColor(color.normal)
-                            .setTitle('Legga')
-                            .setDescription(`Legga Keeeeeeekseeeeee!\nGib \`${serverdata[msg.guild.id].prefix}claim\` ein, um es einzusammeln.`)
-                            .setFooter(`KeksBot ${config.version}`, client.user.avatarURL())
+                        .setTitle('<:cookie3:844554845499293723> Kekslieferung')
+                        .setDescription('Eine Kekslieferung ist gerade eingetroffen. Vielleicht wurde beim Verpacken der Kekse aber ein zu großer Karton gewählt, jetzt sind es deutlich mehr.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.')
+                    keksbox.multiplier = 5
+                    break
+                default: 
+                    switch(Math.floor(Math.random() * 3)) {
+                        case 0:
+                            var embed = new discord.MessageEmbed()
+                                .setColor(color.normal)
+                                .setTitle(`${emotes.cookie} Kekseeeeee`)
+                                .setDescription('Eine Kekslieferung ist gerade gekommen.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.')
+                            break
+                        case 1:
+                            var embed = new discord.MessageEmbed()
+                                .setColor(color.normal)
+                                .setTitle(`${emotes.cookie} Die Lieferung ist da`)
+                                .setDescription('Ein Paket voller Kekse ist aufgetaucht.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.')
+                            break
+                        default: 
+                            var embed = new discord.MessageEmbed()
+                                .setColor(color.normal)
+                                .setTitle(`${emotes.cookie} Huch`)
+                                .setDescription('Ein Haufen Kekse erscheint.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um sie einzusammeln.')
                     }
-                }
-                var message = await msg.channel.send(embed)
-                serverdata[msg.guild.id].gift = message.id
-                fs.writeFileSync('serverdata.json', JSON.stringify(serverdata, null, 2))
+                    keksbox.multiplier = 1
             }
+            let button = new discord.MessageActionRow()
+                .addComponents(
+                    new discord.MessageButton()
+                        .setStyle('PRIMARY')
+                        .setLabel('Einsammeln')
+                        .setCustomId('keksbox:claim')
+                )
+            /** @type {discord.Message}*/
+            var message = await msg.channel.send({ embeds: [embed], components: [button]})
+            keksbox.message = message.id
+            await require('../db/update')('serverdata', msg.guild.id, { keksbox })
+            const filter = ita => ita.customId === 'keksbox:claim'
+            const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: 'BUTTON' })
+            collector.on('collect', async function(ita) {
+                serverdata = await require('../db/getData')('serverdata', ita.guild.id)
+                var content = Math.floor(Math.random() * 10 + 1)
+                if(!serverdata.keksbox || !serverdata.keksbox.message || message.deleted) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
+                if(serverdata.keksbox.spawnrate) content *= serverdata.keksbox.spawnrate
+                content *= serverdata.keksbox.multiplier
+                embeds.successMessage(message, 'Paket eingesammelt', `<@!${ita.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, false)
+                var userdata = await require('../db/getData')('userdata', ita.user.id)
+                if(!userdata) userdata = await require('../db/create')('userdata', ita.user.id)
+                if(!userdata.cookies) userdata.cookies = 0
+                userdata.cookies += content
+                let { keksbox } = serverdata
+                await require('../db/update')('serverdata', ita.guild.id, { keksbox: { channels: keksbox.channels, spawnrate: keksbox.spawnrate } })
+                await require('../db/update')('userdata', ita.user.id, { cookies: userdata.cookies })
+            })
         }
     }
 }
