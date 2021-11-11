@@ -9,9 +9,13 @@ module.exports = {
     async execute(interaction, args, client) {
         var { guild, user } = interaction
         if(!guild.data.keksbox || !guild.data.keksbox.message) return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)
-        var content = Math.floor(Math.random() * 10 + 1)
+        var content = Math.random() * 10
         if(guild.data.keksbox.spawnrate) content *= guild.data.keksbox.spawnrate
-        content *= guild.data.keksbox.multiplier
+        else {
+            content *= 100
+            serverdata.keksbox.spawnrate = 100
+        }
+        content *= Math.round(serverdata.keksbox.multiplier)
         var foundOne = false
         await guild.channels.fetch()
         var channels = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').array()

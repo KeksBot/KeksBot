@@ -72,10 +72,14 @@ module.exports = {
             const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: 'BUTTON' })
             collector.on('collect', async function(ita) {
                 serverdata = await require('../db/getData')('serverdata', ita.guild.id)
-                var content = Math.floor(Math.random() * 10 + 1)
+                var content = Math.random() * 10
                 if(!serverdata.keksbox || !serverdata.keksbox.message || message.deleted) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
                 if(serverdata.keksbox.spawnrate) content *= serverdata.keksbox.spawnrate
-                content *= serverdata.keksbox.multiplier
+                else {
+                    content *= 100
+                    serverdata.keksbox.spawnrate = 100
+                }
+                content *= Math.round(serverdata.keksbox.multiplier)
                 embeds.successMessage(message, 'Paket eingesammelt', `<@!${ita.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, false)
                 var userdata = await require('../db/getData')('userdata', ita.user.id)
                 if(!userdata) userdata = await require('../db/create')('userdata', ita.user.id)
