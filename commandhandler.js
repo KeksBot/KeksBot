@@ -169,7 +169,7 @@ module.exports = async (client) => {
                     if(data.banned.reason) reason = `Begründung: _${data.banned.reason}_`
                     let timestamp = ''
                     if(data.banned.time && data.banned.time != Infinity) timestamp = `\n\nDer Bann wird <t:${Math.round(data.banned.time / 1000)}:R> aufgehoben.`
-                    while(!ita.color) {}
+                    while(!ita.color) {await delay(50)}
                     embeds.error(ita, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
                 }
                 if(data.banned.time && data.banned.time < Date.now()) {
@@ -222,6 +222,7 @@ module.exports = async (client) => {
             }
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | [ ${argsarray.join(', ')} ]`)
+            console.log(ita.color)
             await command.execute(ita, args, client)
         } catch (error) {
             console.error(error)
