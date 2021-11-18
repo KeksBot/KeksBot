@@ -16,7 +16,7 @@ module.exports = {
         }
         if(!Math.floor(Math.random() * spawnrate)) {
             if(!serverdata) serverdata = await require('../db/create')('serverdata', msg.guild.id)
-            const color = await getcolor(msg.guild.id, serverdata)
+            const color = await getcolor(msg.guild, serverdata)
             var keksbox = serverdata.keksbox || {}
             if(keksbox.message) return
             switch(Math.floor(Math.random() * 50)) {
