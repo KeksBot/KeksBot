@@ -17,7 +17,6 @@ module.exports = async (guild, guilddata) => {
             yellow = 0xf1c40f,
             normal = 0x00b99b
         } = guilddata.theme
-        if(guilddata.theme.normal == "role") guilddata.theme.normal = guild.me.displayHexColor || 0x00b99b
         return { red, yellow, lime, normal, lightblue }
     } else return { red: 0xff0000, lightblue: 0x3498db, lime: 0x2ecc71, yellow: 0xf1c40f, normal: 0x00b99b }
 }
