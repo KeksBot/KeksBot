@@ -5,9 +5,6 @@ const commandhandler = require('./commandhandler')
 const eventhandler = require('./eventhandler')
 discord.Collection.prototype.array = function() {return [...this.values()]}
 
-const uptimemonitoring = require('./uptimemonitoring')
-uptimemonitoring(config.uptimeurl)
-
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
 global.cache = require('./db/startup')
@@ -17,10 +14,13 @@ client.once('ready', async () => { //Status
     client.restarting = 0
     var start = Date.now()
     console.log(`[${client.user.username}]: Client geladen.`)
-    console.log(`[${client.user.username}]: System wird gestartet...`)
+    console.log(`[${client.user.username}]: Monitoring wird aktiviert.`)
+    const uptimemonitoring = require('./uptimemonitoring')
+    uptimemonitoring(config.uptimeurl, client)
+    console.log(`[${client.user.username}]: System wird gestartet.`)
     client.setMaxListeners(0)
     let mongoose = await require('./db/database')()
-    console.log(`[${client.user.username}]: Verbindung zur Datenbank hergestellt`)
+    console.log(`[${client.user.username}]: Verbindung zur Datenbank hergestellt.`)
     mongoose.connection.close()
     await commandhandler(client)
     await eventhandler(client)
