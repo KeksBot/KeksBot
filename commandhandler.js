@@ -130,6 +130,7 @@ module.exports = async (client) => {
                 }
             })
         } catch (error) {
+            console.error(error)
             failedguilds++
         } finally {
             progress ++
@@ -148,7 +149,9 @@ module.exports = async (client) => {
             return embeds.error(ita, 'Fehler', 'Der Befehl wurde nicht gefunden.', true, true)
         }
         var args = {}
-        ita.options._hoistedOptions.forEach(option => args[option.name] = option.value)
+        ita.options._hoistedOptions.forEach(option => args[option.name.replaceAll('-', '_')] = option.value)
+        if(ita.options.getSubcommand(false) || false) args.subcommand = ita.options.getSubcommand(false)
+        if(ita.options.getSubcommandGroup(false) || false) args.subcommandgroup = ita.options.getSubcommandGroup(false)
 
         //Daten laden
         var status = {user: false, server: false}
