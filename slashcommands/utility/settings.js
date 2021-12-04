@@ -1,5 +1,4 @@
 const discord = require('discord.js')
-const { isInteger } = require('mathjs')
 const update = require('../../db/update')
 const embeds = require('../../embeds')
 

@@ -9,7 +9,9 @@ module.exports = {
         await require('../db/database')()
         for await (const data of serverdata.find({ tempbans: { $exists: true } })) {
             var guild
-            try { guild = await client.guilds.fetch(data._id) } catch {}
+            try { guild = await client.guilds.fetch(data._id) } catch {
+                try { await serverdata.findByIdAndDelete(data._id) } catch {}
+            }
             if(guild) {
                 let tempbans = [...data.tempbans]
                 data.tempbans.forEach(async function(ban) {
