@@ -42,7 +42,7 @@ module.exports = {
         user.data.cookies += args.count
         user.data.thismin += args.count
         guild.data.thismin += args.count
-        await update('userdata', ita.user.id, { cookies: user.data.cookies, thismin: user.data.thismin })
+        await update('userdata', ita.user.id, { cookies: Math.floor(user.data.cookies), thismin: user.data.thismin })
         await update('serverdata', ita.guild.id, { thismin: guild.data.thismin })
 
         let embed = new discord.MessageEmbed()

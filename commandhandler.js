@@ -130,6 +130,7 @@ module.exports = async (client) => {
                 }
             })
         } catch (error) {
+            console.error(error)
             failedguilds++
         } finally {
             progress ++
@@ -148,7 +149,9 @@ module.exports = async (client) => {
             return embeds.error(ita, 'Fehler', 'Der Befehl wurde nicht gefunden.', true, true)
         }
         var args = {}
-        ita.options._hoistedOptions.forEach(option => args[option.name] = option.value)
+        ita.options._hoistedOptions.forEach(option => args[option.name.replaceAll('-', '_')] = option.value)
+        if(ita.options.getSubcommand(false) || false) args.subcommand = ita.options.getSubcommand(false)
+        if(ita.options.getSubcommandGroup(false) || false) args.subcommandgroup = ita.options.getSubcommandGroup(false)
 
         //Daten laden
         var status = {user: false, server: false}
@@ -169,7 +172,7 @@ module.exports = async (client) => {
                     if(data.banned.reason) reason = `Begründung: _${data.banned.reason}_`
                     let timestamp = ''
                     if(data.banned.time && data.banned.time != Infinity) timestamp = `\n\nDer Bann wird <t:${Math.round(data.banned.time / 1000)}:R> aufgehoben.`
-                    while(!ita.color) {}
+                    while(!ita.color) {await delay(50)}
                     embeds.error(ita, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
                 }
                 if(data.banned.time && data.banned.time < Date.now()) {
@@ -222,6 +225,7 @@ module.exports = async (client) => {
             }
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | [ ${argsarray.join(', ')} ]`)
+            if(ita.color.normal === 'role') ita.color.normal = ita.guild.me.displayHexColor || 0x00b99b
             await command.execute(ita, args, client)
         } catch (error) {
             console.error(error)

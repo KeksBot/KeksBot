@@ -18,8 +18,8 @@ module.exports = {
             .addField('Erstellt am', `<t:${Math.floor(guild.createdAt/1000)}>\n<t:${Math.floor(guild.createdAt/1000)}:R>`, true)
             .addField('Owner', `<@!${guild.ownerId}>`, true)
             .addField('Mitglieder', guild.memberCount.toString(), true)
-            .addField('Nutzer', guild.members.cache.filter(m => !m.user.bot).size.toString(), true)
-            .addField('Bots', guild.members.cache.filter(m => m.user.bot).size.toString(), true)
+            .addField('Nutzer', await (await guild.members.fetch({ cache: false })).filter(m => !m.user.bot).size.toString(), true)
+            .addField('Bots', await (await guild.members.fetch({ cache: false })).filter(m => m.user.bot).size.toString(), true)
             .addField('Verifizierungsstufe', (function() {
                 switch(guild.verificationLevel) {
                     case 'NONE': return '⚪ Keine'

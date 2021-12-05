@@ -23,7 +23,8 @@ var serverdataSchema = mongoose.Schema({
         spawnrate: Number, //Durchschnittliche Anzahl zw. KeksBoxen
         channels: Array, //Channel Whitelist
         message: String, //Nachricht vom Paket
-        multiplier: Number //Für besondere KeksBoxen
+        multiplier: Number, //Für besondere KeksBoxen
+        keepmessage: Boolean, //Ob die Nachricht beim claimen gelöscht werden soll
     },
     warns: [
         {

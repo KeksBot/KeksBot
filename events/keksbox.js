@@ -10,13 +10,13 @@ module.exports = {
         if(!msg.guild || msg.author.bot || msg.author.system) return
         var serverdata = await require('../db/getData')('serverdata', msg.guild.id)
         var spawnrate = 100
-        if(serverdata && serverdata.keksbox) {
+        if(serverdata?.keksbox) {
             spawnrate = serverdata.keksbox.spawnrate || 100
-            if(serverdata.keksbox.channels && serverdata.keksbox.channels.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
+            if(serverdata.keksbox.channels?.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
         }
         if(!Math.floor(Math.random() * spawnrate)) {
             if(!serverdata) serverdata = await require('../db/create')('serverdata', msg.guild.id)
-            const color = await getcolor(msg.guild.id, serverdata)
+            const color = await getcolor(msg.guild, serverdata)
             var keksbox = serverdata.keksbox || {}
             if(keksbox.message) return
             switch(Math.floor(Math.random() * 50)) {
@@ -72,11 +72,15 @@ module.exports = {
             const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: 'BUTTON' })
             collector.on('collect', async function(ita) {
                 serverdata = await require('../db/getData')('serverdata', ita.guild.id)
-                var content = Math.floor(Math.random() * 10 + 1)
-                if(!serverdata.keksbox || !serverdata.keksbox.message || message.deleted) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
+                var content = Math.random() * 10
+                if(!serverdata.keksbox?.message || message.deleted) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
                 if(serverdata.keksbox.spawnrate) content *= serverdata.keksbox.spawnrate
-                content *= serverdata.keksbox.multiplier
-                embeds.successMessage(message, 'Paket eingesammelt', `<@!${ita.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, false)
+                else {
+                    content *= 100
+                    serverdata.keksbox.spawnrate = 100
+                }
+                content = Math.round(content * serverdata.keksbox.multiplier)
+                embeds.successMessage(message, 'Paket eingesammelt', `<@!${ita.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, serverdata.keksbox.keepmessage)
                 var userdata = await require('../db/getData')('userdata', ita.user.id)
                 if(!userdata) userdata = await require('../db/create')('userdata', ita.user.id)
                 if(!userdata.cookies) userdata.cookies = 0

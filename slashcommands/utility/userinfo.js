@@ -1,5 +1,6 @@
 const discord = require('discord.js')
 const embeds = require('../../embeds')
+const emotes = require('../../emotes.json')
 
 module.exports = {
     name: 'userinfo',
@@ -42,6 +43,16 @@ module.exports = {
         if(user.data.cookies) embed.addField('Lagerstand', user.data.cookies.toString(), true)
         if(user.data.xp) embed.addField('Erfahrungspunkte', user.data.xp.toString(), true)
         if(user.data.level) embed.addField('Level', user.data.level.toString(), true)
+        if(user.data.badges) {
+            let badges = []
+            if(user.data.badges.mod) badges.push(emotes.mod)
+            if(user.data.badges.dev) badges.push(emotes.dev)
+            if(user.data.badges.team) badges.push(emotes.team)
+            if(user.data.badges.verified) badges.push(emotes.verified)
+            if(user.data.badges.partner) badges.push(emotes.partner)
+            if(user.data.badges.beta) badges.push(emotes.firsthour)
+            if(badges.length) embed.addField('Badges', badges.join(' '), true)
+        }
         return await ita.reply({ embeds: [embed], ephemeral: true })
     }
 }

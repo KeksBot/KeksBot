@@ -58,7 +58,6 @@ module.exports = async (msg, args, text) => {
                         }
                     }
                 }
-    
             })
         }
     }

@@ -1,10 +1,9 @@
 const https = require('https');
 
-module.exports = function uptimemonitoring(uptimeurl) {
-
-    https.get(uptimeurl)
+module.exports = function uptimemonitoring(uptimeurl, client) {
+    https.get(uptimeurl.replace('PING', client.ws.ping))
     setInterval(() => {
-        https.get(uptimeurl)
+        https.get(uptimeurl.replace('PING', client.ws.ping))
     }, 1000 * 30)
 
 }
