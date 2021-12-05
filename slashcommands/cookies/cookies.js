@@ -15,7 +15,7 @@ module.exports = {
     ],
     async execute(ita, args, client) {
         var { user, guild } = ita
-        if(args < 0) return embeds.error(ita, 'Syntaxfehler', 'Bitte gib eine Zahl > 0 an.', true)
+        if(args.count < 0) return embeds.error(ita, 'Syntaxfehler', 'Bitte gib eine Zahl > 0 an.', true)
         
         if(!user.data.thismin) user.data.thismin = 0
         if(!user.data.badges) user.data.badges = {}
@@ -23,11 +23,11 @@ module.exports = {
         if(!guild.data.level) guild.data.level = 1
         if(!guild.data.thismin) guild.data.thismin = 0
 
-        let maxuser = 128
+        var maxuser = 128
         if(user.data.badges.partner) maxuser = 256
         if(user.data.badges.vip) maxuser = 512
         if(user.data.badges.team) maxuser = 512
-        let maxguild = 2 ** (guild.data.level + 8)
+        var maxguild = 2 ** (guild.data.level + 8)
         if(guild.data.partner && guild.data.partner == 1 && maxguild < 65536) maxguild = 65536
         if(guild.data.verified && maxguild < 4194304) maxguild = 4194304
         maxuser -= user.data.thismin

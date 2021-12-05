@@ -131,6 +131,7 @@ module.exports = async (client) => {
             })
         } catch (error) {
             console.error(error)
+            console.log(`[${client.user.username}]: Server nicht geladen: ${guild.id} | ${guild.name} | ${guild.owner.id}`)
             failedguilds++
         } finally {
             progress ++
