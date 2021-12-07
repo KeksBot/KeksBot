@@ -35,15 +35,11 @@ module.exports = async function(name, id, data) {
     await db()
     try {
         let exists = await model.findById(id)
-        if(exists) {
-            global.cache.get(name).set(id, exists)
-            return exists
-        }
+        if(exists) return exists
         let object = {_id: id}
         if(!data) data = {}
         Object.assign(object, data)
-        await global.cache.get(name).set(id, await model.create(object))
-        return global.cache.get(name).get(id)
+        return await model.create(object)
     } catch (error) {
         return error
     }

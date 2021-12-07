@@ -22,16 +22,15 @@ const readCommands = dir => {
 }
 readCommands(path.join(__dirname, '../schemas'))
 
-async function handle(name, id) {
-    var data = await global.cache.get(name).get(id)
+async function handle(data, name, id) {
     var changed = false
     switch(name) {
         case 'userdata': 
-            if(data.banned && data.banned.time && data.banned.time < Date.now()) {
-                delete global.cache.get(name).get(id).banned
+            if(data.banned?.time && data.banned.time < Date.now()) {
+                data.banned = null
                 changed = true
             }
-            if(changed) await require('./update')('userdata', id, global.cache.get(name).get(id))
+            if(changed) await require('./update')('userdata', id, { banned: data.banned })
     }
 }
 
@@ -45,15 +44,10 @@ module.exports = async function(name, id) {
     /** @type {Model} */
     let model = schemas.get(name)
     if(!model) return new Error('404: Model not found')
-    if(global.cache.get(name).has(id)) {
-        await handle(name, id)
-        return global.cache.get(name).get(id)
-    }
     await db()
     try {
         let data = await model.findById(id)
-        if(data) await global.cache.get(name).set(id, data)
-        if(data) await handle(name, id)
+        if(data) await handle(data, name, id)
         return data
     } catch (error) {
         return error

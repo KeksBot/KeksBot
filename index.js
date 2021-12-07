@@ -7,7 +7,6 @@ discord.Collection.prototype.array = function() {return [...this.values()]}
 
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
-global.cache = require('./db/startup')
 
 client.once('ready', async () => { //Status
     client.user.setStatus('idle')

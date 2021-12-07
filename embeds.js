@@ -1,14 +1,7 @@
 const discord = require('discord.js')
 const emotes = require('./emotes.json')
-const config = require('./config.json')
 const delay = require('delay')
-const color = {
-    red: 0xff0000,
-    lightblue: 0x3498db,
-    lime: 0x2ecc71,
-    yellow: 0xf1c40f,
-    normal: 0x00b99b
-}
+const getColors = require('./subcommands/getcolor')
 
 const translatepermission = (p) => {
     p = p.toUpperCase()
@@ -52,36 +45,6 @@ const translatepermission = (p) => {
     return p
 }
 
-const getColors = async (guild) => {
-    const guilddata = await require('./db/getData')('serverdata', guild.id)
-    if(guilddata && guilddata.theme) {
-        let {
-            red = 0xff0000,
-            lightblue = 0x3498db,
-            lime = 0x2ecc71,
-            yellow = 0xf1c40f,
-            normal = 0x00b99b
-        } = guilddata.theme
-        const color = {
-            red,
-            yellow,
-            lime,
-            normal,
-            lightblue
-        }
-        return color
-    } else {
-        const color = {
-            red: 0xff0000,
-            lightblue: 0x3498db,
-            lime: 0x2ecc71,
-            yellow: 0xf1c40f,
-            normal: 0x00b99b
-        }
-        return color
-    }
-}
-
 module.exports = {
     /**
      * 
@@ -93,7 +56,7 @@ module.exports = {
      * @returns discord.Message
      */
     async errorMessage(msg, title, text, edit, keep) {
-        const color = await getColors(msg)
+        const color = await getColors(msg.guild)
         var embed = new discord.MessageEmbed()
             .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
             .setColor(color.red)
@@ -118,7 +81,7 @@ module.exports = {
      * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
      */
     async error(ita, title, description, ephemeral, del) {
-        const color = await getColors(ita.guild)
+        const color = ita.color || await getColors(ita.guild)
         let embeds = [new discord.MessageEmbed()
             .setColor(color.red)
             .setTitle(`${emotes.denied} ${title}`)
@@ -142,7 +105,7 @@ module.exports = {
      */
     async needpermsMessage(msg, permission, edit, keep) {
         permission = translatepermission(permission)
-        const color = await getColors(msg)
+        const color = await getColors(msg.guild)
         var embed = new discord.MessageEmbed()
             .setFooter(msg.author.tag, msg.author.avatarURL({dynamic: true}))
             .setColor(color.red)
@@ -166,7 +129,7 @@ module.exports = {
      * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
      */
     async needperms(ita, permission, ephemeral, del) {
-        const color = await getColors(ita.guild)
+        const color = ita.color || await getColors(ita.guild)
         permission = translatepermission(permission)
         let embeds = [new discord.MessageEmbed()
             .setColor(color.red)
@@ -191,7 +154,7 @@ module.exports = {
      * @returns discord.Message
      */
     async successMessage(msg, title, text, edit, keep) {
-        const color = await getColors(msg)
+        const color = await getColors(msg.guild)
         var embed = new discord.MessageEmbed()
             .setColor(color.lime)
             .setTitle(`${emotes.accept} ${title}`)
@@ -214,21 +177,21 @@ module.exports = {
      * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
      * @returns {Promise <discord.Interaction>} Die Interaction vom Anfang
      */
-         async success(ita, title, description, ephemeral, del) {
-            const color = ita.color || await getColors(ita.guild)
-            let embeds = [new discord.MessageEmbed()
-                .setColor(color.lime)
-                .setTitle(`${emotes.accept} ${title}`)
-                .setDescription(`${description}`)]
-            if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
-            if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
-            else await ita.reply({ embeds, ephemeral })
-            if(!ephemeral && del) {
-                await delay(7500)
-                await ita.deleteReply().catch()
-            }
-            return Promise.resolve(ita)
-        },
+    async success(ita, title, description, ephemeral, del) {
+        const color = ita.color || await getColors(ita.guild)
+        let embeds = [new discord.MessageEmbed()
+            .setColor(color.lime)
+            .setTitle(`${emotes.accept} ${title}`)
+            .setDescription(`${description}`)]
+        if(!ephemeral) embeds[0].setFooter(ita.user.tag, ita.user.avatarURL({dynamic: true}))
+        if(ita.deferred || ita.replied) await ita.editReply({ embeds, ephemeral, components: [] })
+        else await ita.reply({ embeds, ephemeral })
+        if(!ephemeral && del) {
+            await delay(7500)
+            await ita.deleteReply().catch()
+        }
+        return Promise.resolve(ita)
+    },
     /**
      * 
      * @param {discord.Message} msg 
@@ -238,7 +201,7 @@ module.exports = {
      * @returns discord.Message
      */
     async syntaxerror(msg, syntax, edit, keep) {
-        const color = await getColors(msg)
+        const color = await getColors(msg.guild)
         var embed = new discord.MessageEmbed()
             .setColor(color.red)
             .setTitle(`${emotes.denied} Syntaxfehler`)

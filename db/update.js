@@ -33,20 +33,13 @@ module.exports = async function(name, id, value) {
     if(!model) return new Error('404: Model not found')
     await db()
     try {
-        await model.findOneAndUpdate({
+        let data = await model.findOneAndUpdate({
             _id: id
         }, value, {
             upsert: true,
             strict: false
         })
-        if(global.cache.get(model.modelName).has(id)) {
-            let data = global.cache.get(model.modelName).get(id)
-            for (const key in value) {
-                data[key] = value[key]
-            }
-            global.cache.get(model.modelName).set(id, data)
-            return data
-        }
+        return data
     } catch (error) {
         return error
     }
