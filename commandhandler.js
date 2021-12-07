@@ -165,9 +165,10 @@ module.exports = async (client) => {
         getData('userdata', ita.user.id).then(async function(data) {
             if(!data) data = await require('./db/create')('userdata', ita.user.id)
             ita.user.data = data
+            console.log(data._doc)
             if(data.banned && data.banned.time) {
                 ita.user.data = -2
-                if(data.banned.time < Date.now()) {
+                if(data.banned.time > Date.now()) {
                     let reason = '_Es liegt keine Begründung vor._'
                     if(data.banned.reason) reason = `Begründung: _${data.banned.reason}_`
                     let timestamp = ''
@@ -175,10 +176,10 @@ module.exports = async (client) => {
                     while(!ita.color) {await delay(50)}
                     embeds.error(ita, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
                 }
-                if(banned.time != -1 && data.banned.time > Date.now()) {
+                if(data.banned.time != -1 && data.banned.time < Date.now()) {
                     delete data.banned
                     ita.user.data = data
-                    await update('userdata', ita.user.id, data)
+                    await update('userdata', ita.user.id, { banned: null })
                 }
             }
             status.user = true

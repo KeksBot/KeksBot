@@ -26,7 +26,7 @@ async function handle(data, name, id) {
     var changed = false
     switch(name) {
         case 'userdata': 
-            if(data.banned?.time && data.banned.time < Date.now()) {
+            if(data.banned?.time && data.banned.time != -1 && data.banned.time < Date.now()) {
                 data.banned = null
                 changed = true
             }
