@@ -86,7 +86,9 @@ module.exports = {
                 if(!userdata.cookies) userdata.cookies = 0
                 userdata.cookies += content
                 let { keksbox } = serverdata
-                await require('../db/update')('serverdata', ita.guild.id, { keksbox: { channels: keksbox.channels, spawnrate: keksbox.spawnrate } })
+                keksbox.message = null
+                keksbox.multiplier = null
+                await require('../../db/update')('serverdata', guild.id, { keksbox })
                 await require('../db/update')('userdata', ita.user.id, { cookies: userdata.cookies })
             })
         }

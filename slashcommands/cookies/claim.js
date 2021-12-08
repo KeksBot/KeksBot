@@ -32,7 +32,9 @@ module.exports = {
                     if(!user.data.cookies) user.daPaketta.cookies = 0
                     user.data.cookies += content
                     let { keksbox } = guild.data
-                    await require('../../db/update')('serverdata', guild.id, { keksbox: { channels: keksbox.channels, spawnrate: keksbox.spawnrate } })
+                    keksbox.message = null
+                    keksbox.multiplier = null
+                    if(keksbox.message) await require('../../db/update')('serverdata', guild.id, { keksbox })
                     await require('../../db/update')('userdata', user.id, { cookies: user.data.cookies })
                     return
                 }
@@ -44,7 +46,9 @@ module.exports = {
         })
         while(waiting) {await delay(50)}
         let { keksbox } = guild.data
-        if(keksbox.message) await require('../../db/update')('serverdata', guild.id, { keksbox: { channels: keksbox.channels, spawnrate: keksbox.spawnrate } })
+        keksbox.message = null
+        keksbox.multiplier = null
+        if(keksbox.message) await require('../../db/update')('serverdata', guild.id, { keksbox })
         return embeds.error(interaction, 'Fehler', 'Ein unbekannter Fehler ist aufgetreten. Die Kekse konnten nicht zugestellt werden.', true)
     }
 }
