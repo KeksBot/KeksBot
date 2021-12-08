@@ -14,6 +14,6 @@ module.exports = {
             } catch (error) {
                 console.error
             }
-        }, 10000)
+        }, 60000)
     } 
 }
