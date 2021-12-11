@@ -1,7 +1,6 @@
 const discord = require('discord.js')
 const delay = require('delay')
 const update = require('../../../db/update')
-const { e } = require('mathjs')
 
 module.exports = async function(ita, args, client) {
     var { guild, color } = ita
@@ -35,13 +34,13 @@ module.exports = async function(ita, args, client) {
             let message = await ita.reply({ embeds: [embed], ephemeral: true, components: [buttons], fetchReply: true })
             let i = await message.awaitMessageComponent({ componentType: 'BUTTON', time: 600_000, })
             if(!i) return
+            let textcontinue = ''
+            if(args.theme) textcontinue = '\nDie Einstellungen für das Theme werden in Kürze geladen.'
             if(i.customId.includes('yes')) {
                 color.normal = args.color.toUpperCase()
                 if(!guild.data.theme) guild.data.theme = { normal: args.color.toUpperCase() }
                 else guild.data.theme.normal = args.color.toUpperCase()
                 await update('serverdata', guild.id, { theme: guild.data.theme })
-                let textcontinue = ''
-                if(args.theme) textcontinue = '\nDie Einstellungen für das Theme werden in Kürze geladen.'
                 embed = new discord.MessageEmbed()
                     .setColor(color.lime)
                     .setTitle('Änderungen übernommen')
