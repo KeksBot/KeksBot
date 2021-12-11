@@ -11,10 +11,10 @@ module.exports = async (guild) => {
     if(!guild.data) guild.data = await require('../db/getData')('serverdata', guild.id)
     if(guild.data?.theme) {
         let {
-            red = 0xff0000,
+            red = 0xe62535,
             lightblue = 0x3498db,
-            lime = 0x2ecc71,
-            yellow = 0xf1c40f,
+            lime = 0x25d971,
+            yellow = 0xf2e03f,
             normal = 0x00b99b
         } = guild.data.theme
         if(normal == 'role') normal = guild.me?.displayHexColor || 0x00b99b

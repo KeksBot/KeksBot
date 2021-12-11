@@ -62,7 +62,7 @@ module.exports = async (client) => {
             if(stat.isDirectory()) {
                 readCommands(path.join(dir, file))
             } else {
-                if(file.endsWith('.js') && !file.startsWith('subcmd' || 'subcommand')) {
+                if(file.endsWith('.js') && !file.startsWith('!')) {
                     var command = require(path.join(__dirname, dir, file))
                     if(command.permission) {
                         command.defaultPermission = false
@@ -165,7 +165,6 @@ module.exports = async (client) => {
         getData('userdata', ita.user.id).then(async function(data) {
             if(!data) data = await require('./db/create')('userdata', ita.user.id)
             ita.user.data = data
-            console.log(data._doc)
             if(data.banned && data.banned.time) {
                 ita.user.data = -2
                 if(data.banned.time > Date.now()) {
