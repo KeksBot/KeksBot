@@ -7,7 +7,7 @@
     "start": "node index"
   },
   "author": "Clyde",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/FixlTV/KeksBot/issues"
   },

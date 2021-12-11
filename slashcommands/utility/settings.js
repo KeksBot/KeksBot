@@ -51,7 +51,7 @@ module.exports = {
                     choices: [
                         {
                             name: 'KeksBot Standard',
-                            value: 'normal'
+                            value: 'default'
                         },
                         {
                             name: 'KeksBot Dark',
