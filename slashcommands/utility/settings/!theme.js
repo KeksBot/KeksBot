@@ -10,7 +10,8 @@ module.exports = async function(ita, args, client) {
             .setTitle('Farbeinstellungen | Standardfarbe')
             .setDescription('Möchtest du die jetzt angezeigte Farbe als Standard festlegen?')
         try {
-            embed.setColor(args.color.toUpperCase())
+            if(args.color.toLowerCase() == 'role') embed.setColor(guild.me.displayColor)
+            else embed.setColor(args.color.toUpperCase())
             execute = true
         } catch {
             embed = new discord.MessageEmbed()
@@ -38,7 +39,8 @@ module.exports = async function(ita, args, client) {
             if(args.theme) textcontinue = '\nDie Einstellungen für das Theme werden in Kürze geladen.'
             if(i.customId.includes('yes')) {
                 color.normal = args.color.toUpperCase()
-                if(!guild.data.theme) guild.data.theme = { normal: args.color.toUpperCase() }
+                if(!guild.data.theme) guild.data.theme = {}
+                if(args.color.toLowerCase() == 'role') guild.data.theme.normal = 'role'
                 else guild.data.theme.normal = args.color.toUpperCase()
                 await update('serverdata', guild.id, { theme: guild.data.theme })
                 embed = new discord.MessageEmbed()

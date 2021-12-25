@@ -1,5 +1,6 @@
 const discord = require('discord.js')
 const embeds = require('../../embeds')
+const update = require('../../db/update')
 
 module.exports = {
     name: 'eat',
@@ -33,6 +34,8 @@ module.exports = {
             user.data.level ++
             levelup = true
         }
+
+        await update('userdata', user.id, { cookies: user.data.cookies, xp: user.data.xp, level: user.data.level })
 
         var embed = new discord.MessageEmbed()
         if(levelup) {
