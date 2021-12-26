@@ -5,43 +5,48 @@ const getColors = require('./subcommands/getcolor')
 
 const translatepermission = (p) => {
     p = p.toUpperCase()
-    if(p === 'ADMINISTRATOR') p = 'Administrator'
-    else if(p === 'CREATE_INSTANT_INVITE') p = 'Einladung erstellen'
-    else if(p === 'KICK_MEMBERS') p = 'Mitglieder kicken'
-    else if(p === 'BAN_MEMBERS') p = 'Mitglieder bannen'
-    else if(p === 'MANAGE_CHANNELS') p = 'Kanäle verwalten'
-    else if(p === 'MANAGE_GUILD') p = 'Server verwalten'
-    else if(p === 'ADD_REACTIONS') p = 'Reaktionen hinzufügen'
-    else if(p === 'VIEW_AUDIT_LOG') p = 'Audit-Log einsehen'
-    else if(p === 'PRIORITY_SPEAKER') p = 'Very Important Speaker'
-    else if(p === 'STREAM') p = 'Video'
-    else if(p === 'VIEW_CHANNEL') p = 'Kanäle ansehen'
-    else if(p === 'SEND_MESSAGES') p = 'Nachrichten senden'
-    else if(p === 'SEND_TTS_MESSAGES') p = 'Text-zu-Sprache-Nachrichten senden'
-    else if(p === 'MANAGE_MESSAGES') p = 'Nachrichten verwalten'
-    else if(p === 'EMBED_LINKS') p = 'Links einbetten'
-    else if(p === 'ATTACH_FILES') p = 'Dateien anhängen'
-    else if(p === 'READ_MESSAGE_HISTORY') p = 'Nachrichtenverlauf anzeigen'
-    else if(p === 'MENTION_EVERYONE') p = 'Erwähne @everyone, @here und "Alle Rollen"'
-    else if(p === 'USE_EXTERNAL_EMOJIS') p = 'Externe Emojis verwenden'
-    else if(p === 'VIEW_GUILD_INSIGHTS') p = 'Server-Einblicke anzeigen'
-    else if(p === 'CONNECT') p = 'Verbinden'
-    else if(p === 'SPEAK') p = 'Sprechen'
-    else if(p === 'MUTE_MEMBERS') p = 'Mitglieder stummschalten'
-    else if(p === 'DEAFEN_MEMBERS') p = 'Ein- und Ausgabe von Mitgliedern deaktivieren'
-    else if(p === 'MOVE_MEMBERS') p = 'Mitglieder verschieben'
-    else if(p === 'USE_VAD') p = 'Sprachaktivierung verwenden'
-    else if(p === 'CHANGE_NICKNAME') p = 'Nickname ändern'
-    else if(p === 'MANAGE_NICKNAMES') p = 'Nicknames verwalten'
-    else if(p === 'MANAGE_ROLES') p = 'Rollen verwalten'
-    else if(p === 'MANAGE_WEBHOOKS') p = 'WebHooks verwalten'
-    else if(p === 'MANAGE_EMOJIS_AND_STICKERS') p = 'Emojis verwalten'
-    else if(p === 'USE_APPLICATION_COMMANDS') p = 'Anwendungsbefehle verwenden'
-    else if(p === 'REQUEST_TO_SPEAK') p = 'Redeanfrage'
-    else if(p === 'MANAGE_THREADS') p = 'Threads verwalten'
-    else if(p === 'USE_PUBLIC_THREADS') p = 'Öffentliche Threads verwenden'
-    else if(p === 'USE_PRIVATE_THREADS') p = 'Private Threads verwenden'
-    else if(p === 'USE_EXTERNAL_STICKERS') p = 'Externe Sticker verwenden'
+    p = 
+        p == 'ADMINISTRATOR' ? p = 'Administrator' :
+        p == 'CREATE_INSTANT_INVITE' ? p = 'Einladung erstellen' :
+        p == 'KICK_MEMBERS' ? p = 'Mitglieder kicken' :
+        p == 'BAN_MEMBERS' ? p = 'Mitglieder bannen' :
+        p == 'MANAGE_CHANNELS' ? p = 'Kanäle verwalten' :
+        p == 'MANAGE_GUILD' ? p = 'Server verwalten' :
+        p == 'ADD_REACTIONS' ? p = 'Reaktionen hinzufügen' :
+        p == 'VIEW_AUDIT_LOG' ? p = 'Audit-Log einsehen' :
+        p == 'PRIORITY_SPEAKER' ? p = 'Very Important Speaker' :
+        p == 'STREAM' ? p = 'Video' :
+        p == 'VIEW_CHANNEL' ? p = 'Kanäle ansehen' :
+        p == 'SEND_MESSAGES' ? p = 'Nachrichten senden' :
+        p == 'SEND_TTS_MESSAGES' ? p = 'Text-zu-Sprache-Nachrichten senden' :
+        p == 'MANAGE_MESSAGES' ? p = 'Nachrichten verwalten' :
+        p == 'EMBED_LINKS' ? p = 'Links einbetten' :
+        p == 'ATTACH_FILES' ? p = 'Dateien anhängen' :
+        p == 'READ_MESSAGE_HISTORY' ? p = 'Nachrichtenverlauf anzeigen' :
+        p == 'MENTION_EVERYONE' ? p = 'Erwähne @everyone, @here und "Alle Rollen"' :
+        p == 'USE_EXTERNAL_EMOJIS' ? p = 'Externe Emojis verwenden' :
+        p == 'VIEW_GUILD_INSIGHTS' ? p = 'Server-Einblicke anzeigen' :
+        p == 'CONNECT' ? p = 'Verbinden' :
+        p == 'SPEAK' ? p = 'Sprechen' :
+        p == 'MUTE_MEMBERS' ? p = 'Mitglieder stummschalten' :
+        p == 'DEAFEN_MEMBERS' ? p = 'Ein- und Ausgabe von Mitgliedern deaktivieren' :
+        p == 'MOVE_MEMBERS' ? p = 'Mitglieder verschieben' :
+        p == 'USE_VAD' ? p = 'Sprachaktivierung verwenden' :
+        p == 'CHANGE_NICKNAME' ? p = 'Nickname ändern' :
+        p == 'MANAGE_NICKNAMES' ? p = 'Nicknames verwalten' :
+        p == 'MANAGE_ROLES' ? p = 'Rollen verwalten' :
+        p == 'MANAGE_WEBHOOKS' ? p = 'WebHooks verwalten' :
+        p == 'MANAGE_EMOJIS_AND_STICKERS' ? p = 'Emojis verwalten' :
+        p == 'USE_APPLICATION_COMMANDS' ? p = 'Anwendungsbefehle verwenden' :
+        p == 'REQUEST_TO_SPEAK' ? p = 'Redeanfrage' :
+        p == 'MANAGE_THREADS' ? p = 'Threads verwalten' :
+        p == 'USE_PUBLIC_THREADS' ? p = 'Öffentliche Threads verwenden' :
+        p == 'USE_PRIVATE_THREADS' ? p = 'Private Threads verwenden' :
+        p == 'USE_EXTERNAL_STICKERS' ? p = 'Externe Sticker verwenden' :
+        p == 'SEND_MESSAGES_IN_THREADS' ? p = 'Nachrichten in Threads senden' :
+        p == 'START_EMBEDDED_ACTIVITIES' ? p = 'Aktivitäten starten' :
+        p == 'MODERATE_MEMBERS' ? p = 'Mitglieder im Timeout' : 
+        p
     return p
 }
 

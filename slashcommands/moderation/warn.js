@@ -7,7 +7,7 @@ const embeds = require('../../embeds')
 module.exports = {
     name: 'warn',
     description: 'Warnt den ausgewählten Nutzer',
-    permission: 'KICK_MEMBERS',
+    permission: 'MODERATE_MEMBERS',
     options: [
         {
             name: 'member',

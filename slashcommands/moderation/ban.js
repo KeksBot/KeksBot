@@ -77,13 +77,14 @@ module.exports = {
         var time = 0
         let timeparts = args.time.split(/ +/)
         timeparts.forEach(data => {
-            if(data.toLowerCase().endsWith('y')) time += parseInt(data) * 1000 * 60 *60 * 24 * 365
-            else if(data.endsWith('M')) time += parseInt(data) * 1000 * 60 * 60 * 24 * 30
-            else if(data.toLowerCase().endsWith('w')) time += parseInt(data) * 1000 * 60 * 60 * 24 * 7
-            else if(data.toLowerCase().endsWith('d')) time += parseInt(data) * 1000 * 60 * 60 * 24
-            else if(data.toLowerCase().endsWith('h')) time += parseInt(data) * 1000 * 60 * 60
-            else if(data.endsWith('m')) time += parseInt(data) * 1000 * 60
-            else if(data.toLowerCase().endsWith('s')) time += parseInt(data) * 1000
+            time +=
+                data.toLowerCase().endsWith('y') ? parseInt(data) * 1000 * 60 *60 * 24 * 365 :
+                data.endsWith('M') ? parseInt(data) * 1000 * 60 * 60 * 24 * 30 :
+                data.toLowerCase().endsWith('w') ? parseInt(data) * 1000 * 60 * 60 * 24 * 7 :
+                data.toLowerCase().endsWith('d') ? parseInt(data) * 1000 * 60 * 60 * 24 :
+                data.toLowerCase().endsWith('h') ? parseInt(data) * 1000 * 60 * 60 :
+                data.endsWith('m') ? parseInt(data) * 1000 * 60 :
+                data.toLowerCase().endsWith('s') ? parseInt(data) * 1000 : 0
         })
         time = new Date(Date.now() + time)
         if(args.deletion < 0) args.deletion = 0
@@ -145,6 +146,7 @@ module.exports = {
                 embed.setColor(color.red)
                 canceled = true
                 await ita.editReply({ embeds: [embed], components: [] })
+                waiting = false
             }, 7000)
             collector.on('collect', async function(interaction) {
                 clearTimeout(ending)
@@ -165,7 +167,7 @@ module.exports = {
             .setTitle(
                 `${require('../../emotes.json').pinging} ${member.displayName} wird gebannt` + 
                 (function() {
-                    if(!args.instant) return ' [Schritt 2/2]'
+                    if(args.instant != 'ja') return ' [Schritt 2/2]'
                     return ''
                 })()
             )

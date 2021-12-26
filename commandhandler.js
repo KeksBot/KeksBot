@@ -42,7 +42,10 @@ const validatePermissions = (command) => {
         'MANAGE_THREADS',
         'USE_PUBLIC_THREADS',
         'USE_PRIVATE_THREADS',
-        'USE_EXTERNAL_STICKERS'
+        'USE_EXTERNAL_STICKERS',
+        'SEND_MESSAGES_IN_THREADS',
+        'START_EMBEDDED_ACTIVITIES',
+        'MODERATE_MEMBERS'
     ]
     if(!validPermissions.includes(command.permission)) throw new Error(`Unbekannte Permission "${command.permission} bei "${command.name}"`)
 }
