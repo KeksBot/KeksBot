@@ -64,7 +64,6 @@ module.exports = {
         if(!ita.channel.permissionsFor(guild.me).has('MODERATE_MEMBERS')) return embeds.error(ita, 'Keine Berechtigung', 'Ich habe in diesem Kanal keine Berechtigung, Mitglieder zu moderieren.', true)
         var member
         try { member = await guild.members.fetch(args.member) } catch (err) {}
-        console.log(member)
         if(!member) return embeds.error(ita, 'Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
         if(!member.moderatable) return embeds.error(ita, 'Keine Berechtigung', `Ich kann <@!${member.id}> aufgrund der Rolleneinstellungen/-hierarchie nicht moderieren.`, true)
 

@@ -36,7 +36,7 @@ module.exports = {
         user.data.cookies -= args.count
 
         await update('userdata', user.id, { cookies: user.data.cookies })
-        await update('userdata', member.id, { cookies: member.cookies })
+        await update('userdata', member.id, { cookies: member.data.cookies })
 
         return embeds.success(ita, 'Kekse übertragen', `Du hast <@${member.id}> ${args.count} Kekse geschenkt.`.replace(' 1 Kekse', ' einen Keks'), true)
     }
