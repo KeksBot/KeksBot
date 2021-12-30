@@ -90,7 +90,8 @@ module.exports = {
         if(args.deletion < 0) args.deletion = 0
         else if(args.deletion > 7) args.deletion = 7
         if(args.time && time <= Date.now()) return embeds.error(ita, 'Fehler', 'Es konnte kein Datum ermittelt werden oder es liegt in der Vergangenheit.', true)
-        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000))) {
+        let instant = !(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000)))
+        if(!instant) {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Bannen" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
@@ -168,7 +169,7 @@ module.exports = {
             .setTitle(
                 `${require('../../emotes.json').pinging} ${member.displayName} wird gebannt` + 
                 (function() {
-                    if(args.instant != 'ja') return ' [Schritt 2/2]'
+                    if(!instant) return ' [Schritt 2/2]'
                     return ''
                 })()
             )
@@ -181,10 +182,25 @@ module.exports = {
             )
         if(!ita.replied) await ita.reply({ embeds: [embed], ephemeral: true })
         else await ita.editReply({ embeds: [embed], components: [] })
+
+        //DM Information
+        if(guild.data.settings?.dm_users & 0b1000) {
+            embed = new discord.MessageEmbed()
+                .setColor(color.red)
+                .setTitle(`Du wurdest gebannt (Fall #${guild.data.modactions})`)
+                .setDescription(`Du wurdest von ${guild.name} gebannt.\nZuständiger Moderator: ${ita.user.username}`)
+                .addField('Begründung', (function() {
+                    if(args.reason) return `${args.reason}`
+                    return '_Es liegt keine Begründung vor._'
+                })(), true)
+                if(args.time) embed.addField('Automatische Aufhebung', `Du wirst <t:${Math.floor(time / 1000)}:R> (<t:${Math.floor(time / 1000)}>) automatisch entbannt.`, true)
+            try { await (await member.user.createDM()).send({ embeds: [embed] })} catch (err) { throw err }
+        }
+
+        //bannen
         var banned
         try {
-            if(args.reason && !member.banned) banned = await member.ban({ days: args.deletion, reason: args.reason })
-            else if(!member.banned) banned = await member.ban({ days: args.deletion })
+            banned = await member.ban({ days: args.deletion, reason: args.reason })
         } catch {}
         if(!banned) return embeds.error(ita, 'Fehler', 'Ein unbekannter Fehler ist aufgetreten.\nBitte probiere es später erneut.', true)
         guild.data.modactions ++

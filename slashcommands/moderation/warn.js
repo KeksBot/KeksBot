@@ -52,7 +52,8 @@ module.exports = {
         if(args.reason) warning.reason = args.reason
         warning.responsible = user.id
         var embed
-        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.setttings?.instant_modactions & 0b0001))) {
+        let instant = !(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000)))
+        if(!instant) {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Warnen" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
@@ -114,7 +115,7 @@ module.exports = {
             .setTitle(
                 `${require('../../emotes.json').pinging} ${member.displayName} wird gewarnt` + 
                 (function() {
-                    if(!args.instant) return ' [Schritt 2/2]'
+                    if(!instant) return ' [Schritt 2/2]'
                     return ''
                 })()
             )
@@ -127,9 +128,24 @@ module.exports = {
             )
         if(!ita.replied) await ita.reply({ embeds: [embed], ephemeral: true })
         else await ita.editReply({ embeds: [embed], components: [] })
+
+        //DM Information
+        if(guild.data.settings?.dm_users & 0b0001) {
+            embed = new discord.MessageEmbed()
+                .setColor(color.red)
+                .setTitle(`Du wurdest gewarnt (Fall #${guild.data.modactions})`)
+                .setDescription(`Du wurdest auf ${guild.name} gewarnt.\nZuständiger Moderator: ${ita.user.username}`)
+                .addField('Begründung', (function() {
+                    if(args.reason) return `${args.reason}`
+                    return '_Es liegt keine Begründung vor._'
+                })(), true)
+            try { await (await member.user.createDM()).send({ embeds: [embed] })} catch (err) { throw err }
+        }
+
         guild.data = await getData('serverdata', guild.id)
         if(!guild.data.warns) guild.data.warns = []
         guild.data.warns.push(warning)
+        guild.data.modactions ++
         await update('serverdata', guild.id, { warns: guild.data.warns, modactions: guild.data.modactions })
         embed = new discord.MessageEmbed()
             .setColor(color.lime)

@@ -81,7 +81,8 @@ module.exports = {
         })
 
         //Nachfragen
-        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.setttings?.instant_modactions & 0b0010))) {
+        let instant = !(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000)))
+        if(!instant) {
             let embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Weiter" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
@@ -155,7 +156,7 @@ module.exports = {
                 .setColor(color.yellow)
                 .setTitle(`${require('../../emotes.json').pinging} ${member.displayName} wird entmutet ${(
                     function () {
-                        if(args.instant != 'ja') return ' [Schritt 2/2]'
+                        if(!instant != 'ja') return ' [Schritt 2/2]'
                         return ''
                     }
                 )()}`)
@@ -191,6 +192,20 @@ module.exports = {
             .addField('Dauer', `<@!${member.id}> wird <t:${Math.floor((Date.now() + time) / 1000)}:R> (<t:${Math.floor((Date.now() + time) / 1000)}>) entmutet`, true)
         if(ita.replied) await ita.editReply({ embeds: [embed], components: [], ephemeral: true})
         else await ita.reply({ embeds: [embed], components: [], ephemeral: true })
+
+        //DM Information
+        if(guild.data.settings?.dm_users & 0b0010) {
+            embed = new discord.MessageEmbed()
+                .setColor(color.red)
+                .setTitle(`Du wurdest gemutet (Fall #${guild.data.modactions})`)
+                .setDescription(`Du wurdest auf ${guild.name} ins Timeout versetzt.\nZuständiger Moderator: ${ita.user.username}`)
+                .addField('Begründung', (function() {
+                    if(args.reason) return `${args.reason}`
+                    return '_Es liegt keine Begründung vor._'
+                })(), true)
+            try { await (await member.user.createDM()).send({ embeds: [embed] })} catch (err) { throw err }
+        }
+
         await member.timeout(time, `Timeout aufgehoben durch ${user.username}`)
         guild.data = await getData('serverdata', guild.id)
         await update('serverdata', guild.id, { modactions: guild.data.modactions })

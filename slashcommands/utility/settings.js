@@ -109,6 +109,37 @@ module.exports = {
                             value: 'check-all'
                         }
                     ]
+                },
+                {
+                    name: 'dm-users',
+                    description: 'Legt fest, bei welchen Aktionen eine DM an den Moderierten gesendet wird (Toggle Switch)',
+                    type: 'STRING',
+                    choices: [
+                        {
+                            name: 'ban',
+                            value: 'ban'
+                        },
+                        {
+                            name: 'kick',
+                            value: 'kick'
+                        },
+                        {
+                            name: 'timeout',
+                            value: 'timeout'
+                        },
+                        {
+                            name: 'warn',
+                            value: 'warn'
+                        },
+                        {
+                            name: 'Immer informieren',
+                            value: 'send-all'
+                        },
+                        {
+                            name: 'Nie informieren',
+                            value: 'send-none'
+                        }
+                    ]
                 }
             ]
         }

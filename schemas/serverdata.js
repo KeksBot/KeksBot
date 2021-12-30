@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 
 var serverdataSchema = mongoose.Schema({
     _id: { type: String, required: true },
+    __v: false,
     xp: Number,
     level: Number,
     thismin: Number,
@@ -42,8 +43,10 @@ var serverdataSchema = mongoose.Schema({
         }
     ],
     settings: {
-        instant_modactions: Number
-    }
+        instant_modactions: Number,
+        dm_users: Number,
+    },
+    modactions: Number
 }, { strict: false })
 
 module.exports = mongoose.model('serverdata', serverdataSchema)

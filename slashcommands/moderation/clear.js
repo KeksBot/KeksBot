@@ -35,7 +35,7 @@ module.exports = {
             if(filter.user) messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).filter(m => m.author.id === filter.id).sort((a, b) => b.createdAt - a.createdAt)
             else messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).filter(m => m.member.roles.cache.has(filter.id)).sort((a, b) => b.createdAt - a.createdAt)
         } else messages = channel.messages.cache.filter(m => (Date.now() - m.createdAt) < 1209600000).sort((a, b) => b.createdAt - a.createdAt)
-        messages = messages.filter(m => !m.deleted && !m.interaction && !m.pinned).first(args.count)
+        messages = messages.filter(m => m.deletable && !m.interaction && !m.pinned).first(args.count)
         let embed = new discord.MessageEmbed()
             .setColor(color.yellow)
             .setTitle(`${require('../../emotes.json').pinging} Nachrichten werden glöscht`)

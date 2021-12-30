@@ -222,12 +222,9 @@ module.exports = async (client) => {
 
         //Execute
         try {
-            let argsarray = []
-            for (const item in args) {
-                argsarray.push(args[item])
-            }
+            let argsarray = JSON.stringify(args)
             let d = new Date()
-            console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | [ ${argsarray.join(', ')} ]`)
+            console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
             if(ita.color.normal === 'role') ita.color.normal = ita.guild.me.displayHexColor || 0x00b99b
             await command.execute(ita, args, client)
         } catch (error) {
