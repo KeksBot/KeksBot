@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 var serverdataSchema = mongoose.Schema({
     _id: { type: String, required: true },
-    lang: String,
     xp: Number,
     level: Number,
     thismin: Number,
@@ -41,7 +40,10 @@ var serverdataSchema = mongoose.Schema({
             time: Date,
             _id: false
         }
-    ]
+    ],
+    settings: {
+        instant_modactions: Number
+    }
 }, { strict: false })
 
 module.exports = mongoose.model('serverdata', serverdataSchema)

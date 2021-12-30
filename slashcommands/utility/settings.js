@@ -7,7 +7,7 @@ module.exports = {
     name: 'settings',
     description: 'Ändert die KeksBot Einstellungen',
     options: [
-        {
+        { //keksbox
             name: 'keksbox',
             type: 'SUB_COMMAND',
             description: 'Ändert KeksBox Einstellungen',
@@ -34,7 +34,7 @@ module.exports = {
                 }
             ]
         },
-        {
+        { //theme
             name: 'theme',
             type: 'SUB_COMMAND',
             description: 'Farbeinstellungen für Embeds',
@@ -73,11 +73,50 @@ module.exports = {
                     ]
                 }
             ]
+        },
+        { //moderation
+            name: 'moderation',
+            type: 'SUB_COMMAND',
+            description: 'Erweiterte Moderationseinstellungen',
+            options: [
+                {
+                    name: 'instant-modactions',
+                    description: 'Ändert, ob Moderationen sofort ausgeführt werden (Toggle Switch)',
+                    type: 'STRING',
+                    choices: [
+                        {
+                            name: 'ban',
+                            value: 'ban'
+                        },
+                        {
+                            name: 'kick',
+                            value: 'kick'
+                        },
+                        {
+                            name: 'timeout',
+                            value: 'timeout'
+                        },
+                        {
+                            name: 'warn',
+                            value: 'warn'
+                        },
+                        {
+                            name: 'Alle überspringen',
+                            value: 'skip-all'
+                        },
+                        {
+                            name: 'Alle überprüfen',
+                            value: 'check-all'
+                        }
+                    ]
+                }
+            ]
         }
     ],
     permission: 'MANAGE_GUILD',
     async execute(ita, args, client) {
         if(args.subcommand == 'keksbox') settings.keksbox(ita, args)
         else if(args.subcommand == 'theme') settings.theme(ita, args, client)
+        else if(args.subcommand == 'moderation') settings.moderation(ita, args)
     }
 }

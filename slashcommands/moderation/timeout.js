@@ -81,7 +81,7 @@ module.exports = {
         })
 
         //Nachfragen
-        if(args.instant != 'ja' ) {
+        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.setttings?.instant_modactions & 0b0010))) {
             let embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Weiter" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')

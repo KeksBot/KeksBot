@@ -62,7 +62,7 @@ module.exports = {
         if(!guild.data.warns) guild.data.warns = []
         if(!guild.data.modactions) guild.data.modactions = 0
         var embed
-        if(!args.instant || args.instant === 'nein') {
+        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.setttings?.instant_modactions & 0b0100))) {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Kicken" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')

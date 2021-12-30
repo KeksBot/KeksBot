@@ -75,7 +75,7 @@ module.exports = {
         if(!guild.data.modactions) guild.data.modactions = 0
         var embed
         var time = 0
-        let timeparts = args.time.split(/ +/)
+        let timeparts = args.time?.split(/ +/) || []
         timeparts.forEach(data => {
             time +=
                 data.toLowerCase().endsWith('y') ? parseInt(data) * 1000 * 60 *60 * 24 * 365 :
@@ -90,7 +90,7 @@ module.exports = {
         if(args.deletion < 0) args.deletion = 0
         else if(args.deletion > 7) args.deletion = 7
         if(args.time && time <= Date.now()) return embeds.error(ita, 'Fehler', 'Es konnte kein Datum ermittelt werden oder es liegt in der Vergangenheit.', true)
-        if(!args.instant || args.instant === 'nein') {
+        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000))) {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Bannen" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
@@ -99,6 +99,7 @@ module.exports = {
                     'Du willst dieses Fenster nicht mehr sehen und direkt bannen? Verwende /ban instant:Ja, um die Überprüfung zu überspringen.' +
                     (function() {
                         if(args.time) return '\nAus Performancegründen können beim Entbannen Verzögerungen von bis zu 5 Minuten auftreten.'
+                        return ''
                     })()
                     )
                 .addField('Nutzer', `<@!${member.id}>\nAccount erstellt <t:${Math.floor(member.user.createdAt / 1000)}:R>\nBeigetreten <t:${Math.floor(member.joinedAt / 1000)}:R>\nWarnungen: ${guild.data.warns.filter(object => object.user === member.id).length}`, true)

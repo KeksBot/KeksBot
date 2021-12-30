@@ -52,7 +52,7 @@ module.exports = {
         if(args.reason) warning.reason = args.reason
         warning.responsible = user.id
         var embed
-        if(!args.instant || args.instant === 'nein') {
+        if(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.setttings?.instant_modactions & 0b0001))) {
             embed = new discord.MessageEmbed()
                 .setColor(color.yellow)
                 .setDescription('Bitte überprüfe nochmal deine Angaben und drücke dann den "Warnen" Knopf oder brich den Vorgang ab.\nNach einer Minute wird der Vorgang automatisch abgebrochen')
