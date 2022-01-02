@@ -165,9 +165,17 @@ module.exports = {
             if(ita.replied) await ita.editReply({ embeds: [embed], components: [], ephemeral: true})
             else await ita.reply({ embeds: [embed], components: [], ephemeral: true})
             await member.timeout(null, `Timeout aufgehoben durch ${user.username}`)
-            guild.data = await getData('serverdata', guild.id)
-            await update('serverdata', guild.id, { modactions: guild.data.modactions })
+            if(!instant) guild.data = await getData('serverdata', guild.id)
             guild.data.modactions = guild.data.modactions ? guild.data.modactions + 1 : 1
+            if(!guild.data.modlog) guild.data.modlog = []
+            guild.data.modlog.push({
+                type: 'unmute',
+                user: member.id,
+                moderator: user.id,
+                id: guild.data.modactions, 
+                time: Date.now(),
+            })
+            await update('serverdata', guild.id, { modactions: guild.data.modactions, modlog: guild.data.modlog })
             embed.setColor(color.lime)
                 .setTitle(`${member.user.username} wurde entmutet (Fall #${guild.data.modactions})`)
                 .setDescription(`${member} hat nun wieder Zugriff auf Text- und Sprachkanäle.`)
@@ -207,9 +215,18 @@ module.exports = {
         }
 
         await member.timeout(time, `Timeout aufgehoben durch ${user.username}`)
-        guild.data = await getData('serverdata', guild.id)
-        await update('serverdata', guild.id, { modactions: guild.data.modactions })
+        if(!instant) guild.data = await getData('serverdata', guild.id)
         guild.data.modactions = guild.data.modactions ? guild.data.modactions + 1 : 1
+        if(!guild.data.modlog) guild.data.modlog = []
+        guild.data.modlog.push({
+            type: 'mute',
+            user: member.id,
+            moderator: user.id,
+            id: guild.data.modactions,
+            reason: args.reason,
+            time: Date.now()
+        })
+        await update('serverdata', guild.id, { modactions: guild.data.modactions, modlog: guild.data.modlog })
         embed.setColor(color.lime)
             .setTitle(`${member.user.username} wurde gemutet (Fall #${guild.data.modactions})`)
             .setDescription(`${member} hat keinen Zugriff mehr auf Text- und Sprachkanäle.`)

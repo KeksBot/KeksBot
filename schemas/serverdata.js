@@ -26,12 +26,8 @@ var serverdataSchema = mongoose.Schema({
         multiplier: Number, //Für besondere KeksBoxen
         keepmessage: Boolean, //Ob die Nachricht beim claimen gelöscht werden soll
     },
-    warns: [
+    modlog: [
         {
-            id: String,
-            user: String,
-            reason: String,
-            responsible: String,
             _id: false
         }
     ],

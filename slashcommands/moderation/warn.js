@@ -45,12 +45,15 @@ module.exports = {
         if(!member) return embeds.error(ita, 'Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
         if(member.roles.highest.comparePositionTo(ita.member.roles.highest) > 0 && !guild.ownerId == user.id) return embeds.error(ita, 'Fehlende Berechtigungen', `Deine aktuelle Rollenkonfiguration erlaubt es dir nicht, <@!${member.id}> zu warnen.`, true)
         if(!guild.data.modactions) guild.data.modactions = 0
-        let warning = {}
         guild.data.modactions ++
-        warning.id = guild.data.modactions
-        warning.user = member.id
-        if(args.reason) warning.reason = args.reason
-        warning.responsible = user.id
+        let warning = {
+            id: guild.data.modactions,
+            user: member.id,
+            moderator: user.id,
+            reason: args.reason,
+            type: 'warning',
+            time: Date.now()
+        }
         var embed
         let instant = !(args.instant == 'nein' || (args.instant != 'ja' && !(guild.data.settings?.instant_modactions & 0b1000)))
         if(!instant) {
@@ -143,10 +146,10 @@ module.exports = {
         }
 
         guild.data = await getData('serverdata', guild.id)
-        if(!guild.data.warns) guild.data.warns = []
-        guild.data.warns.push(warning)
+        if(!guild.data.modlog) guild.data.modlog = []
+        guild.data.modlog.push(warning)
         guild.data.modactions ++
-        await update('serverdata', guild.id, { warns: guild.data.warns, modactions: guild.data.modactions })
+        await update('serverdata', guild.id, { modlog: guild.data.modlog, modactions: guild.data.modactions })
         embed = new discord.MessageEmbed()
             .setColor(color.lime)
             .setTitle(`${member.user.username} wurde gewarnt (Fall #${guild.data.modactions})`)

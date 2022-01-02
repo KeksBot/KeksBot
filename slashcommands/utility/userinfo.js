@@ -14,8 +14,8 @@ module.exports = {
         }
     ],
     async execute(ita, args, client) {
-        var { color, guild } = ita
-        if(args.user === ita.user.id) var user = await guild.members.fetch(ita.user.id)
+        var { color, guild, member } = ita
+        if(args.user === ita.user.id) var user = ita.member
         else {
             var user = await guild.members.fetch(args.user)
             if(!user) return embeds.error(ita, 'Fehler', 'Der Nutzer konnte nicht gefunden werden.', true)    
@@ -53,6 +53,31 @@ module.exports = {
             if(user.data.badges.beta) badges.push(emotes.firsthour)
             if(badges.length) embed.addField('Badges', badges.join(' '), true)
         }
-        return await ita.reply({ embeds: [embed], ephemeral: true })
+        if(member.permissions.has('MODERATE_MEMBERS')) {
+            let button = new discord.MessageActionRow()
+                .addComponents(
+                    new discord.MessageButton()
+                        .setLabel('Modlogs herunterladen')
+                        .setStyle('SECONDARY')
+                        .setCustomId('userinfo:downloadmodlogs')
+                )
+            let message = await ita.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
+            message.awaitMessageComponent({ componentType: 'BUTTON', time: 60000 })
+                .then(async interaction => {
+                    if(interaction.customId == 'userinfo:downloadmodlogs') {
+                        embed.setColor(color.yellow)
+                        embed.setFooter('Modlogs werden geladen...\nDies kann einige Zeit dauern.')
+                        await interaction.update({ embeds: [embed], components: [] })
+                        let modlogs = await guild.data.modlog?.filter(modlog => modlog.user == user.id)
+                        if(!modlogs?.length) return embeds.error(ita, 'Fehler', 'Keine Modlogs vorhanden', true)
+                        let modlogsString = `KeksBot Modlogs für ${guild.name}\nAngewandter Filter: User = ${user.user.tag}\n\n`
+                        modlogs = modlogs.sort((a, b) => a.id - b.id)
+                        modlogsString += modlogs.map((modlog) => `Eintrag #${modlog.id}:\nAktion: ${modlog.type.replace('warning', 'Warnung').replace('kick', 'Kick').replace('ban', 'Ban').replace('mute', 'Timeout').replace('unmute', 'Timeout aufgehoben')}\nDatum: ${new Date(modlog.time).toLocaleString()}${modlog.reason ? `\nBegründung: ${modlog.reason}` : ''}`).join('\n\n==========\n\n').trim()
+                        embed.setFooter('')
+                        embed.setColor(color.lime)
+                        await interaction.editReply({ embeds: [embed], components: [], files: [new discord.MessageAttachment().setFile(Buffer.from(modlogsString, 'utf8'), `modlogs-${guild.name.toLowerCase().replaceAll(/\W+/g, '-')}-${user.user.username}.txt`)] })
+                    }
+                })
+        } else return await ita.reply({ embeds: [embed], ephemeral: true })
     }
 }

@@ -56,7 +56,7 @@ module.exports = {
      * @returns 
      */
     async execute(ita, args, client) {
-        var { guild, color } = ita
+        var { guild, color, user } = ita
         if(!guild.me.permissions.has('BAN_MEMBERS')) return embeds.error(ita, 'Fehlende Berechtigung', 'Um diese Aktion durchzuführen, benötige ich die "Mitglieder kicken" Berechtigung.', true)
         let member
         try { member = await guild.members.fetch(args.member) } catch {}
@@ -211,7 +211,16 @@ module.exports = {
             time
         }
         if(ban) guild.data.tempbans.push(ban)
-        await require('../../db/update')('serverdata', guild.id, { modactions: guild.data.modactions, tempbans: guild.data.tempbans })
+        if(!guild.data.modlog) guild.data.modlog = []
+        guild.data.modlog.push({
+            type: 'ban',
+            user: member.id,
+            moderator: user.id,
+            id: guild.data.modactions,
+            reason: args.reason,
+            time: Date.now()
+        })
+        await require('../../db/update')('serverdata', guild.id, { modactions: guild.data.modactions, tempbans: guild.data.tempbans, modlog: guild.data.modlog })
         embed = new discord.MessageEmbed()
             .setColor(color.lime)
             .setTitle(`${member.user.username} wurde gebannt (Fall #${guild.data.modactions})`)
