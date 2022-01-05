@@ -17,6 +17,7 @@
     "type": "github"
   },
   "dependencies": {
+    "@discordjs/builders": "^0.11.0",
     "axios": ">=0.21.1",
     "check-links": ">=1.1.8",
     "delay": ">=5.0.0",
