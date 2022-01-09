@@ -5,48 +5,7 @@ const discord = require('discord.js')
 const delay = require('delay')
 
 const validatePermissions = (command) => {
-    const validPermissions = [
-        'ADMINISTRATOR',
-        'CREATE_INSTANT_INVITE',
-        'KICK_MEMBERS',
-        'BAN_MEMBERS',
-        'MANAGE_CHANNELS',
-        'MANAGE_GUILD',
-        'ADD_REACTIONS',
-        'VIEW_AUDIT_LOG',
-        'PRIORITY_SPEAKER',
-        'STREAM',
-        'VIEW_CHANNEL',
-        'SEND_MESSAGES',
-        'SEND_TTS_MESSAGES',
-        'MANAGE_MESSAGES',
-        'EMBED_LINKS',
-        'ATTACH_FILES',
-        'READ_MESSAGE_HISTORY',
-        'MENTION_EVERYONE',
-        'USE_EXTERNAL_EMOJIS',
-        'VIEW_GUILD_INSIGHTS',
-        'CONNECT',
-        'SPEAK',
-        'MUTE_MEMBER',
-        'DEAFEN_MEMBERS',
-        'MOVE_MEMBERS',
-        'USE_VAD',
-        'CHANGE_NICKNAME',
-        'MANAGE_NICKNAMES',
-        'MANAGE_ROLES',
-        'MANAGE_WEBHOOKS',
-        'MANAGE_EMOJIS_AND_STICKERS',
-        'USE_APPLICATION_COMMANDS',
-        'REQUEST_TO_SPEAK',
-        'MANAGE_THREADS',
-        'USE_PUBLIC_THREADS',
-        'USE_PRIVATE_THREADS',
-        'USE_EXTERNAL_STICKERS',
-        'SEND_MESSAGES_IN_THREADS',
-        'START_EMBEDDED_ACTIVITIES',
-        'MODERATE_MEMBERS'
-    ]
+    const validPermissions = Object.keys(discord.Permissions.FLAGS)
     if(!validPermissions.includes(command.permission)) throw new Error(`Unbekannte Permission "${command.permission} bei "${command.name}"`)
 }
 
@@ -159,6 +118,7 @@ module.exports = async (client) => {
 
         //Daten laden
         var status = {user: false, server: false}
+        //let newUser = false
         getData('serverdata', ita.guild.id).then(async function(data) {
             if(!data) data = await require('./db/create')('serverdata', ita.guild.id)
             ita.guild.data = data
@@ -166,7 +126,10 @@ module.exports = async (client) => {
             status.server = true
         })
         getData('userdata', ita.user.id).then(async function(data) {
-            if(!data) data = await require('./db/create')('userdata', ita.user.id)
+            if(!data) {
+                data = await require('./db/create')('userdata', ita.user.id)
+                // newUser = true
+            }
             ita.user.data = data
             if(data.banned && data.banned.time) {
                 ita.user.data = -2
@@ -197,6 +160,23 @@ module.exports = async (client) => {
         if(!ita.guild.available) return
         if(ita.user.data == -2) return
         if(ita.user.data == -1 || ita.guild.data == -1) return embeds.error(ita, 'Fehler', 'Timeout der beim Laden erforderlichen Daten. Bitte probiere es später erneut.', true).catch()
+
+        //Cookiebanner; möglich in zukünftigen Versionen
+        /* if(newUser) {
+            let newUserEmbed = new discord.MessageEmbed()
+                .setColor(ita.color.normal)
+                .setTitle('Hewwwoo')
+                .setDescription('Du scheinst neu beim KeksBot zu sein.\nBitte beachte, dass wir wie jeder im Internet Daten speichern ~~und dann an Meta verkaufen~~. \nDies ist zur Nutzung des KeksBot erforderlich; wenn du mit der Speicherung von Nutzungsdaten einverstanden bist, drücke "Akzeptieren". Du kannst Einsicht oder Löschung deiner Daten jederzeit beim [Team](discord.gg/g8AkYzWRCK "Zum KeksBot Support Server") beantragen.\nWir wünschen dir viel Spaß beim Kekse sammeln.')
+            let buttons = new discord.MessageActionRow()
+                .addComponents(
+                    new discord.MessageButton()
+                        .setLabel('Akzeptieren')
+                        .setStyle('SUCCESS')
+                        .setCustomId('newUserAccept')
+                )
+            let message = await ita.reply({ embeds: [newUserEmbed], buttons: [buttons], ephemeral: true, fetchReply: true })
+            await message.awaitMessageComponent({ componentType: 'BUTTON', time: 60000, customId: 'newUserAccept' })
+        } */
 
         //Cooldown
         const { cooldowns } = client

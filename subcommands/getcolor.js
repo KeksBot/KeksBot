@@ -18,6 +18,6 @@ module.exports = async (guild) => {
         } = guild.data.theme
 
         if(normal == 'role') normal = guild.me?.displayHexColor || 0x00b99b
-        return { red, yellow, lime, normal, lightblue }
+        return { red, yellow, lime, normal }
     } else return { red: 0xE62535, yellow: 0xF2E03F, lime: 0x25D971, normal: 0x00b99b }
 }
