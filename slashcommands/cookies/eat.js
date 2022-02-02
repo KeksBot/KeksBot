@@ -30,7 +30,7 @@ module.exports = {
         user.data.cookies -= args.count
         var levelup = false
 
-        while (128 * ((2 ** user.data.level) ** 2) <= user.data.xp) {
+        while (128 * ((2 ** user.data.level)) <= user.data.xp) {
             user.data.level ++
             levelup = true
         }
