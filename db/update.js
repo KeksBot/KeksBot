@@ -44,3 +44,13 @@ module.exports = async function(name, id, value) {
         return error
     }
 }
+
+require('discord.js').Guild.prototype.setData() = async function(value) {
+    this.data = await module.exports('serverdata', this.id, value)
+    return this.data
+}
+
+require('discord.js').User.prototype.setData() = async function(value) {
+    this.data = await module.exports('userdata', this.id, value)
+    return this.data
+}

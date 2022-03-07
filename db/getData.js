@@ -53,3 +53,13 @@ module.exports = async function(name, id) {
         return error
     }
 }
+
+require('discord.js').Guild.prototype.getData() = async function() {
+    this.data = await module.exports('serverdata', this.id)
+    return this.data
+}
+
+require('discord.js').User.prototype.getData() = async function() {
+    this.data = await module.exports('userdata', this.id)
+    return this.data
+}

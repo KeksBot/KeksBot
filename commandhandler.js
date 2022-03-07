@@ -4,9 +4,17 @@ const path = require('path')
 const discord = require('discord.js')
 const delay = require('delay')
 
+class UnknownPermissionError extends Error {
+    constructor(message, command) {
+        super(message, command)
+        this.name = 'UnknownPermissionError'
+        this.message = `Unknown permission "${message}" (reading ${command})`
+    }
+}
+
 const validatePermissions = (command) => {
     const validPermissions = Object.keys(discord.Permissions.FLAGS)
-    if(!validPermissions.includes(command.permission)) throw new Error(`Unbekannte Permission "${command.permission} bei "${command.name}"`)
+    if(!validPermissions.includes(command.permission)) throw new UnknownPermissionError(command.permission, command.name)
 }
 
 const getcolors = require('./subcommands/getcolor')
@@ -30,6 +38,9 @@ module.exports = async (client) => {
                         command.defaultPermission = false
                         command.permission = command.permission.toUpperCase()
                         validatePermissions(command)
+                    }
+                    if(command.before) {
+                        if(typeof command.before === 'string') command.before = [command.before]
                     }
                     client.commands.set(command.name, command)
                     console.log(`[${client.user.username}]: ${command.name} wurde geladen.`)

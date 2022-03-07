@@ -221,3 +221,11 @@ module.exports = {
         return Promise.resolve(message)
     }
 }
+
+discord.Interaction.prototype.success = async function(title, description, ephemeral, del) {
+    return await module.exports.success(this, title, description, ephemeral, del)
+}
+
+discord.Interaction.prototype.error = async function(title, description, ephemeral, del) {
+    return await module.exports.error(this, title, description, ephemeral, del)
+}
