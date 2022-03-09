@@ -48,18 +48,18 @@ module.exports = async function(name, id) {
     try {
         let data = await model.findById(id)
         if(data) await handle(data, name, id)
-        return data
+        return data._doc || data
     } catch (error) {
         return error
     }
 }
 
-require('discord.js').Guild.prototype.getData() = async function() {
+require('discord.js').Guild.prototype.getData = async function() {
     this.data = await module.exports('serverdata', this.id)
     return this.data
 }
 
-require('discord.js').User.prototype.getData() = async function() {
+require('discord.js').User.prototype.getData = async function() {
     this.data = await module.exports('userdata', this.id)
     return this.data
 }

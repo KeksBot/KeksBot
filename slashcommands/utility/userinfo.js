@@ -62,7 +62,7 @@ module.exports = {
                         .setCustomId('userinfo:downloadmodlogs')
                 )
             let message = await ita.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
-            message.awaitMessageComponent({ componentType: 'BUTTON', time: 60000 })
+            message.awaitMessageComponent({ componentType: 'BUTTON' })
                 .then(async interaction => {
                     if(interaction.customId == 'userinfo:downloadmodlogs') {
                         embed.setColor(color.yellow)
@@ -78,6 +78,7 @@ module.exports = {
                         await interaction.editReply({ embeds: [embed], components: [], files: [new discord.MessageAttachment().setFile(Buffer.from(modlogsString, 'utf8'), `modlogs-${guild.name.toLowerCase().replaceAll(/\W+/g, '-')}-${user.user.username}.txt`)] })
                     }
                 })
+                .catch()
         } else return await ita.reply({ embeds: [embed], ephemeral: true })
     }
 }

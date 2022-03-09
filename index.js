@@ -4,6 +4,10 @@ const config  = require('./config.json')
 const commandhandler = require('./commandhandler')
 const eventhandler = require('./eventhandler')
 discord.Collection.prototype.array = function() {return [...this.values()]}
+discord.CommandInteraction.prototype.safeReply = async function(object) {
+    if(this.replied) return await this.editReply(object)
+    else return await this.reply(object)
+}
 
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)

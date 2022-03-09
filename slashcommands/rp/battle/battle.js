@@ -12,5 +12,8 @@ module.exports = {
             type: 'USER'
         }
     ],
-    before: 'battle'
+    before: require('../../../subcommands/before/battle'),
+    execute: async function(client, message, args) {
+
+    }
 }

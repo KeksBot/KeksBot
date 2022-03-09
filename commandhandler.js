@@ -39,9 +39,6 @@ module.exports = async (client) => {
                         command.permission = command.permission.toUpperCase()
                         validatePermissions(command)
                     }
-                    if(command.before) {
-                        if(typeof command.before === 'string') command.before = [command.before]
-                    }
                     client.commands.set(command.name, command)
                     console.log(`[${client.user.username}]: ${command.name} wurde geladen.`)
                 }
@@ -217,7 +214,9 @@ module.exports = async (client) => {
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${ita.user.tag} | ID: ${ita.user.id} | ${ita.guild.name} | ID: ${ita.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
             if(ita.color.normal === 'role') ita.color.normal = ita.guild.me.displayHexColor || 0x00b99b
-            await command.execute(ita, args, client)
+            let ex = true
+            if(command.before) ex = await command.before(ita, args, client)
+            if(ex !== false) await command.execute(ita, args, client)
         } catch (error) {
             console.error(error)
             return embeds.error(ita, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)

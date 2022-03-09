@@ -28,12 +28,28 @@ module.exports = {
 
         user.data.xp += args.count
         user.data.cookies -= args.count
-        var levelup = false
+        let levelup = false
+        let scanning = true
+        let neededxp = user.data.xp
 
-        while (128 * ((2 ** user.data.level)) <= user.data.xp) {
-            user.data.level ++
-            levelup = true
+        while (scanning) {
+            if(user.data.level <= 15 && (user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3) <= user.data.xp) {
+                user.data.level++
+                levelup = true
+            } else if(user.data.level <= 36 && user.data.level > 15 && (user.data.level + 1) ** 3 * ((15 + user) / 3) <= user.data.xp) {
+                user.data.level++
+                levelup = true
+            } else if(user.data.level < 100 && user.data.level > 37 && (user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) {
+                user.data.level++
+                levelup = true
+            } else scanning = false
         }
+
+        neededxp = 
+            (user.data.level <= 15) ? Math.ceil((user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3)) : 
+            (user.data.level <= 36) ? Math.ceil((user.data.level + 1) ** 3 * ((15 + user) / 3)) :
+            (user.data.level < 100) ? Math.ceil((user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) :
+            user.data.xp
 
         await update('userdata', user.id, { cookies: user.data.cookies, xp: user.data.xp, level: user.data.level })
 
@@ -47,7 +63,7 @@ module.exports = {
             embed
                 .setColor(color.lime)
                 .setTitle(`${require('../../emotes.json').accept} Kekse gegessen`)
-                .setDescription(`Du hast ${args.count} Kekse gegessen.\nDadurch hast du nun ${user.data.xp} Erfahrungspunkte. Es fehlen noch ${128 * ((2 ** user.data.level) ** 2) - user.data.xp} Erfahrungspunkte, um Level ${user.data.level + 1} zu erreichen.`)
+                .setDescription(`Du hast ${args.count} Kekse gegessen.\nDadurch hast du nun ${user.data.xp} Erfahrungspunkte. Es fehlen noch ${neededxp - user.data.xp} Erfahrungspunkte, um Level ${user.data.level + 1} zu erreichen.`.replace('fehlen noch 1 Erfahrungspunkte', 'fehlt noch ein Erfahrungspunkt').replace(' 1 Erfahrungspunkte', ' einen Erfahrungspunkt'))
         }
         return await ita.reply({ embeds: [embed], ephemeral: true})
     }

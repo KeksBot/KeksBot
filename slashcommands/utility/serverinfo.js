@@ -51,7 +51,7 @@ module.exports = {
                         .setCustomId('serverinfo:downloadmodlogs')
                 )
             let message = await ita.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
-            message.awaitMessageComponent({ componentType: 'BUTTON', time: 60000 })
+            message.awaitMessageComponent({ componentType: 'BUTTON' })
                 .then(async interaction => {
                     if(interaction.customId == 'serverinfo:downloadmodlogs') {
                         embed.setColor(color.yellow)

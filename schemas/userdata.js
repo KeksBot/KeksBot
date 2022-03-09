@@ -19,6 +19,17 @@ var userdataSchema = mongoose.Schema({
         time: Number,
         reason: String
     },
+    battle: {
+        skills: [
+            {
+                _id: false,
+                name: String,
+                value: Number
+            }
+        ],
+        ready: Boolean,
+        priority: String
+    },
     tan: String
 }, { strict: false })
 
