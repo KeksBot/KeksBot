@@ -13,7 +13,7 @@ module.exports = {
         }
     ],
     before: require('../../../subcommands/before/battle'),
-    execute: async function(client, message, args) {
+    execute: async function(ita, args, client) {
 
     }
 }
