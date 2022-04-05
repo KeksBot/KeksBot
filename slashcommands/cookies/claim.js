@@ -6,6 +6,7 @@ const delay = require('delay')
 module.exports = {
     name: 'claim',
     description: 'Sammle eine KeksBox auf',
+    battlelock: true,
     async execute(interaction, args, client) {
         var { guild, user } = interaction
         if(!guild.data.keksbox?.message) return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)

@@ -5,6 +5,7 @@ const update = require('../../db/update')
 module.exports = {
     name: 'eat',
     description: 'Konvertiert deine Kekse zu Erfahrungspunkten',
+    battlelock: true,
     options: [
         {
             name: 'count',

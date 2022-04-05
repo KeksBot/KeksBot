@@ -28,7 +28,9 @@ var userdataSchema = mongoose.Schema({
             }
         ],
         ready: Boolean,
-        priority: String
+        priority: String,
+        currentHP: Number,
+        healTimestamp: Number,
     },
     tan: String
 }, { strict: false })

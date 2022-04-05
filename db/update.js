@@ -37,9 +37,10 @@ module.exports = async function(name, id, value) {
             _id: id
         }, value, {
             upsert: true,
-            strict: false
+            strict: false,
+            new: true
         })
-        return data
+        return data._doc || data
     } catch (error) {
         return error
     }
@@ -53,4 +54,12 @@ require('discord.js').Guild.prototype.setData = async function(value) {
 require('discord.js').User.prototype.setData = async function(value) {
     this.data = await module.exports('userdata', this.id, value)
     return this.data
+}
+
+require('discord.js').User.prototype.save = async function() {
+    return await this.setData(this.data)
+}
+
+require('discord.js').Guild.prototype.save = async function() {
+    return await this.setData(this.data)
 }

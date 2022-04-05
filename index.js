@@ -4,9 +4,24 @@ const config  = require('./config.json')
 const commandhandler = require('./commandhandler')
 const eventhandler = require('./eventhandler')
 discord.Collection.prototype.array = function() {return [...this.values()]}
+/**
+ * 
+ * @param {Object} object 
+ * @returns discord.CommandInteraction
+ */
 discord.CommandInteraction.prototype.safeReply = async function(object) {
     if(this.replied) return await this.editReply(object)
     else return await this.reply(object)
+}
+
+/**
+ * 
+ * @param {Object} object 
+ * @returns discord.CommandInteraction
+ */
+discord.ButtonInteraction.prototype.safeUpdate = async function(object) {
+    if(this.replied) return await this.editReply(object)
+    else return await this.update(object)
 }
 
 var date = new Date()
@@ -30,6 +45,9 @@ client.once('ready', async () => { //Status
     var end = Date.now()
     console.log(`[${client.user.username}]: System aktiv.`)
     console.log(`[${client.user.username}]: Startzeit betrug ${end - start} ms.`)
+
+    client.battles = new discord.Collection()
+    require('./battledata/PvPBattle').setClient(client)
     client.user.setStatus('online')
 })
 

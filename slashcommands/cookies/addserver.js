@@ -5,6 +5,7 @@ const update = require('../../db/update')
 module.exports = {
     name: 'addserver',
     description: 'Fügt dem Server Kekse als Erfahrungspunkte hinzu',
+    battlelock: true,
     options: [
         {
             name: 'count',

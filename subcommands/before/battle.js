@@ -9,7 +9,7 @@ module.exports = async (ita, args, client) => {
             .setColor(color.normal)
             .setTitle('Willkommen')
             .setDescription('>>> Herzlich Willkommen zum KeksBot Kampfsystem. (Wir suchen btw noch einen kuhlen Namen <:Ehehehe:694899997166010509>)\nBevor du anfangen kannst, Leute zu bonken, musst du aber noch ein paar Sachen machen.')
-            .setFooter('Schritt 1/6')
+            .setFooter({text: 'Schritt 1/6'})
         let buttons = new discord.MessageActionRow()
             .addComponents(
                 new discord.MessageButton()
@@ -25,7 +25,7 @@ module.exports = async (ita, args, client) => {
         embed
             .setTitle('Allgemeine Informationen')
             .setDescription('>>> Beim KeksBot Kampfsystem (Wir suchen im Übrigen immer noch einen Namen) handelt es sich um ein skillbasiertes PvP "Roleplay".\nDurch Level-Ups erhöhen sich Statuswerte und man wird stärker. Relativ simpel :)\n**Wichtiger Hinweis**: Das ganze ist ein Proof of Concept und dient ausschließlich Entwicklungszwecken. Eine später verwendete Version kann stark vom aktuellen Entwicklungsstatus abweichen.')
-            .setFooter('Schritt 2/6')
+            .setFooter({text: 'Schritt 2/6'})
         buttons = new discord.MessageActionRow()
             .addComponents(
                 new discord.MessageButton()
@@ -41,7 +41,7 @@ module.exports = async (ita, args, client) => {
         embed
             .setTitle('Skill Priorität')
             .setDescription('>>> Wähle einen priorisierten Skill.\nDieser steigt bei Level Ups schneller an, als andere.\n__Achtung__: Die hier getroffene Auswahl kann nur durch einen Reset geändert werden. Dabei geht der gesamte Fortschritt verloren.')
-            .setFooter('Schritt 3/6')
+            .setFooter({text: 'Schritt 3/6'})
         buttons = new discord.MessageActionRow()
             .addComponents(
                 new discord.MessageButton()
@@ -90,7 +90,7 @@ module.exports = async (ita, args, client) => {
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`> Du erhältst nun automatisch anhand deines Levels Skillpoints.`)
                 .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
-                .setFooter('Schritt 4/6')
+                .setFooter({text: 'Schritt 4/6'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true, ephemeral: true })
             for (let l = user.data.level || 0; l > 1; l--) {
                 skills.forEach((skill) => {
@@ -147,7 +147,7 @@ module.exports = async (ita, args, client) => {
                         .setLabel('Geschwindigkeit')
                         .setStyle('SECONDARY')
                 )
-            embed.setFooter('Schritt 5/6')
+            embed.setFooter({text: 'Schritt 5/6'})
             for (let l = user.data.level || 0; l > 1; l--) {
                 embed  
                     .setTitle('Verteilung der Statuswerte')
@@ -215,7 +215,7 @@ module.exports = async (ita, args, client) => {
             embed = new discord.MessageEmbed()
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`>>> Du hast bisher noch kein Level erreicht.\nVerwende \`/cookies\` und \`/eat\`, um dein Level zu erhöhen und deine Statuswerte zu verbessern.`)
-                .setFooter('Schritt 4+5/6')
+                .setFooter({text: 'Schritt 4+5/6'})
             buttons = new discord.MessageActionRow()
                 .addComponents(
                     new discord.MessageButton()
@@ -232,7 +232,7 @@ module.exports = async (ita, args, client) => {
             .setFields([])
             .addField('Skill Priorität', priority, true)
             .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
-            .setFooter('Schritt 6/6')
+            .setFooter({text: 'Schritt 6/6'})
         buttons = new discord.MessageActionRow()
             .addComponents(
                 new discord.MessageButton()
@@ -255,7 +255,8 @@ module.exports = async (ita, args, client) => {
             let battle = {
                 priority,
                 skills,
-                ready: true
+                ready: true,
+                currentHP: skills.find(skill => skill.name == 'HP').value
             }
             await user.setData({ battle })
         }
@@ -264,7 +265,7 @@ module.exports = async (ita, args, client) => {
                 embed
                     .setTitle('Daten gespeichert')
                     .setDescription('Alle erforderlichen Daten wurden angelegt.')
-                    .setFooter('')
+                    .setFooter({text: ''})
                     .setFields([])
                     .setColor(color.lime)
                 await interaction.update({ embeds: [embed], components: [] })
@@ -273,7 +274,7 @@ module.exports = async (ita, args, client) => {
                 embed
                     .setTitle('Daten gespeichert')
                     .setDescription('Alle erforderlichen Daten wurden angelegt. Der Prozess wird nun fortgesetzt.')
-                    .setFooter('')
+                    .setFooter({text: ''})
                     .setFields([])
                     .setColor(color.lime)
                 await interaction.update({ embeds: [embed], components: [] })
@@ -283,7 +284,7 @@ module.exports = async (ita, args, client) => {
                 embed
                     .setTitle('Abbruch')
                     .setDescription('Der Prozess wurde abgebrochen.')
-                    .setFooter('Alle angelegten Daten wurden vernichtet.')
+                    .setFooter({text: 'Alle angelegten Daten wurden vernichtet.'})
                     .setFields([])
                     .setColor(color.red)
                 await interaction.update({ embeds: [embed], components: [] })

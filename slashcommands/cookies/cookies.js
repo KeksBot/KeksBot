@@ -5,6 +5,7 @@ const update = require('../../db/update')
 module.exports = {
     name: 'cookies',
     description: 'Gibt dir Keeeeekseeee',
+    battlelock: true,
     options: [
         {
             name: 'count',

@@ -7,7 +7,7 @@ module.exports = {
         const { user, color } = ita
         let buttons = new discord.MessageActionRow()
         let embed = new discord.MessageEmbed()
-            .setColor(color.normal)
+            .setColor(await (await require('../subcommands/getcolor')(ita.guild).normal))
             .setAuthor({ 
                 name: 'Level Up',
                 iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: true })
@@ -19,8 +19,9 @@ module.exports = {
                 .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
                 .setDescription(embed.description)
         }
-        await ita.safeReply({ embeds: [embed], ephemeral: true })
-        if(!user.data.cookies) return
+        if(ita.isButton()) await ita.safeUpdate({ embeds: [embed], ephemeral: true })
+        else await ita.safeReply({ embeds: [embed], ephemeral: true })
+        if(!user.data.battle?.ready) return
         await require('delay')(2000)
 
         const skillid = require('../battledata/skillids.json')
@@ -39,11 +40,11 @@ module.exports = {
         }
 
         embed.setDescription(embed.description + '\nBitte wähle einen Skill aus, den du erhöhen möchtest.\nNach 2 Minuten wird automatisch ein zufälliger Skill erhöht.')
-        embed.addField('​', skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n'), true)
+        embed.addField('​', skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​', true)
         embed.setFields([
             {
                 name: 'Statuswerte',
-                value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
+                value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
                 inline: true
             },
             embed.fields[1]
@@ -51,6 +52,7 @@ module.exports = {
 
         skills.forEach(skill => {
             skill.value += skill.added
+            if(skill.name == 'HP') user.data.battle.currentHP += skill.added
             skill.added = 0
         })
 
@@ -116,6 +118,7 @@ module.exports = {
 
     
             skills.forEach(skill => {
+                if(skill.name == 'HP') user.data.battle.currentHP += skill.added
                 skill.added = 0
             })
         }

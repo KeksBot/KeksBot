@@ -208,6 +208,9 @@ module.exports = async (client) => {
         timestamps.set(ita.user.id, now)
         setTimeout(() => timestamps.delete(ita.user.id), cooldownAmount)
 
+        //Battlelock
+        if(client.battles.find(b => b.user1.id == ita.user.id || b.user2.id == ita.user.id) && command.battlelock) return ita.error('Kampfsperre', 'Du kannst diesen Befehl nicht während eines Kampfes anwenden.', true)
+
         //Execute
         try {
             let argsarray = JSON.stringify(args)

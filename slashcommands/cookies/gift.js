@@ -6,6 +6,7 @@ const update = require('../../db/update')
 module.exports = {
     name: 'gift',
     description: 'Schenk jemandem Kekse',
+    battlelock: true,
     options: [
         {
             name: 'user',
