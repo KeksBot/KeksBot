@@ -207,15 +207,15 @@ module.exports = async (ita, args, client) => {
                         .setStyle('PRIMARY')
                 )
             await interaction.update({ embeds: [embed], components: [buttons] })
-            interaction = await message.awaitMessageComponent({ time: 10000 }).catch(() => {})
+            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
             if(!interaction) return
         } else {
-
             //Kein-Level-Fehler
             embed = new discord.MessageEmbed()
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`>>> Du hast bisher noch kein Level erreicht.\nVerwende \`/cookies\` und \`/eat\`, um dein Level zu erhöhen und deine Statuswerte zu verbessern.`)
                 .setFooter({text: 'Schritt 4+5/6'})
+                .setColor(color.red)
             buttons = new discord.MessageActionRow()
                 .addComponents(
                     new discord.MessageButton()
@@ -223,6 +223,9 @@ module.exports = async (ita, args, client) => {
                         .setLabel('Fortfahren')
                         .setStyle('PRIMARY')
                 )
+            await interaction.update({ embeds: [embed], components: [buttons] })
+            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+            if(!interaction) return    
         }
 
         //Anzeige

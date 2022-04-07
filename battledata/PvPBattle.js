@@ -106,29 +106,33 @@ class PvPBattle extends EventEmitter {
         await this.user2Interaction.safeUpdate({ embeds: [embed], components: [] })
         if(this.user1.user.data.battle.healTimestamp) {
             let { healTimestamp, skills, currentHP } = this.user1.user.data.battle
-            let maxHP = skills.find(skill => skill.name == 'HP')
+            let maxHP = skills.find(skill => skill.name == 'HP').value
             if(currentHP != maxHP) {
-                let healBonus = skills.find(s => s.name == 'Regeneration')
+                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
                 let heal = maxHP / 100
-                currentHP =+ Math.floor(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                currentHP += Math.floor(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(currentHP >= maxHP) {
                     currentHP = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
+                this.user1.user.data.battle.healTimestamp = healTimestamp
+                this.user1.user.data.battle.currentHP = currentHP
                 await this.user1.user.save()
             }
         }
         if(this.user2.user.data.battle.healTimestamp) {
             let { healTimestamp, skills, currentHP } = this.user2.user.data.battle
-            let maxHP = skills.find(skill => skill.name == 'HP')
+            let maxHP = skills.find(skill => skill.name == 'HP').value
             if(currentHP != maxHP) {
-                let healBonus = skills.find(s => s.name == 'Regeneration')
+                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
                 let heal = maxHP / 100
-                currentHP =+ Math.floor(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(currentHP >= maxHP) {
                     currentHP = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
+                this.user2.user.data.battle.healTimestamp = healTimestamp
+                this.user2.user.data.battle.currentHP = currentHP
                 await this.user2.user.save()
             }
         }
@@ -244,7 +248,6 @@ class PvPBattle extends EventEmitter {
         let dmg1 = Math.floor((user1.user.data.level * .3 + 5) * (this.atk[i1].strength || 0) * (user1.user.data.battle.skills.find(skill => skill.name == 'Angriff').value / (40 * user2.user.data.battle.skills.find(skill => skill.name == 'Verteidigung').value)) * 8)
         let dmg2 = Math.floor((user2.user.data.level * .3 + 5) * (this.atk[i2].strength || 0) * (user2.user.data.battle.skills.find(skill => skill.name == 'Angriff').value / (40 * user1.user.data.battle.skills.find(skill => skill.name == 'Verteidigung').value)) * 8)
 
-        console.log(dmg1, dmg2)
         user2.user.data.battle.currentHP -= dmg1
 
         if(dmg1) user2.user.data.battle.healTimestamp = Date.now()
@@ -258,10 +261,10 @@ class PvPBattle extends EventEmitter {
         let embed = new discord.MessageEmbed()
             .setColor(this.color.normal)
             .setTitle(`⚔️ Imagine a title`)
-            .setDescription(this.display(i1.replace('user', '')))
+            .setDescription(this.display(1))
             .setFooter({ text: `${user1.user.username} greift an!` })
         this.user1Interaction.safeUpdate({ embeds: [embed], components: [] })
-        embed.setDescription(this.display(i2.replace('user', '')))
+        embed.setDescription(this.display(2))
         this.user2Interaction.safeUpdate({ embeds: [embed], components: [] })
         await delay(1000)
 
@@ -276,11 +279,10 @@ class PvPBattle extends EventEmitter {
         }
 
         user1.user.data = await user1.user.save()
-        console.log(user1.user.data.battle.currentHP, user2.user.data.battle.currentHP)
 
-        embed.setDescription(this.display(i1.replace('user', ''))).setFooter({ text: `${user2.user.username} greift an!` })
+        embed.setDescription(this.display(1)).setFooter({ text: `${user2.user.username} greift an!` })
         this.user1Interaction.safeUpdate({ embeds: [embed], components: [] })
-        embed.setDescription(this.display(i2.replace('user', '')))
+        embed.setDescription(this.display(2))
         this.user2Interaction.safeUpdate({ embeds: [embed], components: [] })
         await delay(1000)
 
@@ -331,6 +333,7 @@ class PvPBattle extends EventEmitter {
             await delay(3000)
             client.emit('userLevelUp', wi, levelcount)
         }
+        client.battles.delete(this.id)
     }
 }
 

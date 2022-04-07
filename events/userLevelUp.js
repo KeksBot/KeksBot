@@ -7,7 +7,7 @@ module.exports = {
         const { user, color } = ita
         let buttons = new discord.MessageActionRow()
         let embed = new discord.MessageEmbed()
-            .setColor(await (await require('../subcommands/getcolor')(ita.guild).normal))
+            .setColor(color?.normal || await (await (require('../subcommands/getcolor')(ita.guild)).normal))
             .setAuthor({ 
                 name: 'Level Up',
                 iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: true })

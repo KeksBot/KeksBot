@@ -51,4 +51,4 @@ client.once('ready', async () => { //Status
     client.user.setStatus('online')
 })
 
-client.login(config.token) 
+client.login(config.token)

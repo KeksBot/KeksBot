@@ -23,8 +23,46 @@ module.exports = {
             return await ita.error('Fehler', 'Der Nutzer ist nicht auf dem Server.', true)
         })
 
+        if(user.data.battle?.healTimestamp) {
+            let { healTimestamp, skills, currentHP } = user.data.battle
+            let maxHP = skills.find(skill => skill.name == 'HP').value
+            if(currentHP != maxHP) {
+                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
+                let heal = maxHP / 100
+                currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                if(currentHP >= maxHP) {
+                    currentHP = maxHP
+                    healTimestamp = 0
+                } else healTimestamp = Date.now()
+                user.data.battle.healTimestamp = healTimestamp
+                user.data.battle.currentHP = currentHP
+                await user.save()
+            }
+        }
+
+        if(user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
+
         await target.user.getData()
         if(!target.user.data.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
+
+        if(target.data.battle?.healTimestamp) {
+            let { healTimestamp, skills, currentHP } = target.data.battle
+            let maxHP = skills.find(skill => skill.name == 'HP').value
+            if(currentHP != maxHP) {
+                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
+                let heal = maxHP / 100
+                currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                if(currentHP >= maxHP) {
+                    currentHP = maxHP
+                    healTimestamp = 0
+                } else healTimestamp = Date.now()
+                target.data.battle.healTimestamp = healTimestamp
+                target.data.battle.currentHP = currentHP
+                await target.save()
+            }
+        }
+
+        if(target.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 
         //Herausforderung
         let embed = new discord.MessageEmbed()
@@ -52,7 +90,7 @@ module.exports = {
         let interaction = await message.awaitMessageComponent({ filter, time: 300000 }).catch(() => {})
         if(!interaction) {
             await embeds.errorMessage(message, 'Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`, true, false)
-            await ita.error('Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`)
+            return await ita.error('Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`)
         }
         if(interaction.customId == 'battle.decline') {
             await ita.error('Herausforderung abgebrochen', `${target} hat deine Herausforderung abgelehnt.`)

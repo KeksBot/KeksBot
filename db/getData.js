@@ -48,7 +48,7 @@ module.exports = async function(name, id) {
     try {
         let data = await model.findById(id)
         if(data) await handle(data, name, id)
-        return data._doc || data
+        return data?._doc || data
     } catch (error) {
         return error
     }

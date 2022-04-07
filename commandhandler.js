@@ -135,7 +135,7 @@ module.exports = async (client) => {
         })
         getData('userdata', ita.user.id).then(async function(data) {
             if(!data) {
-                data = await require('./db/create')('userdata', ita.user.id)
+                data = await require('./db/create')('userdata', ita.user.id, { level: 1, xp: 0, cookies: 0 })
                 // newUser = true
             }
             ita.user.data = data
