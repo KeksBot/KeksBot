@@ -45,7 +45,7 @@ module.exports = {
         await target.user.getData()
         if(!target.user.data.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
 
-        if(target.data.battle?.healTimestamp) {
+        if(target.user.data.battle?.healTimestamp) {
             let { healTimestamp, skills, currentHP } = target.data.battle
             let maxHP = skills.find(skill => skill.name == 'HP').value
             if(currentHP != maxHP) {
@@ -56,9 +56,9 @@ module.exports = {
                     currentHP = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
-                target.data.battle.healTimestamp = healTimestamp
-                target.data.battle.currentHP = currentHP
-                await target.save()
+                target.user.data.battle.healTimestamp = healTimestamp
+                target.user.data.battle.currentHP = currentHP
+                await target.user.save()
             }
         }
 

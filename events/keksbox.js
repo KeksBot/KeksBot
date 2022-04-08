@@ -88,7 +88,7 @@ module.exports = {
                 let { keksbox } = serverdata
                 keksbox.message = null
                 keksbox.multiplier = null
-                await require('../db/update')('serverdata', guild.id, { keksbox })
+                await require('../db/update')('serverdata', ita.guild.id, { keksbox })
                 await require('../db/update')('userdata', ita.user.id, { cookies: userdata.cookies })
             })
         }
