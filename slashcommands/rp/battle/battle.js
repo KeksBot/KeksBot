@@ -46,7 +46,7 @@ module.exports = {
         if(!target.user.data.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
 
         if(target.user.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, currentHP } = target.data.battle
+            let { healTimestamp, skills, currentHP } = target.user.data.battle
             let maxHP = skills.find(skill => skill.name == 'HP').value
             if(currentHP != maxHP) {
                 let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
@@ -62,7 +62,7 @@ module.exports = {
             }
         }
 
-        if(target.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
+        if(target.user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 
         //Herausforderung
         let embed = new discord.MessageEmbed()
