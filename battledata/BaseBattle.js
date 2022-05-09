@@ -1,19 +1,57 @@
+const Discord = require('discord.js')
+const BattleUser = require('./BattleUser')
+var client
+
 module.exports = class BaseBattle {
-    constructor(teams, private, message, color) {
+    #actions
+
+    /**
+     * 
+     * @param {boolean} private whether the battle is private or not
+     * @param {Discord.Message} message the message that started the battle
+     * @param {Object} color the guild's color object
+     */
+    constructor(private, message, color) {
         this.id = new Date().getTime()
-        this.users = []
-        for(i = 0; i < teams; i++) {
-            this.users.push([])
-        }
+        /**
+         * @type {Discord.Collection<string, BattleUser>}
+         */
+        this.users = new Discord.Collection()
         this.private = private
         this.message = message
-        this.client = message.client
         this.color = color
-        this.client.battles.set(this.id, this)
+        if(!client) this.client = message.client
+        client.battles.set(this.id, this)
     }
 
-    async addUser(user, team) {
-        if(team >= this.users.length) throw new Error('Team does not exist')
-        
+    /**
+     * 
+     * @param {BattleUser} battleUser 
+     */
+    addUser(battleUser) {
+        this.users.set(battleUser.user.id, battleUser)
+    }
+
+    async load() {
+        let embed = new Discord.MessageEmbed()
+            .setColor(this.color.yellow)
+            .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
+            .setDescription(
+                'Der Kampf zwischen ' +
+                this.users.array().map(user => `**${user.member.displayName}**`).join(', ').replaceLast(',', ' und') +
+                'beginnt in Kürze.\nBitte drücke diesen Knopf, sobald du bereit bist. Nach 2 Minuten ohne Eingabe wird das Matchmaking abgebrochen.'
+            )
+        let buttons = new Discord.MessageActionRow()
+            .setComponents(
+                new Discord.MessageButton()
+                    .setLabel('Bereit')
+                    .setCustomId('pvpBattle.ready')
+                    .setStyle('SUCCESS')
+            )
+        let collectors = []
+        await this.users.array().forEach(async user => {
+            let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
+            collectors.push(message.createMessageComponentCollector({ time: 120000, max: 1 }))
+        })
     }
 }

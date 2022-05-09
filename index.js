@@ -24,6 +24,16 @@ discord.ButtonInteraction.prototype.safeUpdate = async function(object) {
     else return await this.update(object)
 }
 
+/**
+ * 
+ * @param {String|RegExp} searchValue 
+ * @param {String} replaceValue 
+ * @returns String
+ */
+String.prototype.replaceLast = function (searchValue, replaceValue) {
+    return this.replace(new RegExp(searchValue+"([^"+searchValue+"]*)$"), replaceValue+"$1");
+}
+
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
 
