@@ -20,7 +20,7 @@ module.exports = class BaseBattle {
         this.private = private
         this.message = message
         this.color = color
-        if(!client) this.client = message.client
+        if (!client) this.client = message.client
         client.battles.set(this.id, this)
     }
 
@@ -53,5 +53,32 @@ module.exports = class BaseBattle {
             let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
             collectors.push(message.createMessageComponentCollector({ time: 120000, max: 1 }))
         })
+
+        collectors.forEach((collector) => {
+            collector.on('collect', async i => {
+                this.users.get(i.user.id).interaction = i
+                if (collectors.length <= 1) return // TODO: Start the battle
+                let embed = new Discord.MessageEmbed()
+                    .setColor(this.color.yellow)
+                    .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
+                    .setDescription(
+                        'Der Kampf zwischen ' +
+                        this.users.array().map(user => `**${user.member.displayName}**`).join(', ').replaceLast(',', ' und') +
+                        'beginnt in Kürze.\nBitte warte noch einen Moment, bis alle bereit sind.'
+                    )
+                buttons.components[0].setDisabled(true)
+                await i.update({ embeds: [embed], components: [buttons], ephemeral: true })
+                collectors.splice(collectors.indexOf(collector), 1)
+            })
+
+            collector.on('end', reason => {
+                collectors.splice(collectors.indexOf(collector), 1)
+                if (reason === 'time') return // TODO: Call Timeout Function
+            })
+        })
+    }
+
+    async start() {
+        
     }
 }

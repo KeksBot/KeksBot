@@ -12,7 +12,6 @@ module.exports = class BattleUser {
         this.interaction = interaction
         this.battle = this.data.battle
         this.team = team
-        this.skills = {}
     }
 
     init() {
