@@ -7,10 +7,10 @@ module.exports = class BattleUser {
      * @param {0|1} team 
      */
     constructor(interaction, team) {
-        this.user = interaction.user
-        this.member = interaction.member
+        this.user = interaction?.user
+        this.member = interaction?.member
         this.interaction = interaction
-        this.battle = this.data.battle
+        this.battle = this.user?.data?.battle
         this.team = team
     }
 
@@ -19,7 +19,7 @@ module.exports = class BattleUser {
         this.skills = JSON.parse(JSON.stringify(this.data.skills))
     }
 
-    heal() {
+    async heal() {
         let { healTimestamp, skills, currentHP } = this.battle
         let maxHP = skills.find(skill => skill.name == 'HP').value
         if(currentHP < maxHP) {

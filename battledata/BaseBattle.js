@@ -49,7 +49,7 @@ module.exports = class BaseBattle {
                     .setStyle('SUCCESS')
             )
         let collectors = []
-        await this.users.array().forEach(async user => {
+        await this.users.filter(u => !u.ai).array().forEach(async user => {
             let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
             collectors.push(message.createMessageComponentCollector({ time: 120000, max: 1 }))
         })
@@ -73,12 +73,58 @@ module.exports = class BaseBattle {
 
             collector.on('end', reason => {
                 collectors.splice(collectors.indexOf(collector), 1)
-                if (reason === 'time') return // TODO: Call Timeout Function
+                if (collectors.length == 0 && reason === 'time') return // TODO: Call Timeout Function
             })
         })
     }
 
     async start() {
-        
+
+    }
+
+    display(user, text) {
+
+    }
+
+    async game() {
+        let embed = new Discord.MessageEmbed()
+            .setTitle(`⚔️ Imagine a title`)
+            .setColor(this.color.normal)
+        let buttons = [new Discord.MessageActionRow()
+            .addComponents(
+                new Discord.MessageButton()
+                    .setLabel('Kampf')
+                    .setStyle('SECONDARY')
+                    .setCustomId('battle:attack'),
+                new Discord.MessageButton()
+                    .setLabel('Items')
+                    .setCustomId('battle:items')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setLabel('Heilen [WIP]')
+                    .setStyle('SECONDARY')
+                    .setCustomId('battle:heal')
+                    .setDisabled(true),
+            )
+        ]
+        let components = []
+        await this.users.filter(u => !u.ai).array().forEach(async u => {
+            embed.setDescription(display(u))
+            let message = await u.interaction.safeUpdate({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
+            const collector = message.createMessageComponentCollector({ time: 300000 })
+            components.push(collector)
+
+            collector.on('collect', async i => {
+
+            })
+
+            collector.on('end', async reason => {
+                
+            })
+        })
+    }
+
+    async * calculations() {
+
     }
 }
