@@ -11,6 +11,7 @@ module.exports = class BattleUser {
         this.member = interaction?.member
         this.interaction = interaction
         this.battle = this.user?.data?.battle
+        this.id = this.user.id
         this.team = team
     }
 

@@ -4,6 +4,7 @@ var client
 
 module.exports = class BaseBattle {
     #actions
+    #usable
 
     /**
      * 
@@ -57,7 +58,7 @@ module.exports = class BaseBattle {
         collectors.forEach((collector) => {
             collector.on('collect', async i => {
                 this.users.get(i.user.id).interaction = i
-                if (collectors.length <= 1) return // TODO: Start the battle
+                if (collectors.length <= 1) return this.start()
                 let embed = new Discord.MessageEmbed()
                     .setColor(this.color.yellow)
                     .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
@@ -79,7 +80,14 @@ module.exports = class BaseBattle {
     }
 
     async start() {
+        let usableData = require('./usable')
+        this.#usable = {}
+        this.users.forEach(u => {
+            u.battle.attacks.forEach(a => { if (!this.#usable[a]) this.#usable[a] = usableData[a] })
+            u.battle.inventory.forEach(i => { if (!this.#usable[i.id]) this.#usable[i.id] = usableData[i.id] })
+        })
 
+        return true
     }
 
     display(user, text) {
@@ -108,6 +116,7 @@ module.exports = class BaseBattle {
             )
         ]
         let components = []
+        this.#actions = {}
         await this.users.filter(u => !u.ai).array().forEach(async u => {
             embed.setDescription(display(u))
             let message = await u.interaction.safeUpdate({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
@@ -115,11 +124,30 @@ module.exports = class BaseBattle {
             components.push(collector)
 
             collector.on('collect', async i => {
+                let user = i.user
+                this.users.get(user.id).interaction = i
+                switch (i.customId.split(':')[1]) {
+                    case 'attack':
+                        let embed = new Discord.MessageEmbed()
+                            .setTitle(`⚔️ Angriff wird vorbereitet`)
+                            .setColor(this.color.normal)
+                            .setDescription('Wähle den anzuwendenden Angriff aus.')
+                        
+                        let buttons = new Discord.MessageActionRow()
+                        break
+                    case 'items':
 
+                        break
+                    case 'heal':
+
+                        break
+                    default:
+
+                }
             })
 
             collector.on('end', async reason => {
-                
+
             })
         })
     }

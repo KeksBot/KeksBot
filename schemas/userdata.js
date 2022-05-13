@@ -31,6 +31,11 @@ var userdataSchema = mongoose.Schema({
         priority: String,
         currentHP: Number,
         healTimestamp: Number,
+        inventory: [{
+            id: String,
+            count: Number,
+        }],
+        attacks: [String],
     },
     tan: String
 }, { strict: false })
