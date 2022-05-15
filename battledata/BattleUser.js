@@ -17,7 +17,18 @@ module.exports = class BattleUser {
 
     init() {
         //TODO: Ausrüstung auf Werte anwenden
+        let usable = require('./usable')
         this.skills = JSON.parse(JSON.stringify(this.data.skills))
+        this.attacks = []
+        for (const i of this.battle.attacks) {
+            this.attacks.push({
+                id: i,
+                uses: usable(i).uses
+            }) = usable[i].uses
+        }
+
+        //TODO: Bot Nutzer
+        this.ai = false
     }
 
     async heal() {

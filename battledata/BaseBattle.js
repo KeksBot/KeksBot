@@ -125,15 +125,42 @@ module.exports = class BaseBattle {
 
             collector.on('collect', async i => {
                 let user = i.user
-                this.users.get(user.id).interaction = i
+                let u = this.users.get(user.id)
+                u.interaction = i
                 switch (i.customId.split(':')[1]) {
+                    case 'home':
+
+                        break
                     case 'attack':
                         let embed = new Discord.MessageEmbed()
                             .setTitle(`⚔️ Angriff wird vorbereitet`)
                             .setColor(this.color.normal)
-                            .setDescription('Wähle den anzuwendenden Angriff aus.')
-                        
-                        let buttons = new Discord.MessageActionRow()
+                        u.attacks.forEach((a, i) => {
+                            embed.addField(
+                                `${(() => { return { 0: ':one:', 1: ':two:', 2: ':three', 3: ':four:', 4: ':five:', 5: ':six:' }()[i] })()} ${this.#usable[a.id].name}`,
+                                `${this.#usable[a.id].description}\nVerwendungen übrig: **${a.uses}/${this.#usable[a.id].uses}**`,
+                                true
+                            )
+                        })
+                        let components = []
+                        u.attacks.forEach((a, i) => {
+                            if (components[0]?.components.length > 3) components.push(new Discord.MessageActionRow())
+                            components[-1].addComponents(
+                                new Discord.MessageButton()
+                                    .setEmoji(() => { return { 0: '1️⃣', 1: '2️⃣', 2: '3️⃣', 3: '4️⃣', 4: '5️⃣', 5: '6️⃣' }()[i] })
+                                    .setCustomId(`battle:${a.id}`)
+                                    .setStyle('SUCCESS')
+                            )
+                        })
+                        components.push(new Discord.MessageActionRow()
+                            .addComponents(
+                                new Discord.MessageButton()
+                                    .setEmoji('✖️')
+                                    .setCustomId('battle:home')
+                                    .setStyle('DANGER')
+                            )
+                        )
+                        await u.interaction.safeUpdate({ embeds: [embed], components, ephemeral: true })
                         break
                     case 'items':
 
