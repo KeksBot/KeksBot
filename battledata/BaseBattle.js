@@ -91,7 +91,22 @@ module.exports = class BaseBattle {
     }
 
     display(user, text) {
+        let users = this.users.filter(u => u.team == user.team)
+        let enemies = this.users.filter(u => u.team != user.team)
 
+        let enemyText = enemies.map(u => 
+            `${`${u.member.displayName} • Lv. ${u.user.data.level}`.padStart(42)}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padStart(20, '▁').padStart(42)}`
+        ).array().join('\n')
+
+        let userText = users.map(u => {
+            return u.user.id == user.user.id 
+                ? null
+                : `${u.member.displayName} • Lv. ${u.user.data.level}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padEnd(20, '▁')}`
+        }).filter(u => u).array().join('\n')
+
+        userText += `\n${user.member.displayName} • Lv. ${user.user.data.level}\n${''.padEnd(Math.floor(user.battle.currentHP / user.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padEnd(20, '▁')} ${user.battle.currentHP} / ${user.skills.find(skill => skill.name == 'HP').value} HP`
+
+        return `\`\`\`${enemyText}\n\n\n${userText}\`\`\``
     }
 
     async game() {
@@ -155,7 +170,7 @@ module.exports = class BaseBattle {
                         components.push(new Discord.MessageActionRow()
                             .addComponents(
                                 new Discord.MessageButton()
-                                    .setEmoji('✖️')
+                                    .setEmoji('🏡')
                                     .setCustomId('battle:home')
                                     .setStyle('DANGER')
                             )
@@ -169,7 +184,7 @@ module.exports = class BaseBattle {
 
                         break
                     default:
-
+                        
                 }
             })
 
