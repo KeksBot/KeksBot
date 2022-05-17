@@ -190,6 +190,7 @@ module.exports = class BaseBattle {
                         else if (action.type.startsWith('atk')) {
                             if (this.users.size > 2) {
                                 //TODO: Nutzer fragen, auf wen der Angriff angewendet werden soll.
+
                             } else {
                                 /*
                                 target:
@@ -201,11 +202,11 @@ module.exports = class BaseBattle {
                                     5: Mehrere Ziele: gegnerisches Team
                                     6: Mehrere Ziele: alle Teilnehmer (exklusiv man selbst)
                                     7: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
-                            */
+                                */
                                 targets = 
-                                    (action.target == 7) ? targets = this.users :
-                                    ([0, 3, 5, 6].includes(action.target)) ? targets = this.users.filter(u => u.user.id != user.id) :
-                                    targets = this.users.filter(u => u.user.id == user.id)
+                                    (action.target == 7) ? this.users :
+                                    ([0, 3, 5, 6].includes(action.target)) ? this.users.filter(u => u.user.id != user.id) :
+                                    this.users.filter(u => u.user.id == user.id)
                             }
                         }
                         this.#actions[u.id] = { action: i.cutsomId, target: targets, user: u }
