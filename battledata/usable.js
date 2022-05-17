@@ -4,6 +4,18 @@ module.exports = {
         type: 'atk/normal',
         description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz.',
         uses: 40,
+        target: 'single', 
+        /*
+            target:
+                0: Einzelnes Ziel (andere Person)
+                1: Einzelnes Ziel: man selbst
+                2: Einzelnes Ziel: Teammitglied
+                3: Einzelnes Ziel: Irgendwer
+                4: Mehrere Ziele: eigenes Team
+                5: Mehrere Ziele: gegnerisches Team
+                6: Mehrere Ziele: alle Teilnehmer (exklusiv man selbst)
+                7: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
+        */
     },
     '000001': {
         name: 'Spezi',

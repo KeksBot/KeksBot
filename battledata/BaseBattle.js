@@ -94,12 +94,12 @@ module.exports = class BaseBattle {
         let users = this.users.filter(u => u.team == user.team)
         let enemies = this.users.filter(u => u.team != user.team)
 
-        let enemyText = enemies.map(u => 
+        let enemyText = enemies.map(u =>
             `${`${u.member.displayName} • Lv. ${u.user.data.level}`.padStart(42)}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padStart(20, '▁').padStart(42)}`
         ).array().join('\n')
 
         let userText = users.map(u => {
-            return u.user.id == user.user.id 
+            return u.user.id == user.user.id
                 ? null
                 : `${u.member.displayName} • Lv. ${u.user.data.level}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padEnd(20, '▁')}`
         }).filter(u => u).array().join('\n')
@@ -184,7 +184,31 @@ module.exports = class BaseBattle {
 
                         break
                     default:
-                        
+                        let targets = new Discord.Collection()
+                        let action = this.#usable[i.customId]
+                        if (action.type.startsWith('item')) targets = this.users.filter(u => u.id == user.id)
+                        else if (action.type.startsWith('atk')) {
+                            if (this.users.size > 2) {
+                                //TODO: Nutzer fragen, auf wen der Angriff angewendet werden soll.
+                            } else {
+                                /*
+                                target:
+                                    0: Einzelnes Ziel (andere Person)
+                                    1: Einzelnes Ziel: man selbst
+                                    2: Einzelnes Ziel: Teammitglied
+                                    3: Einzelnes Ziel: Irgendwer (exklusiv man selbst)
+                                    4: Mehrere Ziele: eigenes Team (inklusiv man selbst)
+                                    5: Mehrere Ziele: gegnerisches Team
+                                    6: Mehrere Ziele: alle Teilnehmer (exklusiv man selbst)
+                                    7: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
+                            */
+                                targets = 
+                                    (action.target == 7) ? targets = this.users :
+                                    ([0, 3, 5, 6].includes(action.target)) ? targets = this.users.filter(u => u.user.id != user.id) :
+                                    targets = this.users.filter(u => u.user.id == user.id)
+                            }
+                        }
+                        this.#actions[u.id] = { action: i.cutsomId, target: targets, user: u }
                 }
             })
 
