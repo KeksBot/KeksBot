@@ -1,0 +1,13 @@
+{
+    "exclude": ["node_modules", "build"],
+    "include": ["src"],
+    "compilerOptions": {
+        "allowJs": true,
+        "strict": false,
+        "module": "CommonJS",
+        "strictNullChecks": false,
+        "outDir": "build",
+        "rootDir": "src",
+        "skipLibCheck": true
+    },
+}
