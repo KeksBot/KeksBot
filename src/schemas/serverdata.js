@@ -25,24 +25,7 @@ var serverdataSchema = mongoose.Schema({
         message: String, //Nachricht vom Paket
         multiplier: Number, //Für besondere KeksBoxen
         keepmessage: Boolean, //Ob die Nachricht beim claimen gelöscht werden soll
-    },
-    modlog: [
-        {
-            _id: false
-        }
-    ],
-    tempbans: [
-        {
-            user: String,
-            time: Date,
-            _id: false
-        }
-    ],
-    settings: {
-        instant_modactions: Number,
-        dm_users: Number,
-    },
-    modactions: Number
+    }
 }, { strict: false })
 
 module.exports = mongoose.model('serverdata', serverdataSchema)

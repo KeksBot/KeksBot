@@ -1,7 +1,7 @@
 const db = require('./database')
 const path = require('path')
 const fs = require('fs')
-const { Collection } = require('discord.js')
+const { Collection, User, Guild } = require('discord.js')
 const { Model } = require('mongoose')
 const schemas = new Collection()
 
@@ -54,12 +54,12 @@ module.exports = async function(name, id) {
     }
 }
 
-require('discord.js').Guild.prototype.getData = async function() {
+Guild.prototype.getData = async function() {
     this.data = await module.exports('serverdata', this.id)
     return this.data
 }
 
-require('discord.js').User.prototype.getData = async function() {
+User.prototype.getData = async function() {
     this.data = await module.exports('userdata', this.id)
     return this.data
 }

@@ -1,24 +1,38 @@
-const Discord = require('discord.js')
-const BattleUser = require('./BattleUser')
-var client
+import Discord = require('discord.js')
+import BattleUser = require('./BattleUser')
+var client: Discord.Client
+
+interface Color {
+    red: Discord.ColorResolvable,
+    yellow: Discord.ColorResolvable,
+    lime: Discord.ColorResolvable,
+    normal: Discord.ColorResolvable
+}
 
 module.exports = class BaseBattle {
-    #actions
-    #usable
+    #actions: any
+    #usable: any
+    users: any
+    private: boolean
+    message: Discord.Message
+    id: number
+    color: Color
+    client: Discord.Client
+
 
     /**
      * 
-     * @param {boolean} private whether the battle is private or not
+     * @param {boolean} priv whether the battle is private or not
      * @param {Discord.Message} message the message that started the battle
      * @param {Object} color the guild's color object
      */
-    constructor(private, message, color) {
+    constructor(priv: boolean, message: Discord.Message, color) {
         this.id = new Date().getTime()
         /**
          * @type {Discord.Collection<string, BattleUser>}
          */
         this.users = new Discord.Collection()
-        this.private = private
+        this.private = priv
         this.message = message
         this.color = color
         if (!client) this.client = message.client

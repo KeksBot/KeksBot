@@ -1,6 +1,11 @@
 {
-    "exclude": ["node_modules", "build"],
-    "include": ["src"],
+    "exclude": [
+        "node_modules",
+        "build"
+    ],
+    "include": [
+        "src"
+    ],
     "compilerOptions": {
         "allowJs": true,
         "strict": false,
@@ -8,6 +13,8 @@
         "strictNullChecks": false,
         "outDir": "build",
         "rootDir": "src",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "target": "ES2015",
+        "resolveJsonModule": true
     },
 }

@@ -1,27 +1,28 @@
-const discord = require('discord.js')
-const client  = new discord.Client({ intents: ['GUILDS', 'GUILD_BANS', 'GUILD_MEMBERS', 'GUILD_INVITES', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_VOICE_STATES', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS']})
-const config  = require('./config.json')
-const commandhandler = require('./commandhandler')
-const eventhandler = require('./eventhandler')
+import discord = require('discord.js')
+const client: discord.Client = new discord.Client({ intents: ['GUILDS', 'GUILD_BANS', 'GUILD_MEMBERS', 'GUILD_INVITES', 'GUILD_EMOJIS_AND_STICKERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'GUILD_VOICE_STATES', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS']})
+import config  = require('./config.json')
+import commandhandler = require('./commandhandler')
+import eventhandler = require('./eventhandler')
+
 discord.Collection.prototype.array = function() {return [...this.values()]}
 /**
  * 
- * @param {Object} object 
+ * @param {Object} messageOptions 
  * @returns discord.CommandInteraction
  */
-discord.CommandInteraction.prototype.safeReply = async function(object) {
-    if(this.replied) return await this.editReply(object)
-    else return await this.reply(object)
+discord.CommandInteraction.prototype.safeReply = async function(messageOptions: discord.MessageOptions) {
+    if(this.replied) return await this.editReply(messageOptions)
+    else return await this.reply(messageOptions)
 }
 
 /**
  * 
- * @param {Object} object 
+ * @param {Object} messageOptions 
  * @returns discord.CommandInteraction
  */
-discord.ButtonInteraction.prototype.safeUpdate = async function(object) {
-    if(this.replied) return await this.editReply(object)
-    else return await this.update(object)
+discord.ButtonInteraction.prototype.safeUpdate = async function(messageOptions: discord.MessageOptions) {
+    if(this.replied) return await this.editReply(messageOptions)
+    else return await this.update(messageOptions)
 }
 
 /**
@@ -30,7 +31,7 @@ discord.ButtonInteraction.prototype.safeUpdate = async function(object) {
  * @param {String} replaceValue 
  * @returns String
  */
-String.prototype.replaceLast = function (searchValue, replaceValue) {
+String.prototype.replaceLast = function (searchValue: String, replaceValue: String) {
     return this.replace(new RegExp(searchValue+"([^"+searchValue+"]*)$"), replaceValue+"$1");
 }
 
@@ -39,7 +40,6 @@ console.log(`Starte System am ${date.getDate()}.${date.getMonth() +1}.${date.get
 
 client.once('ready', async () => { //Status
     client.user.setStatus('idle')
-    client.restarting = 0
     var start = Date.now()
     console.log(`[${client.user.username}]: Client geladen.`)
     console.log(`[${client.user.username}]: Monitoring wird aktiviert.`)
