@@ -71,4 +71,16 @@ declare global {
         },
         tan: string
     }
+
+    interface BattleUser {
+        user: discord.User
+        member: discord.GuildMember
+        interaction: discord.ButtonInteraction
+        battle: Userdata['battle']
+        id: string
+        team: number
+        skills: Userdata['battle']['skills']
+        attacks: [{ id: string, uses: number }]
+        ai: boolean
+    }
 }

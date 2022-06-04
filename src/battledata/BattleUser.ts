@@ -5,17 +5,13 @@ module.exports = class BattleUser {
     member: Discord.GuildMember
     interaction: Discord.ButtonInteraction
     battle: Userdata['battle']
-    id: String
-    team: Number
+    id: string
+    team: number
     skills: Userdata['battle']['skills']
-    attacks: [{ id: String, uses: Number }]
-    ai: Boolean
+    attacks: [{ id: string, uses: number }]
+    ai: boolean
 
-    /**
-     * @class BattleUser
-     * @param {Discord.ButtonInteraction} interaction 
-     * @param {0|1} team 
-     */
+
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
         //@ts-ignore

@@ -12,7 +12,7 @@ interface Color {
 module.exports = class BaseBattle {
     #actions: any
     #usable: any
-    users: any
+    users: Discord.Collection<string, BattleUser>
     private: boolean
     message: Discord.Message
     id: number
@@ -26,7 +26,7 @@ module.exports = class BaseBattle {
      * @param {Discord.Message} message the message that started the battle
      * @param {Object} color the guild's color object
      */
-    constructor(priv: boolean, message: Discord.Message, color) {
+    constructor(priv: boolean, message: Discord.Message, color: Color) {
         this.id = new Date().getTime()
         /**
          * @type {Discord.Collection<string, BattleUser>}
@@ -43,11 +43,11 @@ module.exports = class BaseBattle {
      * 
      * @param {BattleUser} battleUser 
      */
-    addUser(battleUser) {
+    addUser(battleUser: BattleUser) {
         this.users.set(battleUser.id, battleUser)
     }
 
-    async load() {
+    async load(){
         let embed = new Discord.MessageEmbed()
             .setColor(this.color.yellow)
             .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
@@ -66,11 +66,12 @@ module.exports = class BaseBattle {
         let collectors = []
         await this.users.filter(u => !u.ai).array().forEach(async user => {
             let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
+            //@ts-ignore
             collectors.push(message.createMessageComponentCollector({ time: 120000, max: 1 }))
         })
 
         collectors.forEach((collector) => {
-            collector.on('collect', async i => {
+            collector.on('collect', async (i: Discord.ButtonInteraction) => {
                 this.users.get(i.user.id).interaction = i
                 if (collectors.length <= 1) return this.start()
                 let embed = new Discord.MessageEmbed()
@@ -82,11 +83,11 @@ module.exports = class BaseBattle {
                         'beginnt in Kürze.\nBitte warte noch einen Moment, bis alle bereit sind.'
                     )
                 buttons.components[0].setDisabled(true)
-                await i.update({ embeds: [embed], components: [buttons], ephemeral: true })
+                await i.update({ embeds: [embed], components: [buttons] })
                 collectors.splice(collectors.indexOf(collector), 1)
             })
 
-            collector.on('end', reason => {
+            collector.on('end', (reason: string) => {
                 collectors.splice(collectors.indexOf(collector), 1)
                 if (collectors.length == 0 && reason === 'time') return // TODO: Call Timeout Function
             })
@@ -104,7 +105,7 @@ module.exports = class BaseBattle {
         return true
     }
 
-    display(user, text) {
+    display(user: BattleUser, text: string) {
         // let users = this.users.filter(u => u.team == user.team)
         // let enemies = this.users.filter(u => u.team != user.team)
 
