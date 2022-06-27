@@ -2,13 +2,6 @@ import Discord = require('discord.js')
 import BattleUser = require('./BattleUser')
 var client: Discord.Client
 
-interface Color {
-    red: Discord.ColorResolvable,
-    yellow: Discord.ColorResolvable,
-    lime: Discord.ColorResolvable,
-    normal: Discord.ColorResolvable
-}
-
 module.exports = class BaseBattle {
     #actions: any
     #usable: any
@@ -95,33 +88,8 @@ module.exports = class BaseBattle {
     }
 
     async start() {
-        let usableData = require('./usable')
-        this.#usable = {}
-        this.users.forEach(u => {
-            u.battle.attacks.forEach(a => { if (!this.#usable[a]) this.#usable[a] = usableData[a] })
-            u.battle.inventory.forEach(i => { if (!this.#usable[i.id]) this.#usable[i.id] = usableData[i.id] })
-        })
-
+        this.#usable = require('./usable')
         return true
-    }
-
-    display(user: BattleUser, text: string) {
-        // let users = this.users.filter(u => u.team == user.team)
-        // let enemies = this.users.filter(u => u.team != user.team)
-
-        // let enemyText = enemies.map(u =>
-        //     `${`${u.member.displayName} • Lv. ${u.user.data.level}`.padStart(42)}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padStart(20, '▁').padStart(42)}`
-        // ).array().join('\n')
-
-        // let userText = users.map(u => {
-        //     return u.user.id == user.user.id
-        //         ? null
-        //         : `${u.member.displayName} • Lv. ${u.user.data.level}\n${''.padEnd(Math.floor(u.battle.currentHP / u.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padEnd(20, '▁')}`
-        // }).filter(u => u).array().join('\n')
-
-        // userText += `\n${user.member.displayName} • Lv. ${user.user.data.level}\n${''.padEnd(Math.floor(user.battle.currentHP / user.skills.find(skill => skill.name == 'HP').value * 20 + 0.99999999999), '█').padEnd(20, '▁')} ${user.battle.currentHP} / ${user.skills.find(skill => skill.name == 'HP').value} HP`
-
-        // return `\`\`\`${enemyText}\n\n\n${userText}\`\`\``
     }
 
     async game() {

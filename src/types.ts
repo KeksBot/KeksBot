@@ -1,15 +1,15 @@
-import discord = require('discord.js')
+import Discord = require('Discord.js')
 
-declare module 'discord.js' {
+declare module 'Discord.js' {
     interface Collection<K, V> {
         array(): V[]
     }
 
-    interface CommandInteraction<Cached extends discord.CacheType = discord.CacheType> {
+    interface CommandInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
         safeReply(messageOptions: MessageOptions): Promise<CommandInteraction>
     }
 
-    interface ButtonInteraction<Cached extends discord.CacheType = discord.CacheType> {
+    interface ButtonInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
         safeUpdate(messageOptions: MessageOptions): Promise<CommandInteraction>
     }
 
@@ -73,14 +73,34 @@ declare global {
     }
 
     interface BattleUser {
-        user: discord.User
-        member: discord.GuildMember
-        interaction: discord.ButtonInteraction
+        user: Discord.User
+        member: Discord.GuildMember
+        interaction: Discord.ButtonInteraction
         battle: Userdata['battle']
         id: string
         team: number
         skills: Userdata['battle']['skills']
         attacks: [{ id: string, uses: number }]
         ai: boolean
+    }
+
+    // interface EmbedRenderer {
+
+    // }
+
+    interface BaseBattle {
+        users: Discord.Collection<string, BattleUser>
+        private: boolean
+        message: Discord.Message
+        id: number
+        color: Color
+        client: Discord.Client
+    }
+
+    interface Color {
+        red: Discord.ColorResolvable,
+        yellow: Discord.ColorResolvable,
+        lime: Discord.ColorResolvable,
+        normal: Discord.ColorResolvable
     }
 }
