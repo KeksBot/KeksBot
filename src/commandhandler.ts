@@ -150,9 +150,9 @@ export default async (client: Discord.Client) => {
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
             if(interaction.color.normal === 'role') interaction.color.normal = interaction.guild.members.me.displayHexColor || 0x00b99b
-            let ex = true
-            if(command.before) ex = await command.before(interaction, args, client)
-            if(ex !== false) await command.execute(interaction, args, client)
+            let execute = true
+            if(command.before) execute = await command.before(interaction, args, client)
+            if(execute !== false) await command.execute(interaction, args, client)
         } catch (error) {
             console.error(error)
             return embeds.error(interaction, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)
