@@ -2,30 +2,31 @@
   "name": "keksbot",
   "version": "1.2",
   "description": "NomNom",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index"
+    "start": "node build/index",
+    "build": "tsc && cpy 'src/*.json' 'build'"
   },
   "author": "Clyde",
-  "license": "CC0-1.0",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/FixlTV/KeksBot/issues"
+    "url": "https://github.com/KeksBot/KeksBot/issues"
   },
-  "homepage": "https://github.com/FixlTV/KeksBot",
+  "homepage": "https://github.com/KeksBot/KeksBot",
   "repository": {
-    "url": "https://github.com/FixlTV/KeksBot",
+    "url": "https://github.com/KeksBot/KeksBot",
     "type": "github"
   },
   "dependencies": {
     "axios": ">=0.21.1",
-    "check-links": ">=1.1.8",
     "delay": ">=5.0.0",
-    "discord.js": "^13.3.1",
+    "discord.js": "^13.8.1",
     "fs": ">=0.0.1-security",
-    "link-check": ">=4.5.4",
-    "linkifyjs": ">=3.0.0-beta.3",
-    "mathjs": ">=9.3.0",
-    "mongoose": "^6.0.9",
-    "systeminformation": ">=5.6.4"
-  }
+    "mongoose": "^6.0.9"
+  },
+  "devDependencies": {
+    "cpy-cli": "^4.1.0",
+    "typescript": "^4.7.2"
+  },
+  "type": "module"
 }

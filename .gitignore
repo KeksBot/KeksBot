@@ -7,3 +7,5 @@ VIP.json
 archiv/
 errors/
 .vscode/
+package-lock.json
+build/
