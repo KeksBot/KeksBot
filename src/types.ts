@@ -29,11 +29,15 @@ declare module 'Discord.js' {
     interface User {
         data: UserData
         setData(data: UserData): Promise<UserData>
+        getData(): Promise<UserData>
         save(): Promise<UserData>
     }
 
     interface Guild {
         data: GuildData
+        setData(data: GuildData): Promise<GuildData>
+        getData(): Promise<GuildData>
+        save(): Promise<GuildData>
     }
 }
 

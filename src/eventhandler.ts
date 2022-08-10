@@ -4,7 +4,7 @@ import Discord from 'discord.js'
 
 export default async (client: Discord.Client) => {
     let events: any[] = []
-    const readEvents = (dir: string) => {
+    const readEvents = async (dir: string) => {
         const files = fs.readdirSync(path.join(__dirname, dir))
         for(const file of files) {
             const stat = fs.lstatSync(path.join(__dirname, dir, file))
@@ -12,7 +12,7 @@ export default async (client: Discord.Client) => {
                 readEvents(path.join(dir, file))
             } else {
                 if(file.endsWith('.js') && !file.startsWith('subevent')) {
-                    var event = require(path.join(__dirname, dir, file))
+                    var event = await import(path.join(__dirname, dir, file))
                     event.path = path.join(__dirname, dir, file)
                     if(event.name && event.on && event.event) {
                         console.log(`[${client.user.username}]: Event ${event.name} (${event.event}) wird geladen...`)

@@ -12,7 +12,7 @@ export default async (client: Discord.Client) => {
     client.commands = new Discord.Collection()
     client.cooldowns = new Discord.Collection()
 
-    const readCommands = (dir: string) => {
+    const readCommands = async (dir: string) => {
         const files = fs.readdirSync(path.join(__dirname, dir))
         for(const file of files) {
             const stat = fs.lstatSync(path.join(__dirname, dir, file))
@@ -20,7 +20,7 @@ export default async (client: Discord.Client) => {
                 readCommands(path.join(dir, file))
             } else {
                 if(file.endsWith('.js') && !file.startsWith('!')) {
-                    var command = require(path.join(__dirname, dir, file))
+                    var command = await import(path.join(__dirname, dir, file))
                     if(command.permission) {
                         command.permission = command.permission.toUpperCase()
                     }
@@ -75,12 +75,12 @@ export default async (client: Discord.Client) => {
 
         //let newUser = false
         let tempdata: any = await getData('serverdata', interaction.guild.id)
-        if(!tempdata) tempdata = await require('./db/create')('serverdata', interaction.guild.id)
+        if(!tempdata) tempdata = await update('serverdata', interaction.guild.id, {})
         interaction.guild.data = tempdata
         interaction.color = await getcolors(interaction.guild)
         tempdata = await getData('userdata', interaction.user.id)
         if(!tempdata) {
-            tempdata = await require('./db/create')('userdata', interaction.user.id, { level: 1, xp: 0, cookies: 0 })
+            tempdata = await update('userdata', interaction.user.id, { level: 1, xp: 0, cookies: 0 })
         }
         interaction.user.data = tempdata
         if(tempdata.banned && tempdata.banned.time) {

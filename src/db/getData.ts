@@ -1,11 +1,11 @@
-const db = require('./database')
-const path = require('path')
-const fs = require('fs')
-const { Collection, User, Guild } = require('discord.js')
-const { Model } = require('mongoose')
+import db from './database'
+import path from 'path'
+import fs from 'fs'
+import update from './update'
+import { Collection, User, Guild } from 'discord.js'
 const schemas = new Collection()
 
-const readCommands = dir => {
+const readCommands = async (dir: string) => {
     const files = fs.readdirSync(dir)
     for(const file of files) {
         const stat = fs.lstatSync(path.join(dir, file))
@@ -14,7 +14,7 @@ const readCommands = dir => {
         } else {
             if(file.endsWith('.js')) {
                 /** @type {Model} */
-                let model = require(path.join(dir, file))
+                let model = await import(path.join(dir, file))
                 schemas.set(model.modelName, model)
             }
         }
@@ -22,7 +22,7 @@ const readCommands = dir => {
 }
 readCommands(path.join(__dirname, '../schemas'))
 
-async function handle(data, name, id) {
+async function handle(data: any, name: string, id: string) {
     var changed = false
     switch(name) {
         case 'userdata': 
@@ -30,7 +30,7 @@ async function handle(data, name, id) {
                 data.banned = null
                 changed = true
             }
-            if(changed) await require('./update')('userdata', id, { banned: data.banned })
+            if(changed) await update('userdata', id, { banned: data.banned })
     }
 }
 
@@ -38,11 +38,11 @@ async function handle(data, name, id) {
  * 
  * @param {string} name Name des Tables
  * @param {string} id Discord ID des Objekts
- * @returns {Promise<object>} Zu ladende Daten
+ * @returns {Promise<any>} Zu ladende Daten
  */
-module.exports = async function(name, id) {
+export default async function(name: string, id: string) {
     /** @type {Model} */
-    let model = schemas.get(name)
+    let model: any  = schemas.get(name)
     if(!model) return new Error('404: Model not found')
     await db()
     try {
