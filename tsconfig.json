@@ -1,11 +1,4 @@
 {
-    // "exclude": [
-    //     "build",
-    //     "node_nodules"
-    // ],
-    // "include": [
-    //     "src"
-    // ],
     "compilerOptions": {
         "allowJs": true,
         "strict": true,
@@ -14,9 +7,11 @@
         "rootDir": "src",
         "skipLibCheck": true,
         "module": "commonjs",
+        "target": "ES2022",
         // "target": "ES2015",
         // "moduleResolution": "node",
         "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "downlevelIteration": true
     }
 }

@@ -7,25 +7,33 @@ declare module 'Discord.js' {
     }
 
     interface CommandInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
-        safeReply(messageOptions: MessageOptions): Promise<CommandInteraction>
+        safeReply(messageOptions: Discord.InteractionReplyOptions): Promise<CommandInteraction>
     }
 
     interface ButtonInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
-        safeUpdate(messageOptions: MessageOptions): Promise<CommandInteraction>
+        safeUpdate(messageOptions: Discord.InteractionUpdateOptions): Promise<CommandInteraction>
+    }
+
+    interface BaseInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
+        color?: Color
+        success(title: string, description: string, ephemeral?: boolean, del?: boolean): this
+        error(title: string, description: string, ephemeral?: boolean, del?: boolean): this
     }
 
     interface Client<Ready extends boolean = boolean> {
         battles: Collection<string | number, any>
+        commands: Collection<string, CommandOptions>
+        cooldowns: Collection<string, any>
     }
 
     interface User {
-        data: Userdata
-        setData(data: Userdata): Promise<Userdata>
-        save(): Promise<Userdata>
+        data: UserData
+        setData(data: UserData): Promise<UserData>
+        save(): Promise<UserData>
     }
 
     interface Guild {
-
+        data: GuildData
     }
 }
 
@@ -34,53 +42,52 @@ declare global {
         replaceLast(searchValue: string, replaceValue: string): string
     }
 
-    interface Userdata {
+    interface UserData {
         _id: string,
-        xp: number,
-        level: number,
-        cookies: number,
-        giftdm: number,
-        thismin: number,
-        badges: {
-            partner: number,
-            verified: boolean,
-            team: boolean,
-            dev: boolean,
-            mod: boolean,
-            beta: boolean
+        xp?: number,
+        level?: number,
+        cookies?: number,
+        giftdm?: number,
+        thismin?: number,
+        badges?: {
+            partner?: number,
+            verified?: boolean,
+            team?: boolean,
+            dev?: boolean,
+            mod?: boolean,
+            beta?: boolean
         },
-        banned: {
-            time: number,
-            reason: string
+        banned?: {
+            time?: number,
+            reason?: string
         },
-        battle: {
-            skills: [
+        battle?: {
+            skills?: [
                 {
                     name: string,
                     value: number
-                }
+                }?
             ],
-            ready: boolean,
-            priority: string,
-            currentHP: number,
-            healTimestamp: number,
-            inventory: [{
+            ready?: boolean,
+            priority?: string,
+            currentHP?: number,
+            healTimestamp?: number,
+            inventory?: [{
                 id: string,
                 count: number,
-            }],
-            attacks: [string],
-        },
-        tan: string
+            }?],
+            attacks?: [string],
+        }
     }
 
     interface BattleUser {
         user: Discord.User
         member: Discord.GuildMember
         interaction: Discord.ButtonInteraction
-        battle: Userdata['battle']
+        battle: UserData['battle']
         id: string
         team: number
-        skills: Userdata['battle']['skills']
+        skills: UserData['battle']['skills']
         attacks: [{ id: string, uses: number }]
         ai: boolean
         embedRenderer: typeof EmbedRenderer
@@ -99,6 +106,35 @@ declare global {
         red: Discord.ColorResolvable,
         yellow: Discord.ColorResolvable,
         lime: Discord.ColorResolvable,
-        normal: Discord.ColorResolvable
+        normal: Discord.ColorResolvable | 'role' | 'normal'
+    }
+
+    interface GuildData {
+        _id: string
+        xp: number,
+        level: number,
+        thismin: number,
+        partner: number, /*
+            2: Antrag gestellt
+            1: Partner
+            0: Kein Partner/Antrag
+            -1: Kein Partner/blockiert
+        */
+        verified: Boolean,
+        theme: Color
+        keksbox: {
+            spawnrate: number, //Durchschnittliche Anzahl zw. KeksBoxen
+            channels: Array<Discord.TextChannelResolvable>, //Channel Whitelist
+            message: string, //Nachricht vom Paket
+            multiplier: number, //Für besondere KeksBoxen
+            keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
+        }
+    }
+
+    type CommandOptions = Discord.ApplicationCommandData & {
+        cooldown?: number
+        battlelock?: boolean
+        before?: any
+        execute(interaction: Discord.CommandInteraction, args: any, client: Discord.Client): any
     }
 }

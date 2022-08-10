@@ -1,12 +1,6 @@
-const { Guild } = require("discord.js")
+import { Guild, ColorResolvable } from "discord.js"
 
-/**
- * 
- * @param {Guild} guild 
- * @returns {Promise<{ red: String, yellow: String, lime: String, normal: String, lightblue: String}>} color object
- */
-
-module.exports = async (guild) => {
+export default async (guild: any): Promise<Color> => {
     if(!guild) return { red: 0xE62535, yellow: 0xF2E03F, lime: 0x25D971, normal: 0x00b99b }
     if(!guild.data) guild.data = await require('../db/getData')('serverdata', guild.id)
     if(guild.data?.theme) {
