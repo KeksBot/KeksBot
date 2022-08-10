@@ -1,5 +1,5 @@
-import Discord = require('discord.js')
-import BattleUser = require('./BattleUser')
+import Discord from 'discord.js'
+import BattleUser from './BattleUser'
 var client: Discord.Client
 
 module.exports = class BaseBattle {
@@ -28,6 +28,7 @@ module.exports = class BaseBattle {
         this.private = priv
         this.message = message
         this.color = color
+        this.#usable = require('./usable')
         if (!client) this.client = message.client
         client.battles.set(this.id, this)
     }
@@ -56,7 +57,7 @@ module.exports = class BaseBattle {
                     .setCustomId('pvpBattle.ready')
                     .setStyle('SUCCESS')
             )
-        let collectors = []
+        let collectors: any[] = []
         await this.users.filter(u => !u.ai).array().forEach(async user => {
             let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
             //@ts-ignore
@@ -66,7 +67,7 @@ module.exports = class BaseBattle {
         collectors.forEach((collector) => {
             collector.on('collect', async (i: Discord.ButtonInteraction) => {
                 this.users.get(i.user.id).interaction = i
-                if (collectors.length <= 1) return this.start()
+                if (collectors.length <= 1) return this.afterLoading()
                 let embed = new Discord.MessageEmbed()
                     .setColor(this.color.yellow)
                     .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
@@ -87,13 +88,16 @@ module.exports = class BaseBattle {
         })
     }
 
-    async start() {
-        this.#usable = require('./usable')
+    async afterLoading() {
         return true
     }
 
-    async game() {
+    async round() {
+        this.users.forEach(user => user.embedRenderer.render()
+    }
 
+    async game() {
+        this.round()
     }
 
     async * calculations() {

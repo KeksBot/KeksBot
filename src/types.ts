@@ -1,4 +1,5 @@
 import Discord = require('Discord.js')
+const { default: EmbedRenderer } = require('./battledata/EmbedRenderer')
 
 declare module 'Discord.js' {
     interface Collection<K, V> {
@@ -82,11 +83,8 @@ declare global {
         skills: Userdata['battle']['skills']
         attacks: [{ id: string, uses: number }]
         ai: boolean
+        embedRenderer: typeof EmbedRenderer
     }
-
-    // interface EmbedRenderer {
-
-    // }
 
     interface BaseBattle {
         users: Discord.Collection<string, BattleUser>

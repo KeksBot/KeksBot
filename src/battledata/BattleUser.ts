@@ -1,7 +1,7 @@
-import Discord = require('discord.js')
-import EmbedRenderer = require('./EmbedRenderer')
+import Discord from 'discord.js'
+import EmbedRenderer from './EmbedRenderer'
 
-module.exports = class BattleUser {
+export default class BattleUser {
     user: Discord.User
     member: Discord.GuildMember
     interaction: Discord.ButtonInteraction

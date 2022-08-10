@@ -1,4 +1,4 @@
-import Discord = require('discord.js')
+import Discord from 'discord.js'
 
 interface RenderOptions {
     title?: string,
@@ -11,7 +11,7 @@ interface RenderOptions {
     }]
 }
 
-module.exports = class {
+export default class EmbedRenderer {
     user: BattleUser
     battle: BaseBattle
     save: string
@@ -77,7 +77,7 @@ module.exports = class {
         return this.user.interaction;
     }
 
-    render() {
+    render(): typeof EmbedRenderer {
         let users = this.battle.users.filter(u => u.team == this.user.team)
         let enemies = this.battle.users.filter(u => u.team != this.user.team)
 
