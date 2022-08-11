@@ -145,6 +145,7 @@ declare global {
         cooldown?: number
         battlelock?: boolean
         before?: any
+        global: boolean
         execute(interaction: Discord.CommandInteraction, args: any, client: Discord.Client): any
     }
 }

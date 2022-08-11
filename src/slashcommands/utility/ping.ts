@@ -5,6 +5,7 @@ import emotes from '../../emotes.json'
 const options: CommandOptions = {
     name: 'ping',
     description: 'Zeigt die Latenz vom Bot an',
+    global: true,
     async execute(ita, args, client) {
         const { color } = ita
         var discordping = client.ws.ping

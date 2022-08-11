@@ -36,13 +36,14 @@ export default async (client: Discord.Client) => {
     readCommands('./slashcommands')
     console.log(`[${client.user.username}]: Commands werden initialisiert.`)
 
+    await client.application.commands.set(client.commands.filter(c => c.global).array())
     await client.guilds.fetch()
     let progress = 0
     let failedguilds = 0
     let end = false
     client.guilds.cache.array().forEach(async guild => {
         try {
-            await guild.commands.set(client.commands.array())
+            await guild.commands.set(client.commands.filter(c => !c.global).array())
         } catch (error) {
             console.error(error)
             console.log(`[${client.user.username}]: Server nicht geladen: ${guild.id} | ${guild.name} | ${guild.ownerId}`)
