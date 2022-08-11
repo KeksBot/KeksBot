@@ -24,6 +24,7 @@ declare module 'Discord.js' {
         battles: Collection<string | number, any>
         commands: Collection<string, CommandOptions>
         cooldowns: Collection<string, any>
+        thismin: Collection<string, number>
     }
 
     interface User {
@@ -52,14 +53,14 @@ declare global {
         level?: number,
         cookies?: number,
         giftdm?: number,
-        thismin?: number,
         badges?: {
             partner?: number,
             verified?: boolean,
             team?: boolean,
             dev?: boolean,
             mod?: boolean,
-            beta?: boolean
+            beta?: boolean,
+            vip?: boolean
         },
         banned?: {
             time?: number,
@@ -110,7 +111,7 @@ declare global {
         red: Discord.ColorResolvable,
         yellow: Discord.ColorResolvable,
         lime: Discord.ColorResolvable,
-        normal: Discord.ColorResolvable | 'role' | 'normal'
+        normal: Discord.ColorResolvable// | 'role'
     }
 
     interface GuildData {

@@ -11,6 +11,7 @@ import update from './db/update'
 export default async (client: Discord.Client) => {
     client.commands = new Discord.Collection()
     client.cooldowns = new Discord.Collection()
+    client.thismin = new Discord.Collection()
 
     const readCommands = async (dir: string) => {
         const files = fs.readdirSync(path.join(__dirname, dir))
@@ -149,6 +150,7 @@ export default async (client: Discord.Client) => {
             let argsarray = JSON.stringify(args)
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
+            //@ts-ignore
             if(interaction.color.normal === 'role') interaction.color.normal = interaction.guild.members.me.displayHexColor || 0x00b99b
             let execute = true
             if(command.before) execute = await command.before(interaction, args, client)
