@@ -22,12 +22,12 @@ const options: CommandOptions = {
 
         let embeds: { expand?: Discord.EmbedBuilder, collapse?: Discord.EmbedBuilder } = {}
 
-        let baseEmbedFields: Array<Discord.APIEmbedField> = []
-
-        if (targetMember.data.cookies) baseEmbedFields.push({ name: 'Lagerstand', value: targetMember.data.cookies.toString(), inline: true })
-        if (targetMember.data.xp) baseEmbedFields.push({ name: 'Erfahrungspunkte', value: targetMember.data.xp.toString(), inline: true })
-        if (targetMember.data.level) baseEmbedFields.push({ name: 'Level', value: targetMember.data.level.toString(), inline: true })
-
+        let baseEmbedFields: Array<Discord.APIEmbedField> = [
+            { name: 'Lagerstand', value: targetMember.data?.cookies?.toString() || '0', inline: true },
+            { name: 'Erfahrungspunkte', value: targetMember.data?.xp?.toString() || '0', inline: true },
+            { name: 'Level', value: targetMember.data?.level?.toString() ||'1', inline: true }
+        ]
+        
         let badges = []
         if (targetMember.data.badges) {
             if (targetMember.data.badges.mod) badges.push(emotes.mod)
