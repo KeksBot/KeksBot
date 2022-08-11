@@ -100,3 +100,5 @@ const options: CommandOptions = {
         })
     }
 }
+
+export default options
