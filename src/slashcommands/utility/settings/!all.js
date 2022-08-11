@@ -1,1 +1,0 @@
-module.exports = { keksbox: require('./!keksbox'), theme: require('./!theme'), moderation: require('./!moderation') };
