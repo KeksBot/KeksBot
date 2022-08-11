@@ -1,9 +1,9 @@
-const discord = require('discord.js')
-const embeds = require('../../embeds')
-const update = require('../../db/update')
-const delay = require('delay')
+import Discord from 'discord.js'
+import embeds from '../../embeds'
+import update from '../../db/update'
+import delay from 'delay'
 
-module.exports = {
+const options: CommandOptions = {
     name: 'claim',
     description: 'Sammle eine KeksBox auf',
     battlelock: true,
@@ -14,9 +14,9 @@ module.exports = {
         if(guild.data.keksbox.spawnrate) content *= guild.data.keksbox.spawnrate
         else {
             content *= 100
-            serverdata.keksbox.spawnrate = 100
+            guild.data.keksbox.spawnrate = 100
         }
-        content = Math.round(content * serverdata.keksbox.multiplier)
+        content = Math.round(content * guild.data.keksbox.multiplier)
         var foundOne = false
         await guild.channels.fetch()
         var channels = guild.channels.cache.filter(c => c.type === 'GUILD_TEXT').array()
@@ -30,13 +30,13 @@ module.exports = {
                     foundOne = true
                     embeds.successMessage(message, 'Paket eingesammelt', `<@!${user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, guild.data.keksbox.keepmessage)
                     embeds.success(interaction, 'Paket eingesammelt', `Du hast das Paket eingesammelt und ${content} Kekse erhalten.`, true)
-                    if(!user.data.cookies) user.daPaketta.cookies = 0
+                    if(!user.data.cookies) user.data.cookies = 0
                     user.data.cookies += content
                     let { keksbox } = guild.data
                     keksbox.message = null
                     keksbox.multiplier = null
-                    if(keksbox.message) await require('../../db/update')('serverdata', guild.id, { keksbox })
-                    await require('../../db/update')('userdata', user.id, { cookies: user.data.cookies })
+                    if(keksbox.message) await update('serverdata', guild.id, { keksbox })
+                    await update('userdata', user.id, { cookies: user.data.cookies })
                     return
                 }
             } catch (error) {
@@ -53,3 +53,5 @@ module.exports = {
         return embeds.error(interaction, 'Fehler', 'Ein unbekannter Fehler ist aufgetreten. Die Kekse konnten nicht zugestellt werden.', true)
     }
 }
+
+export default options

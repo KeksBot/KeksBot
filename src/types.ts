@@ -29,14 +29,14 @@ declare module 'Discord.js' {
 
     interface User {
         data: UserData
-        setData(data: UserData): Promise<UserData>
+        setData(data: any): Promise<UserData>
         getData(): Promise<UserData>
         save(): Promise<UserData>
     }
 
     interface Guild {
         data: GuildData
-        setData(data: GuildData): Promise<GuildData>
+        setData(data: any): Promise<GuildData>
         getData(): Promise<GuildData>
         save(): Promise<GuildData>
     }
@@ -130,9 +130,10 @@ declare global {
         keksbox: {
             spawnrate: number, //Durchschnittliche Anzahl zw. KeksBoxen
             channels: Array<Discord.TextChannelResolvable>, //Channel Whitelist
-            message: string, //Nachricht vom Paket
+            message: Discord.MessageResolvable, //Nachricht vom Paket
             multiplier: number, //Für besondere KeksBoxen
             keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
+            channel: Discord.TextChannelResolvable, //Channel für die Nachricht
         }
     }
 
