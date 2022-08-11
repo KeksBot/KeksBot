@@ -3,6 +3,7 @@ const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMe
 import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
+import './embeds'
 
 Discord.Collection.prototype.array = function () { return [...this.values()] }
 /**

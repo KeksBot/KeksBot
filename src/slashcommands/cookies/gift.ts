@@ -1,6 +1,4 @@
 import Discord from 'discord.js'
-import embeds from '../../embeds'
-import update from '../../db/update'
 
 const options: CommandOptions = {
     name: 'gift',
@@ -39,11 +37,11 @@ const options: CommandOptions = {
     async execute(ita, args, client) {
         var { guild, user } = ita
         var member = await guild.members.fetch(args.user)
-        if (!member) return embeds.error(ita, 'Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
-        if (args.count <= 0) return embeds.error(ita, 'Syntaxfehler', `Es wäre schön, wenn sich ${member.displayName} auch über dein Geschenk freuen könnte, also gib bitte eine positive Zahl an.`, true)
+        if (!member) return ita.error('Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
+        if (args.count <= 0) return ita.error('Syntaxfehler', `Es wäre schön, wenn sich ${member.displayName} auch über dein Geschenk freuen könnte, also gib bitte eine positive Zahl an.`, true)
 
         member.data = await member.user.getData() || { _id: member.id }
-        if (!user.data?.cookies) return embeds.error(ita, 'Fehler', 'Du hast keine Kekse, die du verschenken kannst.\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
+        if (!user.data?.cookies) return ita.error('Fehler', 'Du hast keine Kekse, die du verschenken kannst.\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
         if (!member.data.cookies) member.data.cookies = 0
 
         if (args.count > user.data.cookies) args.count = user.data.cookies
@@ -54,7 +52,7 @@ const options: CommandOptions = {
         await user.save()
         await member.user.setData({ cookies: member.data.cookies })
 
-        return embeds.success(ita, 'Kekse verschenk', `Du hast <@${member.id}> ${args.count} Kekse geschenkt.`.replace(' 1 Kekse', ' einen Keks'), args.public === 'yes')
+        return ita.success('Kekse verschenkt', `Du hast <@${member.id}> ${args.count} Kekse geschenkt.`.replace(' 1 Kekse', ' einen Keks'), args.public === 'yes')
     }
 }
 
