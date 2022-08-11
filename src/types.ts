@@ -40,6 +40,10 @@ declare module 'Discord.js' {
         getData(): Promise<GuildData>
         save(): Promise<GuildData>
     }
+
+    interface GuildMember {
+        data?: UserData
+    }
 }
 
 declare global {
