@@ -1,5 +1,4 @@
 import Discord from 'discord.js'
-import embeds from '../../embeds'
 import emotes from '../../emotes.json'
 
 const options: CommandOptions = {
@@ -16,59 +15,95 @@ const options: CommandOptions = {
     async execute(ita, args, client) {
         var { color, guild, member } = ita
         //@ts-ignore
-        let targetMember: Discord.GuildMember = args.user == ita.user.id ? ita.member : await guild.members.fetch(args.user)
-        if (!targetMember) return embeds.error(ita, 'Fehler', 'Der Nutzer konnte nicht gefunden werden.', true)
+        let targetMember: Discord.GuildMember = args.user == ita.user.id ? member : await guild.members.fetch(args.user)
+        if (!targetMember) return ita.error('Fehler', 'Der Nutzer konnte nicht gefunden werden.', true)
         targetMember.data = await targetMember.user.getData()
         if (!targetMember.data) targetMember.data = { _id: targetMember.id }
-        var roles = targetMember.roles.cache.array()
-        roles.sort((a, b) => {
-            return a.comparePositionTo(b) * -1
-        })
-        //@ts-ignore
-        roles = roles.map(r => `<@&${r.id}>`)
-        var embed = new Discord.EmbedBuilder()
-            .setColor(color.normal)
-            .setTitle(
-                (function () { if (targetMember.data.badges && targetMember.data.badges.partner) { return `${require('../../emotes.json').partnerlogo} ` } else return '' })() +
-                targetMember.user.username)
-            .setThumbnail(targetMember.displayAvatarURL({ forceStatic: false, size: 512, extension: 'png' }))
-            .setDescription(`Hier sind ein paar Informationen über <@!${targetMember.id}>`)
-            .addFields([
-                {
-                    name: 'ID',
-                    value: targetMember.id,
-                    inline: true
-                },
-                {
-                    name: 'Serverbeitritt',
-                    value: `<t:${Math.floor(targetMember.joinedAt.getTime() / 1000)}>\n<t:${Math.floor(targetMember.joinedAt.getTime() / 1000)}:R>`,
-                    inline: true
-                },
-                {
-                    name: 'Account erstellt',
-                    value: `<t:${Math.floor(targetMember.user.createdAt.getTime() / 1000)}>\n<t:${Math.floor(targetMember.user.createdAt.getTime() / 1000)}:R>`,
-                    inline: true
-                },
-                {
-                    name: 'Rollen',
-                    value: roles.join('\n')
-                }
-            ])
 
-        if (targetMember.data.cookies) embed.addFields([{ name: 'Lagerstand', value: targetMember.data.cookies.toString(), inline: true }])
-        if (targetMember.data.xp) embed.addFields([{ name: 'Erfahrungspunkte', value: targetMember.data.xp.toString(), inline: true }])
-        if (targetMember.data.level) embed.addFields([{ name: 'Level', value: targetMember.data.level.toString(), inline: true }])
+        let embeds: { expand?: Discord.EmbedBuilder, collapse?: Discord.EmbedBuilder } = {}
+
+        let baseEmbedFields: Array<Discord.APIEmbedField> = []
+
+        if (targetMember.data.cookies) baseEmbedFields.push({ name: 'Lagerstand', value: targetMember.data.cookies.toString(), inline: true })
+        if (targetMember.data.xp) baseEmbedFields.push({ name: 'Erfahrungspunkte', value: targetMember.data.xp.toString(), inline: true })
+        if (targetMember.data.level) baseEmbedFields.push({ name: 'Level', value: targetMember.data.level.toString(), inline: true })
+
+        let badges = []
         if (targetMember.data.badges) {
-            let badges = []
             if (targetMember.data.badges.mod) badges.push(emotes.mod)
             if (targetMember.data.badges.dev) badges.push(emotes.dev)
             if (targetMember.data.badges.team) badges.push(emotes.team)
             if (targetMember.data.badges.verified) badges.push(emotes.verified)
             if (targetMember.data.badges.partner) badges.push(emotes.partner)
             if (targetMember.data.badges.beta) badges.push(emotes.firsthour)
-            if (badges.length) embed.addFields([{ name: 'Badges', value: badges.join(' '), inline: true }])
         }
-        return await ita.reply({ embeds: [embed], ephemeral: true })
+
+        embeds.expand = new Discord.EmbedBuilder()
+            .setColor(color.normal)
+            .setTitle(targetMember.displayName)
+            .setThumbnail(targetMember.user.displayAvatarURL({ forceStatic: false, size: 512, extension: 'png' }))
+            .setDescription('<@!' + targetMember.id + '>\n' + badges.join(' '))
+            .addFields(baseEmbedFields)
+
+        embeds.collapse = new Discord.EmbedBuilder({ ...embeds.expand.toJSON() })
+
+        let buttons = {
+            expand: new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                .setComponents(
+                    new Discord.ButtonBuilder()
+                        .setEmoji(emotes.expand)
+                        .setCustomId('userinfo:expand')
+                        .setStyle(Discord.ButtonStyle.Secondary)
+                ),
+            collapse: new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                .setComponents(
+                    new Discord.ButtonBuilder()
+                        .setEmoji(emotes.collapse)
+                        .setCustomId('userinfo:collapse')
+                        .setStyle(Discord.ButtonStyle.Secondary)
+                )
+        }
+
+        let message = await ita.reply({ embeds: [embeds.expand], components: [buttons.expand], ephemeral: true, fetchReply: true })
+        const filter = (ita: any) => ita.customId.startsWith('userinfo:')
+        const collector = message.createMessageComponentCollector({ filter, time: 900000, componentType: Discord.ComponentType.Button })
+
+        collector.on('collect', async (ita) => {
+            if (embeds.collapse == embeds.expand) {
+                let roles = targetMember.roles.cache.array()
+                roles.sort((a, b) => {
+                    return a.comparePositionTo(b) * -1
+                })
+                //@ts-ignore
+                roles = roles.map(r => `<@&${r.id}>`)
+                embeds.collapse
+                    .addFields([
+                        {
+                            name: 'ID',
+                            value: targetMember.id,
+                            inline: true
+                        },
+                        {
+                            name: 'Serverbeitritt',
+                            value: `<t:${Math.floor(targetMember.joinedAt.getTime() / 1000)}>\n<t:${Math.floor(targetMember.joinedAt.getTime() / 1000)}:R>`,
+                            inline: true
+                        },
+                        {
+                            name: 'Account erstellt',
+                            value: `<t:${Math.floor(targetMember.user.createdAt.getTime() / 1000)}>\n<t:${Math.floor(targetMember.user.createdAt.getTime() / 1000)}:R>`,
+                            inline: true
+                        },
+                        {
+                            name: 'Rollen',
+                            value: roles.join('\n')
+                        }
+                    ])
+            }
+
+            let type = ita.customId.split(':')[1]
+            //@ts-ignore
+            await message.edit({ embeds: [embeds[type]], components: [buttons[type]] })
+        })
     }
 }
 
