@@ -1,8 +1,8 @@
-const discord = require('discord.js')
-const embeds = require('../../embeds')
-const update = require('../../db/update')
+import Discord from 'discord.js'
+import embeds from '../../embeds'
+import update from '../../db/update'
 
-module.exports = {
+const options: CommandOptions = {
     name: 'addserver',
     description: 'Fügt dem Server Kekse als Erfahrungspunkte hinzu',
     battlelock: true,
@@ -11,7 +11,7 @@ module.exports = {
             name: 'count',
             description: 'Anzahl der Kekse, die du dem Server geben willst',
             required: true,
-            type: 'INTEGER'
+            type: 4
         }
     ],
     async execute(ita, args, client) {
@@ -29,28 +29,30 @@ module.exports = {
 
         guild.data.xp += args.count
         user.data.cookies -= args.count
-        var levelup = false
+        let levelup = false
         
         while (512 * ((2 ** guild.data.level) ** 2) <= guild.data.xp) {
             guild.data.level ++
             levelup = true
         }
 
-        user.data = await update('userdata', user.id, user.data)
-        guild.data = await update('serverdata', guild.id, guild.data)
+        await user.save()
+        await guild.save()
 
         if(levelup) {
-            let embed = new discord.MessageEmbed()
+            let embed = new Discord.EmbedBuilder()
                 .setColor(color.normal)
                 .setTitle('Level Up')
                 .setDescription(`Dieser Server ist nun **Level ${guild.data.level}**.\nDas entspricht einem Limit von **${2 ** (guild.data.level + 8)} Keksen**, die hier pro Minute gegessen werden können.\nHerzlichen Glückwunsch!`)
             ita.channel.send({ embeds: [embed] })
         }
 
-        var sent = `Du hast erfolgreich ${args.count} Kekse überwiesen.`
-        if(args.count == 1) sent = 'Du hast erfolgreich einen Keks überwiesen.'
-        var xp = `Darum hat dieser Server nun ${guild.data.xp} Erfahrungspunkte, es fehlen noch ${512 * ((2 ** guild.data.level) ** 2) - guild.data.xp}, um Level ${guild.data.level + 1} zu erreichen.`.replace(' 1 Erfahrungspunkte', ' einen Erfahrungspunkt').replace('fehlen noch 1,', 'fehlt noch einer,')
+        let sent = `Du hast erfolgreich ${args.count} Kekse an den Server übergeben.`
+        if(args.count == 1) sent = 'Du hast erfolgreich einen Keks an den Server übergeben.'
+        let xp = `Darum hat dieser Server nun ${guild.data.xp} Erfahrungspunkte, es fehlen noch ${512 * ((2 ** guild.data.level) ** 2) - guild.data.xp}, um Level ${guild.data.level + 1} zu erreichen.`.replace(' 1 Erfahrungspunkte', ' einen Erfahrungspunkt').replace('fehlen noch 1,', 'fehlt noch einer,')
 
-        return embeds.success(ita, 'Kekse übertragen', `${sent}\n${xp}`, true)        
+        return embeds.success(ita, 'Kekse übergeben', `${sent}\n${xp}`, true)        
     }
 }
+
+export default options
