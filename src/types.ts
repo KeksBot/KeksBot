@@ -133,7 +133,7 @@ declare global {
             message: Discord.MessageResolvable, //Nachricht vom Paket
             multiplier: number, //Für besondere KeksBoxen
             keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
-            channel: Discord.TextChannelResolvable, //Channel für die Nachricht
+            channel: Discord.Snowflake, //Channel für die Nachricht
         }
     }
 
