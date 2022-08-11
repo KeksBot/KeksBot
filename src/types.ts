@@ -120,24 +120,23 @@ declare global {
 
     interface GuildData {
         _id: string
-        xp: number,
-        level: number,
-        thismin: number,
-        partner: number, /*
+        xp?: number,
+        level?: number,
+        partner?: number, /*
             2: Antrag gestellt
             1: Partner
             0: Kein Partner/Antrag
             -1: Kein Partner/blockiert
         */
-        verified: Boolean,
-        theme: Color
-        keksbox: {
-            spawnrate: number, //Durchschnittliche Anzahl zw. KeksBoxen
-            channels: Array<Discord.TextChannelResolvable>, //Channel Whitelist
-            message: Discord.MessageResolvable, //Nachricht vom Paket
-            multiplier: number, //Für besondere KeksBoxen
-            keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
-            channel: Discord.Snowflake, //Channel für die Nachricht
+        verified?: Boolean,
+        theme?: Color
+        keksbox?: {
+            spawnrate?: number, //Durchschnittliche Anzahl zw. KeksBoxen
+            channels?: Array<Discord.Snowflake>, //Channel Whitelist
+            message?: Discord.MessageResolvable, //Nachricht vom Paket
+            multiplier?: number, //Für besondere KeksBoxen
+            keepmessage?: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
+            channel?: Discord.Snowflake, //Channel für die Nachricht
         }
     }
 

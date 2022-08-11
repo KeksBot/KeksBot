@@ -1,6 +1,4 @@
 import Discord from 'discord.js'
-import update from '../../db/update'
-import embeds from '../../embeds'
 import * as settings from './settings/index'
 
 const options: CommandOptions = {
