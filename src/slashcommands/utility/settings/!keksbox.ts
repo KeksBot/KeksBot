@@ -118,7 +118,6 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                                 textchannels.findKey(channel => channel.name === v) || null
                         })
                         .filter(v => v)
-                    console.log(values)
                     values = [...(new Set(values))]
                     guild.data.keksbox.channels = values
                     console.log(guild.data)
@@ -126,7 +125,9 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                     //@ts-ignore
                     return interaction.update({ embeds: [embed.setFooter({ text: 'Änderungen übernommen' })] })
                 })
-            .catch((err) => {console.error(err)})
+                .catch((error) => { 
+                    if(error.code != 'InteractionCollectorError') console.error(error) 
+                })
         }
     })
 }

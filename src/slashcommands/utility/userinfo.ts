@@ -69,7 +69,7 @@ const options: CommandOptions = {
         const collector = message.createMessageComponentCollector({ filter, time: 900000, componentType: Discord.ComponentType.Button })
 
         collector.on('collect', async (ita) => {
-            if (embeds.collapse == embeds.expand) {
+            if (collector.collected.size == 1) {
                 let roles = targetMember.roles.cache.array()
                 roles.sort((a, b) => {
                     return a.comparePositionTo(b) * -1
@@ -95,7 +95,7 @@ const options: CommandOptions = {
                         },
                         {
                             name: 'Rollen',
-                            value: roles.join('\n')
+                            value: roles.join(' ')
                         }
                     ])
             }
