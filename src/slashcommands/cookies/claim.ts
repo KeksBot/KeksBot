@@ -18,7 +18,7 @@ const options: CommandOptions = {
         }
         content = Math.round(content * guild.data.keksbox.multiplier)
         let channel = await guild.channels.fetch(guild.data.keksbox.channel)
-        if(!channel?.isTextBased()) {
+        if(!guild.data.keksbox.channel || !channel?.isTextBased()) {
             let { keksbox } = guild.data
             keksbox.message = null
             keksbox.multiplier = null

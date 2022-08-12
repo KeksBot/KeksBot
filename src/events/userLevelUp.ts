@@ -1,4 +1,8 @@
 import Discord from 'discord.js'
+import skillid from '../battledata/skillids.json'
+import skillinformation from '../battledata/skills.json'
+import getcolor from '../subcommands/getcolor'
+import delay from 'delay'
 
 export default {
     name: 'Level Up Message',
@@ -7,7 +11,7 @@ export default {
         const { user, color } = ita
         let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
         let embed = new Discord.EmbedBuilder()
-            .setColor(color?.normal || await (await (require('../subcommands/getcolor')(ita.guild)).normal))
+            .setColor(color?.normal || (await getcolor(ita.guild)).normal)
             .setAuthor({ 
                 name: 'Level Up',
                 iconURL: client.user.displayAvatarURL({ extension: 'png', forceStatic: false })
@@ -22,14 +26,13 @@ export default {
         if(ita.isButton()) await ita.safeUpdate({ embeds: [embed] })
         else await ita.safeReply({ embeds: [embed], ephemeral: true })
         if(!user.data.battle?.ready) return
-        await require('delay')(2000)
+        await delay(2000)
 
-        const skillid = require('../battledata/skillids.json')
-        const skillinformation = require('../battledata/skills.json')
         skills = user.data.battle.skills
 
         for (let l = levelCount || 0; l > 0; l--) {
             skills.forEach((skill: any) => {
+                //@ts-ignore
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                 added *= 
                     user.data.battle.priority === skill.name ? 1.5 : 
@@ -89,6 +92,7 @@ export default {
     
             skills.forEach((skill: any) => {
                 if(skill.name != sk) return skill.added = 0
+                //@ts-ignore
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                 added *= 
                     user.data.battle.priority === skill.name ? 1.5 : 
@@ -119,7 +123,7 @@ export default {
                 //@ts-ignore
                 if(!interaction.replied) await interaction.safeUpdate({ embeds: [embed], components: [] })
                 else await interaction.editReply({ embeds: [embed], components: [] })
-                await require('delay')(2000)
+                await delay(2000)
                 await interaction.editReply({ embeds: [embed.spliceFields(1, 1)]})
             }
 
