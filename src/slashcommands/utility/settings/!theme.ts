@@ -1,55 +1,57 @@
-const discord = require('discord.js')
-const delay = require('delay')
-const update = require('../../../db/update')
+import Discord from 'discord.js'
+import delay from 'delay'
+import update from '../../../db/update'
 
-module.exports = async function(ita, args, client) {
+export default async function(ita: Discord.CommandInteraction, args: any, client: Discord.Client) {
     var { guild, color } = ita
     if(args.color) {
         var execute = false
-        let embed = new discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setTitle('Farbeinstellungen | Standardfarbe')
             .setDescription('Möchtest du die jetzt angezeigte Farbe als Standard festlegen?')
         try {
-            if(args.color.toLowerCase() == 'role') embed.setColor(guild.me.displayColor)
+            if(args.color.toLowerCase() == 'role') embed.setColor(guild.members.me.displayColor)
             else embed.setColor(args.color.toUpperCase())
             execute = true
         } catch {
-            embed = new discord.MessageEmbed()
+            embed = new Discord.EmbedBuilder()
                 .setTitle('Fehler')
                 .setColor(color.red)
                 .setDescription(`\`${args.color}\` ist keine akzeptierte Farbe.\nBitte gib einen HEX-Farbcode oder eine auf [dieser](https://discord.js.org/#/docs/main/stable/typedef/ColorResolvable) Liste aufgeführte Farbe ein.`)
             await ita.reply({ embeds: [embed], ephemeral: true })
         }
         if(execute) {
-            let buttons = new discord.MessageActionRow()
+            let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents([
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('settings:theme:yes')
-                        .setStyle('SUCCESS')
+                        .setStyle(Discord.ButtonStyle.Success)
                         .setLabel('Ja'),
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('settings:theme:no')
-                        .setStyle('DANGER')
+                        .setStyle(Discord.ButtonStyle.Danger)
                         .setLabel('Nein')
                 ])
             let message = await ita.reply({ embeds: [embed], ephemeral: true, components: [buttons], fetchReply: true })
-            let i = await message.awaitMessageComponent({ componentType: 'BUTTON', time: 600_000, })
+            let i = await message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 600_000, })
             if(!i) return
             let textcontinue = ''
             if(args.theme) textcontinue = '\nDie Einstellungen für das Theme werden in Kürze geladen.'
             if(i.customId.includes('yes')) {
                 color.normal = args.color.toUpperCase()
+                //@ts-ignore
                 if(!guild.data.theme) guild.data.theme = {}
+                //@ts-ignore
                 if(args.color.toLowerCase() == 'role') guild.data.theme.normal = 'role'
                 else guild.data.theme.normal = args.color.toUpperCase()
                 await update('serverdata', guild.id, { theme: guild.data.theme })
-                embed = new discord.MessageEmbed()
+                embed = new Discord.EmbedBuilder()
                     .setColor(color.lime)
                     .setTitle('Änderungen übernommen')
                     .setDescription('Die Standardfarbe wurde erfolgreich geändert.' + textcontinue)
                 await i.update({ embeds: [embed], components: [] })
             } else {
-                embed = new discord.MessageEmbed()
+                embed = new Discord.EmbedBuilder()
                     .setColor(color.lime)
                     .setTitle('Änderungen verworfen')
                     .setDescription('Der Vorgang wurde erfolgreich abgebrochen.' + textcontinue)
@@ -84,49 +86,49 @@ module.exports = async function(ita, args, client) {
                 break
         }
         themetext += '\n\nDu bist aktuell im Vorschau-Modus. \nBenutze die Knöpfe unten, um die einzelnen Farben in Aktion zu sehen.\nWenn du fertig bist, drücke auf "Speichern" oder "Abbrechen"'
-        let embed = new discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setColor(color.normal)
             .setTitle('Farbeinstellungen | Theme')
             .setDescription(themetext)
-        let buttons = new discord.MessageActionRow()
+        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents([
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('settings:theme:save')
-                    .setStyle('SUCCESS')
+                    .setStyle(Discord.ButtonStyle.Success)
                     .setLabel('Speichern'),
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('settings:theme:cancel')
-                    .setStyle('DANGER')
+                    .setStyle(Discord.ButtonStyle.Danger)
                     .setLabel('Abbrechen'),
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('settings:theme:lime')
-                    .setStyle('SECONDARY')
+                    .setStyle(Discord.ButtonStyle.Secondary)
                     .setLabel('Grün'),
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('settings:theme:yellow')
-                    .setStyle('SECONDARY')
+                    .setStyle(Discord.ButtonStyle.Secondary)
                     .setLabel('Gelb'),
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('settings:theme:red')
-                    .setStyle('SECONDARY')
+                    .setStyle(Discord.ButtonStyle.Secondary)
                     .setLabel('Rot')
             ])
-        if(ita.replied) message = await ita.editReply({ embeds: [embed], components: [buttons], fetchReply: true })
-        else message = await ita.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
-        const collector = message.createMessageComponentCollector({ componentType: 'BUTTON', time: 600_000 })
+        let message = await ita.safeReply({ embeds: [embed], ephemeral: true, components: [buttons], fetchReply: true })
+        //@ts-ignore
+        const collector = message.createMessageComponentCollector({ componentType: Discord.ComponentType.Button, time: 600_000 })
         let theme =  guild.data.theme
-        collector.on('collect', async function(i) {
+        collector.on('collect', async function(i: Discord.ButtonInteraction) {
             switch(i.customId.replace('settings:theme:', '')) {
                 case 'save':
                     await update('serverdata', guild.id, { theme })
-                    embed = new discord.MessageEmbed()
+                    embed = new Discord.EmbedBuilder()
                         .setColor(theme.lime)
                         .setTitle('Änderungen übernommen')
                         .setDescription('Das Theme wurde erfolgreich geändert.')
                     await i.update({ embeds: [embed], components: [] })
                     return collector.stop('1')
                 case 'cancel':
-                    embed = new discord.MessageEmbed()
+                    embed = new Discord.EmbedBuilder()
                         .setColor(color.red)
                         .setTitle('Änderungen verworfen')
                         .setDescription('Der Vorgang wurde erfolgreich abgebrochen.')
@@ -154,32 +156,42 @@ module.exports = async function(ita, args, client) {
         })
     }
     if(ita.replied) return
-    let embed = new discord.MessageEmbed()
+    let embed = new Discord.EmbedBuilder()
         .setTitle('Farbeinstellungen')
         .setDescription('Benutze `/settings theme color:<Farbe>`, um die Standardfarbe für Embeds (sieht man bei dieser Nachricht; `Farbe` kann hierbei ein HEX-Farbcode oder ein Text sein), \
 und `/settings theme theme:<Auswahl>`, um die Farben für andere Embeds zu verändern (`Auswahl` ist eines von vordefinierten Themes)')
         .setColor(color.normal)
-        .addField('Standardfarbe', (function() {
-            let out = color.normal.toString('16')
-            while(out.length < 6) out = '0' + out
-            return ('#' + out).toUpperCase()
-        })(), true)
-        .addField('Theme', (function() {
-            if(guild.data.theme?.red) {
-                let out = 'Bezeichnung: '
-                switch (guild.data.theme.red) {
-                    case '0xE62535': out += 'KeksBot Standard'; break
-                    case '0x661017': out += 'KeksBot Dark'; break
-                    case '0xFF0000': out += 'KeksBot Origins'; break
-                    case '0xED4245': out += 'Discord'; break
-                    case '0x303030': out += 'Graustufen'; break
-                    default: 'Unbekannt'
-                }
-                out += `\nRot: ${guild.data.theme.red}`
-                out += `\nGelb: ${guild.data.theme.yellow}`
-                out += `\nGrün: ${guild.data.theme.lime}`
-                return out.replaceAll('0x', '#').replaceAll('undefined', 'Unbekannt').replaceAll('null', 'Unbekannt')
-            } else return 'Bezeichnung: KeksBot Standard\nRot: `#E62535`\nGelb: `#F2E03F`\nGrün: `#25D971`'
-        })(), true)
+        .addFields([
+            {
+                name: 'Standardfarbe',
+                value: (function() {
+                    let out = color.normal.toString(16)
+                    while(out.length < 6) out = '0' + out
+                    return ('#' + out).toUpperCase()
+                })(),
+                inline: true
+            },
+            {
+                name: 'Theme',
+                value: (function() {
+                    if(guild.data.theme?.red) {
+                        let out = 'Bezeichnung: '
+                        switch (guild.data.theme.red) {
+                            case '0xE62535': out += 'KeksBot Standard'; break
+                            case '0x661017': out += 'KeksBot Dark'; break
+                            case '0xFF0000': out += 'KeksBot Origins'; break
+                            case '0xED4245': out += 'Discord'; break
+                            case '0x303030': out += 'Graustufen'; break
+                            default: 'Unbekannt'
+                        }
+                        out += `\nRot: ${guild.data.theme.red}`
+                        out += `\nGelb: ${guild.data.theme.yellow}`
+                        out += `\nGrün: ${guild.data.theme.lime}`
+                        return out.replaceAll('0x', '#').replaceAll('undefined', 'Unbekannt').replaceAll('null', 'Unbekannt')
+                    } else return 'Bezeichnung: KeksBot Standard\nRot: `#E62535`\nGelb: `#F2E03F`\nGrün: `#25D971`'
+                })(),
+                inline: true
+            }
+        ])
     ita.reply({ embeds: [embed], ephemeral: true })
 }

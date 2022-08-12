@@ -114,7 +114,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                                 textchannels.findKey(channel => channel.name === v) || null
                         })
                         .filter(v => v)
-                    values = new Array(...(new Set(values)))
+                    values = [...(new Set(values))]
                     guild.data.keksbox.channels = values
                     await guild.save()
                     //@ts-ignore
