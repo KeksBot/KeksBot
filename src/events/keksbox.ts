@@ -28,15 +28,16 @@ export default {
                         .setColor(color.lime)
                         .setTitle(':deciduous_tree: Bio Kekse')
                         .setDescription('Eine ganz besondere Packung mit ökologischen Keksen ist aufgetaucht.')
-                        .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.' })
+                        .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende /claim, um das Paket einzusammeln.' })
                     keksbox.multiplier = 2
                     break
                 case 2:
                     embed = new Discord.EmbedBuilder()
                         .setColor(color.yellow)
                         .setTitle('<:cookie3:844554845499293723> Kekslieferung')
-                        .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.' })
-                        .setDescription('Eine Kekslieferung ist gerade eingetroffen. Vielleicht wurde beim Verpacken der Kekse aber ein zu großer Karton gewählt, jetzt sind es deutlich mehr.\nDrücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.')
+                        .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende /claim, um das Paket einzusammeln.' })
+                        .setDescription('Eine Kekslieferung ist gerade eingetroffen. Vielleicht wurde beim Verpacken der Kekse aber ein zu großer Karton gewählt, jetzt sind es deutlich mehr.')
+
                     keksbox.multiplier = 5
                     break
                 default:
@@ -45,21 +46,21 @@ export default {
                             embed = new Discord.EmbedBuilder()
                                 .setColor(color.normal)
                                 .setTitle(`${emotes.cookie} Kekseeeeee`)
-                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.' })
+                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende /claim, um das Paket einzusammeln.' })
                                 .setDescription('Eine Kekslieferung ist gerade gekommen.')
                             break
                         case 1:
                             embed = new Discord.EmbedBuilder()
                                 .setColor(color.normal)
                                 .setTitle(`${emotes.cookie} Die Lieferung ist da`)
-                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.' })
+                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende /claim, um das Paket einzusammeln.' })
                                 .setDescription('Ein Paket voller Kekse ist aufgetaucht.')
                             break
                         default:
                             embed = new Discord.EmbedBuilder()
                                 .setColor(color.normal)
                                 .setTitle(`${emotes.cookie} Huch`)
-                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende `/claim`, um das Paket einzusammeln.' })
+                                .setFooter({ text: 'Drücke hier unten auf den Knopf, oder verwende /claim, um das Paket einzusammeln.' })
                                 .setDescription('Ein Haufen Kekse erscheint.')
                     }
                     keksbox.multiplier = 1

@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers', 'DirectMessages', 'DirectMessageReactions'] })
+const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers',, 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'] })
 import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
