@@ -30,14 +30,14 @@ const options: CommandOptions = {
                 .setComponents(
                     new Discord.ButtonBuilder()
                         .setEmoji(emotes.expand)
-                        .setCustomId('serverinfo:expand')
+                        .setCustomId('serverinfo:collapse')
                         .setStyle(Discord.ButtonStyle.Secondary)
                 ),
             collapse: new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .setComponents(
                     new Discord.ButtonBuilder()
                         .setEmoji(emotes.collapse)
-                        .setCustomId('serverinfo:collapse')
+                        .setCustomId('serverinfo:expand')
                         .setStyle(Discord.ButtonStyle.Secondary)
                 )
         }
@@ -47,7 +47,7 @@ const options: CommandOptions = {
         const collector = message.createMessageComponentCollector({ filter, time: 900000, componentType: Discord.ComponentType.Button })
 
         collector.on('collect', async (ita) => {
-            if (embeds.expand == embeds.collapse) {
+            if (collector.collected.size == 1) {
                 embeds.collapse.addFields([
                     { name: 'ID', value: guild.id, inline: true },
                     { name: 'Erstellt am', value: `<t:${Math.floor(guild.createdAt.getTime() / 1000)}>\n<t:${Math.floor(guild.createdAt.getTime() / 1000)}:R>`, inline: true },
@@ -96,7 +96,7 @@ const options: CommandOptions = {
             
             let type = ita.customId.split(':')[1]
             //@ts-ignore
-            await message.edit({ embeds: [embeds[type]], components: [buttons[type]] })
+            await ita.update({ embeds: [embeds[type]], components: [buttons[type]] })
         })
     }
 }

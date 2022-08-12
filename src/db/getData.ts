@@ -1,26 +1,11 @@
 import db from './database'
-import path from 'path'
-import fs from 'fs'
 import update from './update'
 import { Collection, User, Guild } from 'discord.js'
+import serverdata from '../schemas/serverdata'
+import userdata from '../schemas/userdata'
 const schemas = new Collection()
-
-const readCommands = async (dir: string) => {
-    const files = fs.readdirSync(dir)
-    for(const file of files) {
-        const stat = fs.lstatSync(path.join(dir, file))
-        if(stat.isDirectory()) {
-            readCommands(path.join(dir, file))
-        } else {
-            if(file.endsWith('.js')) {
-                /** @type {Model} */
-                let model = await import(path.join(dir, file))
-                schemas.set(model.modelName, model)
-            }
-        }
-    }
-}
-readCommands(path.join(__dirname, '../schemas'))
+schemas.set('serverdata', serverdata)
+schemas.set('userdata', userdata)
 
 async function handle(data: any, name: string, id: string) {
     var changed = false
@@ -40,9 +25,9 @@ async function handle(data: any, name: string, id: string) {
  * @param {string} id Discord ID des Objekts
  * @returns {Promise<any>} Zu ladende Daten
  */
-export default async function(name: string, id: string) {
+async function get(name: string, id: string) {
     /** @type {Model} */
-    let model: any  = schemas.get(name)
+    let model: any = schemas.get(name)
     if(!model) return new Error('404: Model not found')
     await db()
     try {
@@ -54,12 +39,14 @@ export default async function(name: string, id: string) {
     }
 }
 
+export default get
+
 Guild.prototype.getData = async function() {
-    this.data = await module.exports('serverdata', this.id)
+    this.data = await get('serverdata', this.id)
     return this.data
 }
 
 User.prototype.getData = async function() {
-    this.data = await module.exports('userdata', this.id)
+    this.data = await get('userdata', this.id)
     return this.data
 }

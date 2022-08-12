@@ -52,14 +52,14 @@ const options: CommandOptions = {
                 .setComponents(
                     new Discord.ButtonBuilder()
                         .setEmoji(emotes.expand)
-                        .setCustomId('userinfo:expand')
+                        .setCustomId('userinfo:collapse')
                         .setStyle(Discord.ButtonStyle.Secondary)
                 ),
             collapse: new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .setComponents(
                     new Discord.ButtonBuilder()
                         .setEmoji(emotes.collapse)
-                        .setCustomId('userinfo:collapse')
+                        .setCustomId('userinfo:expand')
                         .setStyle(Discord.ButtonStyle.Secondary)
                 )
         }
@@ -102,7 +102,7 @@ const options: CommandOptions = {
 
             let type = ita.customId.split(':')[1]
             //@ts-ignore
-            await message.edit({ embeds: [embeds[type]], components: [buttons[type]] })
+            await ita.update({ embeds: [embeds[type]], components: [buttons[type]] })
         })
     }
 }

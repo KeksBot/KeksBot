@@ -6,6 +6,8 @@ import eventhandler from './eventhandler'
 import './embeds'
 import uptimemonitoring from './uptimemonitoring'
 import { connect } from './db'
+import './db/getData'
+import './db/update'
 
 Discord.Collection.prototype.array = function () { return [...this.values()] }
 /**

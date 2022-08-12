@@ -68,7 +68,8 @@ export default async (client: Discord.Client) => {
             return embeds.error(interaction, 'Fehler', 'Der Befehl wurde nicht gefunden.', true, true)
         }
         let args: any = {}
-        interaction.options.data.forEach(option => args[option.name.replaceAll('-', '_')] = option.attachment || option.value)
+        //@ts-ignore
+        interaction.options._hoistedOptions.forEach(option => args[option.name.replaceAll('-', '_')] = option.attachment || option.value)
         //@ts-ignore
         if(interaction.options.getSubcommand(false) || false) args.subcommand = interaction.options.getSubcommand(false)
         //@ts-ignore
@@ -78,7 +79,7 @@ export default async (client: Discord.Client) => {
 
         //let newUser = false
         let tempdata: any = await getData('serverdata', interaction.guild.id)
-        if(!tempdata) tempdata = await update('serverdata', interaction.guild.id, {})
+        if(!tempdata) tempdata = await update('serverdata', interaction.guild.id, { level: 1, xp: 0 })
         interaction.guild.data = tempdata
         interaction.color = await getcolors(interaction.guild)
         tempdata = await getData('userdata', interaction.user.id)
@@ -152,8 +153,10 @@ export default async (client: Discord.Client) => {
             let argsarray = JSON.stringify(args)
             let d = new Date()
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
-            //@ts-ignore
-            if(interaction.color.normal === 'role') interaction.color.normal = interaction.guild.members.me.displayHexColor || 0x00b99b
+            // console.log(interaction.guild.members.me.displayHexColor)
+            // //@ts-ignore
+            // if(interaction.color.normal === 'role') interaction.color.normal = interaction.guild.members.me.displayHexColor
+            // console.log(interaction.color)
             let execute = true
             if(command.before) execute = await command.before(interaction, args, client)
             if(execute !== false) await command.execute(interaction, args, client)
