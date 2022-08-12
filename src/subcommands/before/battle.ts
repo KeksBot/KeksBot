@@ -1,21 +1,21 @@
-const discord = require('discord.js')
+import Discord from 'discord.js'
 
-module.exports = async (ita, args, client) => {
+export default async (ita: Discord.CommandInteraction, args: any, client: Discord.Client) => {
     const { user, guild, color } = ita
     if(!user.data.battle?.ready) {
 
         //Willkommen
-        let embed = new discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setColor(color.normal)
             .setTitle('Willkommen')
-            .setDescription('>>> Herzlich Willkommen zum KeksBot Kampfsystem. (Wir suchen btw noch einen kuhlen Namen <:Ehehehe:694899997166010509>)\nBevor du anfangen kannst, Leute zu bonken, musst du aber noch ein paar Sachen machen.')
+            .setDescription('>>> Herzlich Willkommen zum KeksBot Kampfsystem. (Wir suchen btw noch einen kuhlen Namen <:MenheraEhehe:998997848215523460>)\nBevor du anfangen kannst, Leute zu bonken, musst du aber noch ein paar Sachen machen.')
             .setFooter({text: 'Schritt 1/6'})
-        let buttons = new discord.MessageActionRow()
+        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step1')
                     .setLabel('Fortfahren')
-                    .setStyle('PRIMARY')
+                    .setStyle(Discord.ButtonStyle.Primary)
             )
         const message = await ita.reply({ embeds: [embed], components: [buttons], fetchReply: true, ephemeral: true })
         let interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
@@ -26,14 +26,14 @@ module.exports = async (ita, args, client) => {
             .setTitle('Allgemeine Informationen')
             .setDescription('>>> Beim KeksBot Kampfsystem (Wir suchen im Übrigen immer noch einen Namen) handelt es sich um ein skillbasiertes PvP "Roleplay".\nDurch Level-Ups erhöhen sich Statuswerte und man wird stärker. Relativ simpel :)\n**Wichtiger Hinweis**: Das ganze ist ein Proof of Concept und dient ausschließlich Entwicklungszwecken. Eine später verwendete Version kann stark vom aktuellen Entwicklungsstatus abweichen.')
             .setFooter({text: 'Schritt 2/6'})
-        buttons = new discord.MessageActionRow()
+        buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step2')
                     .setLabel('Fortfahren')
-                    .setStyle('PRIMARY')
+                    .setStyle(Discord.ButtonStyle.Primary)
             )
-        await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true, ephemeral: true })
+        await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
         if(!interaction) return
 
@@ -42,30 +42,30 @@ module.exports = async (ita, args, client) => {
             .setTitle('Skill Priorität')
             .setDescription('>>> Wähle einen priorisierten Skill.\nDieser steigt bei Level Ups schneller an, als andere.\n__Achtung__: Die hier getroffene Auswahl kann nur durch einen Reset geändert werden. Dabei geht der gesamte Fortschritt verloren.')
             .setFooter({text: 'Schritt 3/6'})
-        buttons = new discord.MessageActionRow()
+        buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step3.hp')
                     .setLabel('HP')
-                    .setStyle('SECONDARY'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step3.atk')
                     .setLabel('Angriff')
-                    .setStyle('SECONDARY'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step3.def')
                     .setLabel('Verteidigung')
-                    .setStyle('SECONDARY'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step3.spd')
                     .setLabel('Geschwindigkeit')
-                    .setStyle('SECONDARY'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step3.all')
                     .setLabel('Ausgeglichen')
-                    .setStyle('SECONDARY'),
+                    .setStyle(Discord.ButtonStyle.Secondary),
             )
-        await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true, ephemeral: true })
+        await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
         if(!interaction) return
 
@@ -89,9 +89,9 @@ module.exports = async (ita, args, client) => {
             embed
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`> Du erhältst nun automatisch anhand deines Levels Skillpoints.`)
-                .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
+                .addFields([{name: 'Statuswerte', value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 4/6'})
-            await interaction.update({ embeds: [embed], components: [], fetchReply: true, ephemeral: true })
+            await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.data.level || 0; l > 1; l--) {
                 skills.forEach((skill) => {
                     let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
@@ -103,21 +103,21 @@ module.exports = async (ita, args, client) => {
                 })
             }
             await require('delay')(2000)
-            embed.addField('​', skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), true)
+            embed.addFields([{name: '​', value: skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
             embed.setFields([
                 {
                     name: 'Statuswerte',
                     value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
                     inline: true
                 },
-                embed.fields[1]
+                embed.data.fields[1]
             ])
-            buttons = new discord.MessageActionRow()
+            buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step4')
                         .setLabel('Fortfahren')
-                        .setStyle('PRIMARY')
+                        .setStyle(Discord.ButtonStyle.Primary)
                 )
             skills.forEach(skill => {
                 skill.value += skill.added
@@ -128,24 +128,24 @@ module.exports = async (ita, args, client) => {
             if(!interaction) return
 
             //Skillpunkte setzen
-            buttons = new discord.MessageActionRow()
+            buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step5.hp')
                         .setLabel('HP')
-                        .setStyle('SECONDARY'),
-                    new discord.MessageButton()
+                        .setStyle(Discord.ButtonStyle.Secondary),
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step5.atk')
                         .setLabel('Angriff')
-                        .setStyle('SECONDARY'),
-                    new discord.MessageButton()
+                        .setStyle(Discord.ButtonStyle.Secondary),
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step5.def')
                         .setLabel('Verteidigung')
-                        .setStyle('SECONDARY'),
-                    new discord.MessageButton()
+                        .setStyle(Discord.ButtonStyle.Secondary),
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step5.spd')
                         .setLabel('Geschwindigkeit')
-                        .setStyle('SECONDARY')
+                        .setStyle(Discord.ButtonStyle.Secondary)
                 )
             embed.setFooter({text: 'Schritt 5/6'})
             for (let l = user.data.level || 0; l > 1; l--) {
@@ -199,29 +199,29 @@ module.exports = async (ita, args, client) => {
             skills.forEach(skill => {
                 skill.added = 0
             })
-            buttons = new discord.MessageActionRow()
+            buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step5')
                         .setLabel('Fortfahren')
-                        .setStyle('PRIMARY')
+                        .setStyle(Discord.ButtonStyle.Primary)
                 )
             await interaction.update({ embeds: [embed], components: [buttons] })
             interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
             if(!interaction) return
         } else {
             //Kein-Level-Fehler
-            embed = new discord.MessageEmbed()
+            embed = new Discord.EmbedBuilder()
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`>>> Du hast bisher noch kein Level erreicht.\nVerwende \`/cookies\` und \`/eat\`, um dein Level zu erhöhen und deine Statuswerte zu verbessern.`)
                 .setFooter({text: 'Schritt 4+5/6'})
                 .setColor(color.red)
-            buttons = new discord.MessageActionRow()
+            buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
-                    new discord.MessageButton()
+                    new Discord.ButtonBuilder()
                         .setCustomId('battlesetup:step45')
                         .setLabel('Fortfahren')
-                        .setStyle('PRIMARY')
+                        .setStyle(Discord.ButtonStyle.Primary)
                 )
             await interaction.update({ embeds: [embed], components: [buttons] })
             interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
@@ -232,24 +232,27 @@ module.exports = async (ita, args, client) => {
         embed
             .setTitle('Registrierung abschließen')
             .setDescription('Bitte überprüfe die Werte und schließe die Vorbereitung ab.')
-            .setFields([])
-            .addField('Skill Priorität', priority, true)
-            .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
+            .setFields(
+                [
+                    { name: 'Skill Priorität', value: priority, inline: true },
+                    { name: 'Statuswerte', value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true },
+                ]
+            )
             .setFooter({text: 'Schritt 6/6'})
-        buttons = new discord.MessageActionRow()
+        buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:saveandexit')
                     .setLabel('Speichern und verlassen')
-                    .setStyle('SUCCESS'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Success),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:save')
                     .setLabel('Speichern und Fortfahren')
-                    .setStyle('SUCCESS'),
-                new discord.MessageButton()
+                    .setStyle(Discord.ButtonStyle.Success),
+                new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:exit')
                     .setLabel('Abbrechen')
-                    .setStyle('DANGER')
+                    .setStyle(Discord.ButtonStyle.Danger)
             )
         await interaction.update({ embeds: [embed], components: [buttons] })
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
