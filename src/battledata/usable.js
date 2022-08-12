@@ -1,4 +1,4 @@
-module.exports = { 
+export default { 
     '000000': {
         name: 'Angriff',
         type: 'atk/normal',

@@ -4,6 +4,8 @@ import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
 import './embeds'
+import uptimemonitoring from './uptimemonitoring'
+import { connect } from './db'
 
 Discord.Collection.prototype.array = function () { return [...this.values()] }
 /**
@@ -47,10 +49,10 @@ client.once('ready', async () => { //Status
     var start = Date.now()
     console.log(`[${client.user.username}]: Client geladen.`)
     console.log(`[${client.user.username}]: Monitoring wird aktiviert.`)
-    require('./uptimemonitoring')(config.uptimeurl, client)
+    uptimemonitoring(config.uptimeurl, client)
     console.log(`[${client.user.username}]: System wird gestartet.`)
     client.setMaxListeners(0)
-    let mongoose = await require('./db/database')()
+    let mongoose = await connect()
     console.log(`[${client.user.username}]: Verbindung zur Datenbank hergestellt.`)
     mongoose.connection.close()
     await commandhandler(client)
@@ -60,7 +62,6 @@ client.once('ready', async () => { //Status
     console.log(`[${client.user.username}]: Startzeit betrug ${end - start} ms.`)
 
     client.battles = new Discord.Collection()
-    require('./battledata/PvPBattle').setClient(client)
     client.user.setStatus('online')
 })
 

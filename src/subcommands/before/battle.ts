@@ -1,4 +1,5 @@
 import Discord from 'discord.js'
+import delay from 'delay'
 
 export default async (ita: Discord.CommandInteraction, args: any, client: Discord.Client) => {
     const { user, guild, color } = ita
@@ -102,7 +103,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     skill.added += added
                 })
             }
-            await require('delay')(2000)
+            await delay(2000)
             embed.addFields([{name: '​', value: skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
             embed.setFields([
                 {
@@ -284,7 +285,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setFields([])
                     .setColor(color.lime)
                 await interaction.update({ embeds: [embed], components: [] })
-                await require('delay')(3000)
+                await delay(3000)
                 return true
             case 'exit':
                 embed

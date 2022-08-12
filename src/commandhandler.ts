@@ -13,27 +13,28 @@ export default async (client: Discord.Client) => {
     client.cooldowns = new Discord.Collection()
     client.thismin = new Discord.Collection()
 
-    const readCommands = async (dir: string) => {
+    const readCommands: any = async (dir: string) => {
         const files = fs.readdirSync(path.join(__dirname, dir))
         for(const file of files) {
             const stat = fs.lstatSync(path.join(__dirname, dir, file))
             if(stat.isDirectory()) {
-                readCommands(path.join(dir, file))
+                await readCommands(path.join(dir, file))
             } else {
                 if(file.endsWith('.js') && !file.startsWith('!')) {
-                    var command = await import(path.join(__dirname, dir, file))
+                    let { default: command } = await import(path.join(__dirname, dir, file))
+                    if(!command?.name) continue
                     if(command.permission) {
                         command.permission = command.permission.toUpperCase()
                     }
                     client.commands.set(command.name, command)
                     console.log(`[${client.user.username}]: ${command.name} wurde geladen.`)
                 }
-
             }
         }
+        return
     }
     console.log(`[${client.user.username}]: Commands werden geladen.`)
-    readCommands('./slashcommands')
+    await readCommands('./slashcommands')
     console.log(`[${client.user.username}]: Commands werden initialisiert.`)
 
     await client.application.commands.set(client.commands.filter(c => c.global).array())
@@ -60,7 +61,7 @@ export default async (client: Discord.Client) => {
     //@ts-ignore
     client.on('interactionCreate', async function(interaction: Discord.CommandInteraction) {
         //Commandhandling
-        if(interaction.type == Discord.InteractionType.ApplicationCommand) return
+        if(interaction.type != Discord.InteractionType.ApplicationCommand) return
         
         let command = client.commands.get(interaction.commandName)
         if(!command) {

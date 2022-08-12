@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default {
     name: 'Automatic Server Setup',
     event: 'guildCreate',

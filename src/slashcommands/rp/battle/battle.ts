@@ -1,8 +1,9 @@
-const discord = require('discord.js')
-const embeds = require('../../../embeds')
-const PvPBattle = require('../../../battledata/PvPBattle')
+import Discord from 'discord.js'
+import embeds from '../../../embeds'
+import PvPBattle from '../../../battledata/PvPBattle.js'
+import before from '../../../subcommands/before/battle'
 
-module.exports = {
+const options: CommandOptions = {
     name: 'battle',
     description: 'Woäk in pwogwess',
     options: [
@@ -10,10 +11,10 @@ module.exports = {
             name: 'user',
             description: 'Der herausgeforderte Nutzer',
             required: true, 
-            type: 'USER'
+            type: Discord.ApplicationCommandOptionType.User
         }
     ],
-    before: require('../../../subcommands/before/battle'),
+    before,
     execute: async function(ita, args, client) {
         let { user, color, guild } = ita
         let { user: target } = args
@@ -47,9 +48,9 @@ module.exports = {
 
         if(target.user.data.battle?.healTimestamp) {
             let { healTimestamp, skills, currentHP } = target.user.data.battle
-            let maxHP = skills.find(skill => skill.name == 'HP').value
+            let maxHP = skills.find((skill: any) => skill.name == 'HP').value
             if(currentHP != maxHP) {
-                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
+                let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
                 let heal = maxHP / 100
                 currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(currentHP >= maxHP) {
@@ -65,7 +66,7 @@ module.exports = {
         if(target.user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 
         //Herausforderung
-        let embed = new discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setColor(color.yellow)
             .setTitle('Herausforderung erfolgreich')
             .setDescription(`Du hast ${target} erfolgreich herausgefordert.\nDer Kampf wird initialisiert, sobald eine Antwort auf die Herausforderung vorliegt. In 5 Minuten wird die Herausforderung automatisch abgebrochen.`)
@@ -73,30 +74,32 @@ module.exports = {
         embed
             .setTitle('Herausforderung')
             .setDescription(`${user} hat ${target} zu einem Kampf herausgefordert!`)
-        let buttons = new discord.MessageActionRow()
+        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .setComponents(
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setLabel('Annehmen')
-                    .setStyle('SUCCESS')
+                    .setStyle(Discord.ButtonStyle.Success)
                     .setCustomId('battle.accept'),
-                new discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setLabel('Ablehnen')
-                    .setStyle('DANGER')
+                    .setStyle(Discord.ButtonStyle.Danger)
                     .setCustomId('battle.decline')
             )
         let message = await ita.followUp({ embeds: [embed], components: [buttons], content: `${target}: Du wurdest von ${user.tag} zu einem Kampf herausgefordert.`, fetchReply: true })
         message.edit({ embeds: [embed], components: [buttons], content: null })
-        const filter = (i) => i.user.id === target.id
+        const filter = (i: any) => i.user.id === target.id
         let interaction = await message.awaitMessageComponent({ filter, time: 300000 }).catch(() => {})
         if(!interaction) {
             await embeds.errorMessage(message, 'Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`, true, false)
-            return await ita.error('Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`)
+            return ita.error('Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`)
         }
         if(interaction.customId == 'battle.decline') {
             await ita.error('Herausforderung abgebrochen', `${target} hat deine Herausforderung abgelehnt.`)
-            return await embeds.errorMessage(message, 'Herausforderung abgebrochen', `${target} hat die Herausforderung abgelehnt.`, true, false)
+            return embeds.errorMessage(message, 'Herausforderung abgebrochen', `${target} hat die Herausforderung abgelehnt.`, true, false)
         }
         let battle = new PvPBattle(guild.members.cache.get(user.id)|| await guild.members.fetch(user.id), target, ita, interaction, message)
         battle.load()
     }
 }
+
+export default options

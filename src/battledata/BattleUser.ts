@@ -1,17 +1,15 @@
 import Discord from 'discord.js'
-import EmbedRenderer from './EmbedRenderer'
 
 export default class BattleUser {
     user: Discord.User
     member: Discord.GuildMember
     interaction: Discord.ButtonInteraction
-    battle: Userdata['battle']
+    battle: UserData['battle']
     id: string
     team: number
-    skills: Userdata['battle']['skills']
+    skills: UserData['battle']['skills']
     attacks: [{ id: string, uses: number }]
     ai: boolean
-    embedRenderer: typeof EmbedRenderer
 
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
@@ -22,7 +20,6 @@ export default class BattleUser {
         this.battle = this.user?.data?.battle
         this.id = this.user.id
         this.team = team
-        this.embedRenderer = new EmbedRenderer(this, this.battle)
     }
 
     init() {

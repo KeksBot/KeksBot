@@ -12,7 +12,7 @@ export default async (client: Discord.Client) => {
                 readEvents(path.join(dir, file))
             } else {
                 if(file.endsWith('.js') && !file.startsWith('subevent')) {
-                    var event = await import(path.join(__dirname, dir, file))
+                    var { default: event } = await import(path.join(__dirname, dir, file))
                     event.path = path.join(__dirname, dir, file)
                     if(event.name && event.on && event.event) {
                         console.log(`[${client.user.username}]: Event ${event.name} (${event.event}) wird geladen...`)
@@ -23,7 +23,7 @@ export default async (client: Discord.Client) => {
         }
     }
     console.log(`[${client.user.username}]: Events werden geladen.`)
-    readEvents('./events')
+    await readEvents('./events')
     console.log(`[${client.user.username}]: Events geladen.`)
 
     events.forEach(event => {

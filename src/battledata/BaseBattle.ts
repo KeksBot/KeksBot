@@ -1,10 +1,10 @@
 import Discord from 'discord.js'
 import BattleUser from './BattleUser'
+import usable from './usable.js'
 var client: Discord.Client
 
-module.exports = class BaseBattle {
+export default class BaseBattle {
     #actions: any
-    #usable: any
     users: Discord.Collection<string, BattleUser>
     private: boolean
     message: Discord.Message
@@ -28,7 +28,6 @@ module.exports = class BaseBattle {
         this.private = priv
         this.message = message
         this.color = color
-        this.#usable = require('./usable')
         if (!client) this.client = message.client
         client.battles.set(this.id, this)
     }
@@ -42,7 +41,7 @@ module.exports = class BaseBattle {
     }
 
     async load(){
-        let embed = new Discord.MessageEmbed()
+        let embed = new Discord.EmbedBuilder()
             .setColor(this.color.yellow)
             .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
             .setDescription(
@@ -50,12 +49,12 @@ module.exports = class BaseBattle {
                 this.users.array().map(user => `**${user.member.displayName}**`).join(', ').replaceLast(',', ' und') +
                 'beginnt in Kürze.\nBitte drücke diesen Knopf, sobald du bereit bist. Nach 2 Minuten ohne Eingabe wird das Matchmaking abgebrochen.'
             )
-        let buttons = new Discord.MessageActionRow()
+        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .setComponents(
-                new Discord.MessageButton()
+                new Discord.ButtonBuilder()
                     .setLabel('Bereit')
                     .setCustomId('pvpBattle.ready')
-                    .setStyle('SUCCESS')
+                    .setStyle(Discord.ButtonStyle.Success)
             )
         let collectors: any[] = []
         await this.users.filter(u => !u.ai).array().forEach(async user => {
@@ -68,7 +67,7 @@ module.exports = class BaseBattle {
             collector.on('collect', async (i: Discord.ButtonInteraction) => {
                 this.users.get(i.user.id).interaction = i
                 if (collectors.length <= 1) return this.afterLoading()
-                let embed = new Discord.MessageEmbed()
+                let embed = new Discord.EmbedBuilder()
                     .setColor(this.color.yellow)
                     .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
                     .setDescription(
@@ -93,7 +92,6 @@ module.exports = class BaseBattle {
     }
 
     async round() {
-        this.users.forEach(user => user.embedRenderer.render()
     }
 
     async game() {

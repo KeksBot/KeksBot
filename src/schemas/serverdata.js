@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 var serverdataSchema = mongoose.Schema({
     _id: { type: String, required: true },
@@ -28,4 +28,4 @@ var serverdataSchema = mongoose.Schema({
     }
 }, { strict: false })
 
-module.exports = mongoose.model('serverdata', serverdataSchema)
+export default mongoose.model('serverdata', serverdataSchema)

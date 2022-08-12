@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import { Schema, model } from 'mongoose'
 
-var userdataSchema = mongoose.Schema({
+var userdataSchema = Schema({
     _id: { type: String, required: true },
     xp: Number,
     level: Number,
@@ -40,4 +40,4 @@ var userdataSchema = mongoose.Schema({
     tan: String
 }, { strict: false })
 
-module.exports = mongoose.model('userdata', userdataSchema)
+export default model('userdata', userdataSchema)

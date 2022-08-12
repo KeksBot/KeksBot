@@ -1,25 +1,25 @@
-const discord = require('discord.js')
+import Discord from 'discord.js'
 
-module.exports = {
+export default {
     name: 'Level Up Message',
     event: 'userLevelUp',
-    async on(ita, levelCount, client) {
+    async on(ita: Discord.CommandInteraction | Discord.ButtonInteraction, levelCount: number, client: Discord.Client) {
         const { user, color } = ita
-        let buttons = new discord.MessageActionRow()
-        let embed = new discord.MessageEmbed()
+        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+        let embed = new Discord.EmbedBuilder()
             .setColor(color?.normal || await (await (require('../subcommands/getcolor')(ita.guild)).normal))
             .setAuthor({ 
                 name: 'Level Up',
-                iconURL: client.user.displayAvatarURL({ format: 'png', dynamic: true })
+                iconURL: client.user.displayAvatarURL({ extension: 'png', forceStatic: false })
             })
             .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.data.level} erreicht! <a:yay:730426295397384252>`)
         if(user.data.battle?.ready) {
-            let { skills } = user.data.battle
+            var { skills }: any = user.data.battle
             embed
-                .addField('Statuswerte', skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), true)
-                .setDescription(embed.description)
+                .addFields([{name: 'Statuswerte', value: skills.map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
+                .setDescription(embed.data.description)
         }
-        if(ita.isButton()) await ita.safeUpdate({ embeds: [embed], ephemeral: true })
+        if(ita.isButton()) await ita.safeUpdate({ embeds: [embed] })
         else await ita.safeReply({ embeds: [embed], ephemeral: true })
         if(!user.data.battle?.ready) return
         await require('delay')(2000)
@@ -29,60 +29,65 @@ module.exports = {
         skills = user.data.battle.skills
 
         for (let l = levelCount || 0; l > 0; l--) {
-            skills.forEach((skill) => {
+            skills.forEach((skill: any) => {
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                 added *= 
                     user.data.battle.priority === skill.name ? 1.5 : 
                     user.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
                 added = Math.round(added)
+                // @ts-ignore
                 skill.added += added
             })
         }
 
-        embed.setDescription(embed.description + '\nBitte wähle einen Skill aus, den du erhöhen möchtest.\nNach 2 Minuten wird automatisch ein zufälliger Skill erhöht.')
-        embed.addField('​', skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​', true)
+        embed.setDescription(embed.data.description + '\nBitte wähle einen Skill aus, den du erhöhen möchtest.\nNach 2 Minuten wird automatisch ein zufälliger Skill erhöht.')
         embed.setFields([
             {
                 name: 'Statuswerte',
-                value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
+                value: skills.map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
                 inline: true
             },
-            embed.fields[1]
+            {
+                name: '​',
+                value: skills.map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                inline: true
+            }
         ])
 
-        skills.forEach(skill => {
+        skills.forEach((skill: any) => {
             skill.value += skill.added
             if(skill.name == 'HP') user.data.battle.currentHP += skill.added
             skill.added = 0
         })
 
         buttons.addComponents(
-            new discord.MessageButton()
+            new Discord.ButtonBuilder()
                 .setCustomId('userLevelUp.hp')
                 .setLabel('HP')
-                .setStyle('SECONDARY'),
-            new discord.MessageButton()
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
                 .setCustomId('userLevelUp.atk')
                 .setLabel('Angriff')
-                .setStyle('SECONDARY'),
-            new discord.MessageButton()
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
                 .setCustomId('userLevelUp.def')
                 .setLabel('Verteidigung')
-                .setStyle('SECONDARY'),
-            new discord.MessageButton()
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
                 .setCustomId('userLevelUp.spd')
                 .setLabel('Geschwindigkeit')
-                .setStyle('SECONDARY')
+                .setStyle(Discord.ButtonStyle.Secondary)
         )
 
-        const message = await ita.editReply({ embeds: [embed], components: [buttons], fetchReply: true })
+        const message = await ita.editReply({ embeds: [embed], components: [buttons] })
 
         for(let l = levelCount; l > 0; l--) {
             const interaction = await message.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita
+            //@ts-ignore
             const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
             user.data.battle.priority
     
-            skills.forEach((skill) => {
+            skills.forEach((skill: any) => {
                 if(skill.name != sk) return skill.added = 0
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                 added *= 
@@ -96,28 +101,30 @@ module.exports = {
             embed.setFields([
                 {
                     name: 'Statuswerte',
-                    value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
+                    value: skills.map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
                     inline: true
                 },
                 {
                     name: '​',
-                    value: skills.map(skill => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                    value: skills.map((skill: any) => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
                     inline: true
                 }
             ])
             if(l !== 1) {
-                if(!interaction.replied) await interaction.update({ embeds: [embed], components: [buttons] })
+                //@ts-ignore
+                if(!interaction.replied) await interaction.safeUpdate({ embeds: [embed], components: [buttons] })
                 else await interaction.editReply({ embeds: [embed], components: [buttons] })
             } else {
                 embed.setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.data.level} erreicht! <a:yay:730426295397384252>`)
-                if(!interaction.replied) await interaction.update({ embeds: [embed], components: [] })
+                //@ts-ignore
+                if(!interaction.replied) await interaction.safeUpdate({ embeds: [embed], components: [] })
                 else await interaction.editReply({ embeds: [embed], components: [] })
                 await require('delay')(2000)
                 await interaction.editReply({ embeds: [embed.spliceFields(1, 1)]})
             }
 
     
-            skills.forEach(skill => {
+            skills.forEach((skill: any) => {
                 if(skill.name == 'HP') user.data.battle.currentHP += skill.added
                 skill.added = 0
             })
