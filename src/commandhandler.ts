@@ -7,6 +7,7 @@ import embeds from './embeds'
 import getcolors from './subcommands/getcolor'
 import getData from './db/getData'
 import update from './db/update'
+import { logChannel } from './config.json'
 
 export default async (client: Discord.Client) => {
     client.commands = new Discord.Collection()
@@ -156,6 +157,45 @@ export default async (client: Discord.Client) => {
             let execute = true
             if(command.before) execute = await command.before(interaction, args, client)
             if(execute !== false) await command.execute(interaction, args, client)
+                .catch(async (error: Error) => {
+                    console.error(`Error while executing ${interaction?.commandName} (${interaction?.user?.tag}, ${interaction?.guild?.name}) with arguments: ${argsarray.replaceAll('"', '')}`)
+                    console.error(error)
+                    let errorId = (Math.random() * Date.now()).toString(36)
+                    try {
+                        let channel = await client.channels.fetch(logChannel)
+                        let embed = new Discord.EmbedBuilder() 
+                            .setColor('Red')
+                            .setTitle(`${errorId} | ${error.name}`)
+                            .setDescription(`**interaction**:\ncommand: /${interaction?.commandName}\nuser: <@${interaction?.user?.id}> (${interaction?.user?.id})\nguild: ${interaction?.guild?.name} (${interaction?.guild?.id})`)
+                            .addFields([
+                                {
+                                    name: 'args',
+                                    value: argsarray.replaceAll('"', ''),
+                                    inline: true
+                                },
+                                {
+                                    name: 'error',
+                                    value: error.message || 'undefined',
+                                    inline: true
+                                },
+                                {
+                                    name: 'cause',
+                                    value: error.cause.toString() || 'undefined',
+                                },
+                                {
+                                    name: 'stack',
+                                    value: error.stack || 'undefined',
+                                }
+                            ])
+                        //@ts-ignore
+                        await channel.send({ embeds: [embed] })
+                        embed = new Discord.EmbedBuilder()
+                            .setColor(interaction?.color?.red || 'Red')
+                            .setTitle(`Fehler`)
+                            .setDescription(`Ein Fehler ist aufgetreten und der Command konnte nicht ordnungsgemäß ausgeführt werden.\nFehler-Code: ${errorId}`)
+                        await interaction.followUp({ embeds: [embed], ephemeral: true })
+                    } catch (error) {console.error}
+                })
         } catch (error) {
             console.error(error)
             return embeds.error(interaction, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)
