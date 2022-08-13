@@ -150,13 +150,9 @@ export default async (client: Discord.Client) => {
 
         //Execute
         try {
-            let argsarray = JSON.stringify(args)
+            let argsarray = JSON.stringify(args, null, 1).replaceAll(/\n|\t|\r/g, ' ').replaceAll(/ +/g, ' ')
             let d = new Date()
-            console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('":', ':').replaceAll('",', ',').replaceAll('"', ' ')}`)
-            // console.log(interaction.guild.members.me.displayHexColor)
-            // //@ts-ignore
-            // if(interaction.color.normal === 'role') interaction.color.normal = interaction.guild.members.me.displayHexColor
-            // console.log(interaction.color)
+            console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('"', '')}`)
             let execute = true
             if(command.before) execute = await command.before(interaction, args, client)
             if(execute !== false) await command.execute(interaction, args, client)
