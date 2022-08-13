@@ -1,7 +1,7 @@
-import Discord = require('Discord.js')
+import Discord = require('discord.js')
 const { default: EmbedRenderer } = require('./battledata/EmbedRenderer')
 
-declare module 'Discord.js' {
+declare module 'discord.js' {
     interface Collection<K, V> {
         array(): V[]
     }
