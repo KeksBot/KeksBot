@@ -1,6 +1,7 @@
 import Discord, { ModalBuilder } from 'discord.js'
 import update from '../../../db/update'
 import embeds from '../../../embeds'
+import handleError from '../../../subcommands/handleError'
 
 export default async function (ita: Discord.CommandInteraction, args: any) {
     let { guild, color } = ita
@@ -64,69 +65,69 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
     const collector = message.createMessageComponentCollector({ time: 900000, componentType: Discord.ComponentType.Button })
 
     collector.on('collect', async ita => {
-        if (ita.customId == 'settings.keksbox:change-channel-whitelist') {
-            await guild.channels.fetch()
-            let value: string = ''
-            if (!guild.data.keksbox) guild.data.keksbox = {}
-            if (!guild.data.keksbox.channels) guild.data.keksbox.channels = []
-            console.log(guild.data.keksbox.channels)
-            if (guild.data.keksbox.channels.length == 1 && guild.data.keksbox.channels[0] == '0') value = '0'
-            else {
-                value = guild.data.keksbox.channels.map(c => {
-                    return '#' + (guild.channels.cache.filter(c => c.isTextBased()).get(c)?.name || -1) + ' | ' + c
-                }).filter(t => !t.startsWith('#-1')).join('\n')
-            }
+        try {
+            if (ita.customId == 'settings.keksbox:change-channel-whitelist') {
+                await guild.channels.fetch()
+                let value: string = ''
+                if (!guild.data.keksbox) guild.data.keksbox = {}
+                if (!guild.data.keksbox.channels) guild.data.keksbox.channels = []
+                console.log(guild.data.keksbox.channels)
+                if (guild.data.keksbox.channels.length == 1 && guild.data.keksbox.channels[0] == '0') value = '0'
+                else {
+                    value = guild.data.keksbox.channels.map(c => {
+                        return '#' + (guild.channels.cache.filter(c => c.isTextBased()).get(c)?.name || -1) + ' | ' + c
+                    }).filter(t => !t.startsWith('#-1')).join('\n')
+                }
 
-            await ita.showModal(
-                new ModalBuilder()
-                    .setTitle('KeksBox Einstellungen')
-                    .setCustomId('settings.keksbox:channel-whitelist-modal')
-                    .addComponents(
-                        new Discord.ActionRowBuilder<Discord.TextInputBuilder>()
-                            .addComponents(
-                                new Discord.TextInputBuilder()
-                                    .setCustomId('settings.keksbox:set-channel-whitelist')
-                                    .setLabel('KeksBox Spawnkanäle')
-                                    .setStyle(Discord.TextInputStyle.Paragraph)
-                                    .setRequired(true)
-                                    .setValue(value)
-                            )
+                await ita.showModal(
+                    new ModalBuilder()
+                        .setTitle('KeksBox Einstellungen')
+                        .setCustomId('settings.keksbox:channel-whitelist-modal')
+                        .addComponents(
+                            new Discord.ActionRowBuilder<Discord.TextInputBuilder>()
+                                .addComponents(
+                                    new Discord.TextInputBuilder()
+                                        .setCustomId('settings.keksbox:set-channel-whitelist')
+                                        .setLabel('KeksBox Spawnkanäle')
+                                        .setStyle(Discord.TextInputStyle.Paragraph)
+                                        .setRequired(true)
+                                        .setValue(value)
+                                )
 
-                    )
-            )
+                        )
+                )
 
-            ita.awaitModalSubmit({ time: 900000, filter: ita => ita.customId == 'settings.keksbox:channel-whitelist-modal' })
-                .then(async interaction => {
-                    await guild.channels.fetch()
-                    let value = interaction.fields.getTextInputValue('settings.keksbox:set-channel-whitelist')
-                    if (value.trim() == '0') {
-                        guild.data.keksbox.channels = ['0']
-                        await guild.save()
-                        embed.setFooter({ text: 'KeksBoxen deaktiviert' })
-                        //@ts-ignore
-                        return interaction.update({ embeds: [embed] })
-                    }
-                    let textchannels = guild.channels.cache.filter(c => c.isTextBased())
-                    let values = value.replaceAll('\n', ',')
-                        .replaceAll('|', ',')
-                        .replaceAll('#', '')
-                        .split(',')
-                        .map(v => v.trim())
-                        .filter(v => v != '')
-                        .map(v => {
-                            return textchannels.has(v) ? v :
-                                textchannels.findKey(channel => channel.name === v) || null
-                        })
-                        .filter(v => v)
-                    values = [...(new Set(values))]
-                    guild.data.keksbox.channels = values
+                let interaction = await ita.awaitModalSubmit({ time: 900000, filter: ita => ita.customId == 'settings.keksbox:channel-whitelist-modal' }).catch(() => { })
+                if (!interaction) return
+                await guild.channels.fetch()
+                value = interaction.fields.getTextInputValue('settings.keksbox:set-channel-whitelist')
+                if (value.trim() == '0') {
+                    guild.data.keksbox.channels = ['0']
                     await guild.save()
+                    embed.setFooter({ text: 'KeksBoxen deaktiviert' })
                     //@ts-ignore
-                    return interaction.update({ embeds: [embed.setFooter({ text: 'Änderungen übernommen' })] })
-                })
-                .catch((error) => { 
-                    if(error.code != 'InteractionCollectorError') console.error(error) 
-                })
+                    return interaction.update({ embeds: [embed] })
+                }
+                let textchannels = guild.channels.cache.filter(c => c.isTextBased())
+                let values = value.replaceAll('\n', ',')
+                    .replaceAll('|', ',')
+                    .replaceAll('#', '')
+                    .split(',')
+                    .map(v => v.trim())
+                    .filter(v => v != '')
+                    .map(v => {
+                        return textchannels.has(v) ? v :
+                            textchannels.findKey(channel => channel.name === v) || null
+                    })
+                    .filter(v => v)
+                values = [...(new Set(values))]
+                guild.data.keksbox.channels = values
+                await guild.save()
+                //@ts-ignore
+                return interaction.update({ embeds: [embed.setFooter({ text: 'Änderungen übernommen' })] })
+            }
+        } catch (e) {
+            await handleError(ita, e)
         }
     })
 }

@@ -3,11 +3,12 @@ const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMe
 import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
-import './embeds'
 import uptimemonitoring from './uptimemonitoring'
 import { connect } from './db'
+
 import './db/getData'
 import './db/update'
+import './embeds'
 
 Discord.Collection.prototype.array = function () { return [...this.values()] }
 /**
