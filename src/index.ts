@@ -10,6 +10,19 @@ import './db/getData'
 import './db/update'
 import './embeds'
 
+process.on('beforeExit', async (code) => {
+    let channel = await client.channels.fetch(config.logChannel)
+    console.log(`[${client?.user.username}]: System wird heruntergefahren.`)
+    let embed = new Discord.EmbedBuilder()
+        .setColor('DarkRed')
+        .setTitle('Shutdown')
+        .setDescription(`Der Prozess wird beendet. Exit Code: ${code}`)
+    //@ts-ignore
+    channel.send({ embeds: [embed] })
+    client.user.setStatus('invisible')
+    client.destroy()
+})
+
 Discord.Collection.prototype.array = function () { return [...this.values()] }
 /**
  * 
