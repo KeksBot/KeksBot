@@ -1,4 +1,4 @@
-import { ButtonInteraction, CommandInteraction, EmbedBuilder, ModalSubmitInteraction, SelectMenuInteraction } from "Discord.js";
+import { ButtonInteraction, CommandInteraction, EmbedBuilder, ModalSubmitInteraction, SelectMenuInteraction } from "discord.js";
 import { logChannel } from '../config.json'
 
 export default async (interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, error: unknown, args?: any) => {
