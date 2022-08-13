@@ -36,8 +36,7 @@ var userdataSchema = Schema({
             count: Number,
         }],
         attacks: [String],
-    },
-    tan: String
-}, { strict: false })
+    }
+}, { strict: true })
 
 export default model('userdata', userdataSchema)

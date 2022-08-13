@@ -22,7 +22,7 @@ async function set(name: string, id: string, value: any) {
             _id: id
         }, value, {
             upsert: true,
-            strict: false,
+            strict: true,
             new: true
         })
         return data

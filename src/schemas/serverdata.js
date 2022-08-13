@@ -26,6 +26,6 @@ var serverdataSchema = mongoose.Schema({
         multiplier: Number, //Für besondere KeksBoxen
         keepmessage: Boolean, //Ob die Nachricht beim claimen gelöscht werden soll
     }
-}, { strict: false })
+}, { strict: true })
 
 export default mongoose.model('serverdata', serverdataSchema)

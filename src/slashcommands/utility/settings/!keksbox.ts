@@ -120,7 +120,6 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                         .filter(v => v)
                     values = [...(new Set(values))]
                     guild.data.keksbox.channels = values
-                    console.log(guild.data)
                     await guild.save()
                     //@ts-ignore
                     return interaction.update({ embeds: [embed.setFooter({ text: 'Änderungen übernommen' })] })

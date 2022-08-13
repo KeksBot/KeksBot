@@ -7,8 +7,9 @@ const schemas = new Collection()
 schemas.set('serverdata', serverdata)
 schemas.set('userdata', userdata)
 
-async function handle(data: any, name: string, id: string) {
+async function handle(data: any, name: string) {
     var changed = false
+    let id = data._id
     switch(name) {
         case 'userdata': 
             if(data.banned?.time && data.banned.time != -1 && data.banned.time < Date.now()) {
@@ -32,7 +33,7 @@ async function get(name: string, id: string) {
     await db()
     try {
         let data = await model.findById(id)
-        if(data) await handle(data, name, id)
+        if(data) await handle(data, name)
         return data?._doc || data
     } catch (error) {
         return error
