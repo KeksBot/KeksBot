@@ -71,7 +71,6 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                 let value: string = ''
                 if (!guild.data.keksbox) guild.data.keksbox = {}
                 if (!guild.data.keksbox.channels) guild.data.keksbox.channels = []
-                console.log(guild.data.keksbox.channels)
                 if (guild.data.keksbox.channels.length == 1 && guild.data.keksbox.channels[0] == '0') value = '0'
                 else {
                     value = guild.data.keksbox.channels.map(c => {
