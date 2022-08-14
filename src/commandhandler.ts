@@ -147,7 +147,7 @@ export default async (client: Discord.Client) => {
         setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount)
 
         //Battlelock
-        if(client.battles.find(b => b.user1.id == interaction.user.id || b.user2.id == interaction.user.id) && command.battlelock) return interaction.error('Kampfsperre', 'Du kannst diesen Befehl nicht während eines Kampfes anwenden.', true)
+        if(client.battles.find(b => b.user1.id == interaction.user.id || b.user2.id == interaction.user.id && b.started) && command.battlelock) return interaction.error('Kampfsperre', 'Du kannst diesen Befehl nicht während eines Kampfes anwenden.', true)
 
         //Execute
         try {

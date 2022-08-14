@@ -1,7 +1,7 @@
 import Discord from 'discord.js'
 import BattleUser from './BattleUser'
 import usable from './usable.js'
-var client: Discord.Client
+import emotes from '../emotes.json'
 
 export default class BaseBattle {
     #actions: any
@@ -11,7 +11,7 @@ export default class BaseBattle {
     id: number
     color: Color
     client: Discord.Client
-
+    started: boolean
 
     /**
      * 
@@ -28,8 +28,9 @@ export default class BaseBattle {
         this.private = priv
         this.message = message
         this.color = color
-        if (!client) this.client = message.client
-        client.battles.set(this.id, this)
+        this.client = message.client
+        this.started = false
+        this.client.battles.set(this.id, this)
     }
 
     /**
@@ -40,51 +41,32 @@ export default class BaseBattle {
         this.users.set(battleUser.id, battleUser)
     }
 
-    async load(){
-        let embed = new Discord.EmbedBuilder()
-            .setColor(this.color.yellow)
-            .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
-            .setDescription(
-                'Der Kampf zwischen ' +
-                this.users.array().map(user => `**${user.member.displayName}**`).join(', ').replaceLast(',', ' und') +
-                'beginnt in Kürze.\nBitte drücke diesen Knopf, sobald du bereit bist. Nach 2 Minuten ohne Eingabe wird das Matchmaking abgebrochen.'
-            )
-        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-            .setComponents(
-                new Discord.ButtonBuilder()
-                    .setLabel('Bereit')
-                    .setCustomId('pvpBattle.ready')
-                    .setStyle(Discord.ButtonStyle.Success)
-            )
-        let collectors: any[] = []
-        await this.users.filter(u => !u.ai).array().forEach(async user => {
-            let message = await user.interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true, fetchReply: true })
-            //@ts-ignore
-            collectors.push(message.createMessageComponentCollector({ time: 120000, max: 1 }))
-        })
-
-        collectors.forEach((collector) => {
-            collector.on('collect', async (i: Discord.ButtonInteraction) => {
-                this.users.get(i.user.id).interaction = i
-                if (collectors.length <= 1) return this.afterLoading()
-                let embed = new Discord.EmbedBuilder()
-                    .setColor(this.color.yellow)
-                    .setTitle(`${require('../emotes.json').pinging} Warte auf Teilnehmer...`)
-                    .setDescription(
-                        'Der Kampf zwischen ' +
-                        this.users.array().map(user => `**${user.member.displayName}**`).join(', ').replaceLast(',', ' und') +
-                        'beginnt in Kürze.\nBitte warte noch einen Moment, bis alle bereit sind.'
-                    )
-                buttons.components[0].setDisabled(true)
-                await i.update({ embeds: [embed], components: [buttons] })
-                collectors.splice(collectors.indexOf(collector), 1)
-            })
-
-            collector.on('end', (reason: string) => {
-                collectors.splice(collectors.indexOf(collector), 1)
-                if (collectors.length == 0 && reason === 'time') return // TODO: Call Timeout Function
-            })
-        })
+    async load() {
+        for (const user of this.users.values()) {
+            user.setup(this.color)
+        }
+        let updater: any
+        let readyArray: boolean[] = []
+        await Promise.all(this.users.map(async u => {
+            let output = await u.ready()
+            //TODO: Set updater to embed update promise timeout
+            readyArray.push(output)
+        }))
+        if (readyArray.includes(false)) {
+            await Promise.all(this.users.map(u => u.updateMessage({
+                embeds: [
+                    new Discord.EmbedBuilder()
+                        .setTitle(`${emotes.denied} Matchmaking abgebrochen`)
+                        .setDescription(`Es waren nicht alle Teilnehmer bereit und das Matchmaking wurde abgebrochen.`)
+                ], components: []
+            })))
+            return this.client.battles.delete(this.id)
+        }
+        this.started = true
+        for (const user of this.users.values()) {
+            user.init()
+        }
+        this.afterLoading()
     }
 
     async afterLoading() {

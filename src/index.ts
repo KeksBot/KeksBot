@@ -29,7 +29,7 @@ Discord.Collection.prototype.array = function () { return [...this.values()] }
  * @param {Object} messageOptions 
  * @returns discord.CommandInteraction
  */
-//@ts-ignore
+
 Discord.CommandInteraction.prototype.safeReply = async function (messageOptions: Discord.InteractionReplyOptions) {
     if (this.replied) return await this.editReply(messageOptions)
     else return await this.reply(messageOptions)
@@ -41,11 +41,16 @@ Discord.CommandInteraction.prototype.safeReply = async function (messageOptions:
  * @returns discord.CommandInteraction
  */
 
-//@ts-ignore
 Discord.ButtonInteraction.prototype.safeUpdate = async function (messageOptions: Discord.InteractionUpdateOptions) {
     if (this.replied) return await this.editReply(messageOptions)
     else return await this.update(messageOptions)
 }
+
+Discord.SelectMenuInteraction.prototype.safeUpdate = async function (messageOptions: Discord.InteractionUpdateOptions) {
+    if (this.replied) return await this.editReply(messageOptions)
+    else return await this.update(messageOptions)
+}
+
 
 /**
  * 

@@ -7,11 +7,15 @@ declare module 'discord.js' {
     }
 
     interface CommandInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
-        safeReply(messageOptions: Discord.InteractionReplyOptions): Promise<CommandInteraction>
+        safeReply(messageOptions: Discord.InteractionReplyOptions): Promise<Message<boolean> | InteractionResponse<boolean>>
     }
 
     interface ButtonInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
-        safeUpdate(messageOptions: Discord.InteractionUpdateOptions): Promise<CommandInteraction>
+        safeUpdate(messageOptions: Discord.InteractionUpdateOptions): Promise<Message<boolean> | InteractionResponse<boolean>>
+    }
+
+    interface SelectMenuInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
+        safeUpdate(messageOptions: Discord.InteractionUpdateOptions): Promise<Message<boolean> | InteractionResponse<boolean>>
     }
 
     interface BaseInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
@@ -98,8 +102,6 @@ declare global {
         team: number
         skills: UserData['battle']['skills']
         attacks: [{ id: string, uses: number }]
-        ai: boolean
-        embedRenderer: typeof EmbedRenderer
     }
 
     interface BaseBattle {
@@ -109,6 +111,7 @@ declare global {
         id: number
         color: Color
         client: Discord.Client
+        started: boolean
     }
 
     interface Color {
