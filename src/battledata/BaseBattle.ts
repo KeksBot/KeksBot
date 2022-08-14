@@ -45,14 +45,38 @@ export default class BaseBattle {
         for (const user of this.users.values()) {
             user.setup(this.color)
         }
-        let updater: any
-        let readyArray: boolean[] = []
+        let ready: any = {}
+        let oldReady = {}
+        let interval: any
         await Promise.all(this.users.map(async u => {
             let output = await u.ready()
             //TODO: Set updater to embed update promise timeout
-            readyArray.push(output)
+            if(!interval) interval = setInterval((async () => {
+                if(oldReady && ready != oldReady) {
+                    let embedWaiting = new Discord.EmbedBuilder()
+                        .setColor(this.color.yellow)
+                        .setTitle('Kampfvorbereitung')
+                        .setDescription('Du hast noch etwas Zeit, dich auf den Kampf vorzubereiten. Drück den Knopf, sobald du bereit bist.')
+                        .setFooter({ text: 'Nach 2 Minuten wird das Matchmaking abgebrochen.' })
+                        //TODO: .setImage(imageUrl)
+                    let embedWaitingForOthers = new Discord.EmbedBuilder()
+                        .setColor(this.color.yellow)
+                        .setTitle('Kampfvorbereitung')
+                        .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
+                        .setFooter({ text: 'Nach 2 Minuten wird das Matchmaking abgebrochen.' })
+                        //TODO: .setImage(imageUrl)
+
+                    await Promise.all(this.users.map(async u => {
+                        if(ready[u.id]) await u.updateMessage({ embeds: [embedWaitingForOthers] })   
+                        else await u.updateMessage({ embeds: [embedWaiting] }) 
+                    }))
+                }
+                oldReady = {...ready}
+            }), 2000)
+            ready[u.id] = output
         }))
-        if (readyArray.includes(false)) {
+        interval && clearInterval(interval)
+        if (ready.includes(false)) {
             await Promise.all(this.users.map(u => u.updateMessage({
                 embeds: [
                     new Discord.EmbedBuilder()
