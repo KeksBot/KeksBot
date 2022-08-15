@@ -4,6 +4,8 @@ export default {
         type: 'atk/normal',
         description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz.',
         uses: 40,
+        strength: 40,
+        accuracy: 100,
         target: 'single', 
         /*
             target:

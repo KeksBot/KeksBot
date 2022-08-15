@@ -1,5 +1,6 @@
 import Discord from 'discord.js'
 import usable from './usable.js'
+import emotes from '../emotes.json'
 
 export default class BattleUser {
     user: Discord.User
@@ -173,9 +174,32 @@ export default class BattleUser {
                         .setColor(this.color.normal)
                         .setTitle('Kampfmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
+                    let buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
                     for (const attack of this.attacks) {
-                        
+                        //@ts-ignore
+                        let attackData = usable[attack.id]
+                        embed.addFields([{
+                            name: attackData.name,
+                            value: `${attackData.description}\n**Stärke**: ${attackData.stength}\n**Genauigkeit**: ${attackData.accuracy}\n**AP**: ${attack.uses}/${attackData.maxUses}`,
+                            inline: true
+                        }])
+                        buttons[0].components.length == 3 && buttons.unshift(new Discord.ActionRowBuilder<Discord.ButtonBuilder>())
+                        buttons[0].addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`battle:user.exit:${attack.id}`)
+                                .setLabel(attackData.name)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                        )
                     }
+                    buttons.reverse().push(new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId('battle:user.home')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger)
+                        )
+                    )
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: buttons })
                     break
             }
             this.interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 })
