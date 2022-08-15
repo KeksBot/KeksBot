@@ -76,7 +76,7 @@ export default class BaseBattle {
             ready[u.id] = output
         }))
         interval && clearInterval(interval)
-        if (ready.includes(false)) {
+        if ((ready.values().length < this.users.size) && !ready.values().includes(null)) {
             await Promise.all(this.users.map(u => u.updateMessage({
                 embeds: [
                     new Discord.EmbedBuilder()

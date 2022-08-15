@@ -79,6 +79,10 @@ export default class BattleUser {
         this.interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
             .catch(() => { return null })
         if (this.interaction?.customId != 'battle:user.ready')
+        embed
+            .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
+            //TODO: .setImage(editedImageUrl)
+        this.updateMessage({ embeds: [embed], components: [] })
         return true
     }
 }
