@@ -23,8 +23,7 @@ export default {
                 .addFields([{name: 'Statuswerte', value: skills.map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
                 .setDescription(embed.data.description)
         }
-        if(ita.isButton()) await ita.safeUpdate({ embeds: [embed] })
-        else await ita.safeReply({ embeds: [embed], ephemeral: true })
+        let reply = await ita.followUp({ embeds: [embed], ephemeral: true })
         if(!user.data.battle?.ready) return
         await delay(2000)
 
@@ -82,10 +81,10 @@ export default {
                 .setStyle(Discord.ButtonStyle.Secondary)
         )
 
-        const message = await ita.editReply({ embeds: [embed], components: [buttons] })
+        reply = await reply.edit({ embeds: [embed], components: [buttons] })
 
         for(let l = levelCount; l > 0; l--) {
-            const interaction = await message.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita
+            const interaction = await reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita
             //@ts-ignore
             const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
             user.data.battle.priority

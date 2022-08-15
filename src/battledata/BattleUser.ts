@@ -57,6 +57,42 @@ export default class BattleUser {
         await this.user.save()
     }
 
+    async setHP(hp: number) {
+        this.battle.currentHP = hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp
+        this.battle.currentHP = hp
+        await this.user.save()
+    }
+
+    async addXP(xp: number) {
+        this.user.data.xp += xp
+
+        let { user } = this
+        let levelup = false
+        let scanning = true
+        let levelcount = 0
+
+        while (scanning) {
+            if(user.data.level <= 15 && (user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3) <= user.data.xp) {
+                user.data.level++
+                levelup = true
+                levelcount++
+            } else if(user.data.level <= 36 && user.data.level > 15 && (user.data.level + 1) ** 3 * ((15 + user.data.level) / 3) <= user.data.xp) {
+                user.data.level++
+                levelup = true
+                levelcount++
+            } else if(user.data.level < 100 && user.data.level > 37 && (user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) {
+                user.data.level++
+                levelup = true
+                levelcount++
+            } else scanning = false
+        }
+
+        user.data.level += levelcount
+        if(levelup) this.interaction.client.emit('userLevelUp', )
+
+        await this.user.save()
+    }
+
     async updateMessage(options: Discord.MessageEditOptions) {
         return this.interaction.safeUpdate(options)
     }
