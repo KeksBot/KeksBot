@@ -28,7 +28,7 @@ export default class BattleUser {
 
     init() {
         //TODO: Ausrüstung auf Werte anwenden
-        this.skills = JSON.parse(JSON.stringify(this.battle.skills))
+        this.skills = [...this.battle.skills]
         //@ts-ignore
         this.attacks = []
         for (const i of this.battle.attacks) {
@@ -87,15 +87,14 @@ export default class BattleUser {
             } else scanning = false
         }
 
-        user.data.level += levelcount
-        if(levelup) this.interaction.client.emit('userLevelUp', )
-
-        await this.user.save()
+        if(levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client)
     }
 
     async updateMessage(options: Discord.MessageEditOptions) {
         return this.interaction.safeUpdate(options)
     }
+
+    modifySkills() {}
 
     async ready(imageUrl?: string) {
         let embed = new Discord.EmbedBuilder()
@@ -120,5 +119,66 @@ export default class BattleUser {
             //TODO: .setImage(editedImageUrl)
         this.updateMessage({ embeds: [embed], components: [] })
         return true
+    }
+
+    async chooseAction(imageUrl: string) {
+        let imageEmbed = new Discord.EmbedBuilder()
+            .setColor(this.color.normal)
+            .setTitle('Insert Name here')
+            .setImage(imageUrl)
+        do {
+            if(this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
+                let embed = new Discord.EmbedBuilder()
+                    .setColor(this.color.normal)
+                    .setTitle('Hauptmenü')
+                    .setDescription('Bitte wähle eine Aktion aus')
+                    .addFields([
+                        {
+                            name: 'Beutel',
+                            value: 'Öffnet dein Inventar, um Items zu benutzen',
+                            inline: true
+                        },
+                        {
+                            name: 'Kampf',
+                            value: 'Öffnet das Kampfmenü',
+                            inline: true
+                        },
+                        {
+                            name: 'Flucht',
+                            value: 'Beendet deine Teilnahme am Kampf und kann zu einer Niederlage führen',
+                            inline: true
+                        }
+                    ])
+                let components = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                    .addComponents(
+                        new Discord.ButtonBuilder()
+                            .setLabel('Beutel')
+                            .setStyle(Discord.ButtonStyle.Secondary)
+                            .setCustomId('battle:user.inventory')
+                            .setDisabled(true),
+                        new Discord.ButtonBuilder()
+                            .setCustomId('battle:user.attack')
+                            .setLabel('Angriff')
+                            .setStyle(Discord.ButtonStyle.Primary),
+                        new Discord.ButtonBuilder()
+                            .setCustomId('battle:user.surrender')
+                            .setLabel('Flucht')
+                            .setStyle(Discord.ButtonStyle.Secondary)
+                            .setDisabled(true)
+                    )
+                await this.updateMessage({ embeds: [imageEmbed, embed], components: [components] })
+            } else switch(this.interaction.customId.split('.')[1]) {
+                case 'battle':
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(this.color.normal)
+                        .setTitle('Kampfmenü')
+                        .setDescription('Bitte wähle eine Aktion aus')
+                    for (const attack of this.attacks) {
+                        
+                    }
+                    break
+            }
+            this.interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 })
+        } while (!this.interaction.customId.includes('exit'))
     }
 }
