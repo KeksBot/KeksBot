@@ -6,7 +6,7 @@ export default {
         uses: 40,
         strength: 40,
         accuracy: 100,
-        target: 'single', 
+        target: 0 
         /*
             target:
                 0: Einzelnes Ziel (andere Person)
