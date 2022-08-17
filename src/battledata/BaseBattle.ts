@@ -2,6 +2,7 @@ import Discord from 'discord.js'
 import BattleUser from './BattleUser'
 import usable from './usable.js'
 import emotes from '../emotes.json'
+import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
     #actions: any
@@ -98,6 +99,35 @@ export default class BaseBattle {
     }
 
     async round() {
+        let status: any = {}
+        await Promise.all(this.users.map(async u => {
+            let users = []
+            users.push({
+                n: u.member.displayName,
+                h: u.battle.currentHP,
+                m: u.skills.find(s => s.name == 'HP').value,
+                l: u.user.data.level,
+                t: u.team
+            })
+            for (const user of this.users.values()) {
+                if (user.id != u.id) {
+                    users.push({
+                        n: user.member.displayName,
+                        h: user.battle.currentHP,
+                        m: user.skills.find(s => s.name == 'HP').value,
+                        l: user.user.data.level,
+                        t: user.team
+                    })
+                }
+            }
+            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
+            status[u.id] = true
+            if(status.values().length != this.users.size) await u.updateMessage({
+                embeds: [
+                    Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
+                ]
+            })
+        }))
     }
 
     async game() {
