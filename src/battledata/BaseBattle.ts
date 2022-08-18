@@ -120,7 +120,7 @@ export default class BaseBattle {
                     })
                 }
             }
-            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
+            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`).catch()
             status[u.id] = true
             if(status.values().length != this.users.size) await u.updateMessage({
                 embeds: [
@@ -128,6 +128,25 @@ export default class BaseBattle {
                 ]
             })
         }))
+        if(status.values().length != this.users.size) {
+            for await (const u of this.users.values()) {
+                await u.updateMessage({
+                    embeds: [
+                        new Discord.EmbedBuilder()
+                            .setTitle(`${emotes.denied} Timeout`)
+                            .setDescription('Ein Spieler scheint AFK zu sein. Der Kampf wurde abgebrochen.')
+                            .setColor(this.color.red)
+                    ], components: []
+                })
+            }
+            return this.client.battles.delete(this.id)
+        }
+        for (const user of this.users.values()) {
+            this.#actions.push({
+                user: user.id,
+                action: user.interaction.customId.split(':')[2]
+            })
+        }
     }
 
     async game() {
