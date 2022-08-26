@@ -12,6 +12,7 @@ export default class BattleUser {
     skills: UserData['battle']['skills']
     attacks: [{ id: string, uses: number }]
     color: Color
+    name: string
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -21,6 +22,7 @@ export default class BattleUser {
         this.battle = this.user?.data?.battle
         this.id = this.user.id
         this.team = team
+        this.name = this.member.displayName
     }
 
     setup(color: Color) {
@@ -112,8 +114,10 @@ export default class BattleUser {
                     .setCustomId('battle:user.ready')
             )
         await this.updateMessage({ embeds: [embed], components: [button] })
-        this.interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
+        let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
             .catch(() => { return null })
+        if(!interaction) return false
+        this.interaction = interaction
         if (this.interaction?.customId != 'battle:user.ready')
         embed
             .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
