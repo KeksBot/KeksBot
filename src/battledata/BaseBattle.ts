@@ -5,7 +5,10 @@ import emotes from '../emotes.json'
 import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
-    #actions: any
+    #actions: [{
+        user: string,
+        action: string,
+    }?]
     users: Discord.Collection<string, BattleUser>
     private: boolean
     message: Discord.Message
@@ -52,8 +55,14 @@ export default class BaseBattle {
         }
         let oldReady = {}
         let interval: any
+        let imageUrl = `${imageRendererAPI}/r?users=`
+        let imageObject: any = {}
+        for (const id in ready) {
+            imageObject[this.users.get(id).name] = ready[id]
+        }
+        imageUrl += JSON.stringify(imageObject)
         await Promise.all(this.users.map(async u => {
-            let output = await u.ready()
+            let output = await u.ready(imageUrl)
             //TODO: Set updater to embed update promise timeout
             if(!interval && output) interval = setInterval((async () => {
                 if(oldReady && ready != oldReady) {
@@ -109,6 +118,7 @@ export default class BaseBattle {
 
     async round() {
         let status: any = {}
+        this.#actions = []
         await Promise.all(this.users.map(async u => {
             let users = []
             users.push({

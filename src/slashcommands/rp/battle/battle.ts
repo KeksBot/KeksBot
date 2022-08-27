@@ -1,7 +1,8 @@
 import Discord from 'discord.js'
 import embeds from '../../../embeds'
-import PvPBattle from '../../../battledata/PvPBattle.js'
+import BaseBattle from '../../../battledata/BaseBattle'
 import before from '../../../subcommands/before/battle'
+import BattleUser from '../../../battledata/BattleUser'
 
 const options: CommandOptions = {
     name: 'battle',
@@ -43,8 +44,8 @@ const options: CommandOptions = {
 
         if(user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
 
-        await target.user.getData()
-        if(!target.user.data.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
+        await target.user?.getData()
+        if(!target.user?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
 
         if(target.user.data.battle?.healTimestamp) {
             let { healTimestamp, skills, currentHP } = target.user.data.battle
@@ -88,7 +89,7 @@ const options: CommandOptions = {
         let message = await ita.followUp({ embeds: [embed], components: [buttons], content: `${target}: Du wurdest von ${user.tag} zu einem Kampf herausgefordert.`, fetchReply: true })
         message.edit({ embeds: [embed], components: [buttons], content: null })
         const filter = (i: any) => i.user.id === target.id
-        let interaction = await message.awaitMessageComponent({ filter, time: 300000 }).catch(() => {})
+        let interaction = await message.awaitMessageComponent({ filter, time: 300000, componentType: Discord.ComponentType.Button }).catch(() => {})
         if(!interaction) {
             await embeds.errorMessage(message, 'Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`, true, false)
             return ita.error('Herausforderung abgebrochen', `Die Herausforderung wurde nicht rechtzeitig angenommen.`)
@@ -97,7 +98,10 @@ const options: CommandOptions = {
             await ita.error('Herausforderung abgebrochen', `${target} hat deine Herausforderung abgelehnt.`)
             return embeds.errorMessage(message, 'Herausforderung abgebrochen', `${target} hat die Herausforderung abgelehnt.`, true, false)
         }
-        let battle = new PvPBattle(guild.members.cache.get(user.id)|| await guild.members.fetch(user.id), target, ita, interaction, message)
+        let battle = new BaseBattle(false, message, color)
+        //@ts-ignore
+        battle.addUser(new BattleUser(ita, 0))
+        battle.addUser(new BattleUser(interaction, 1))
         battle.load()
     }
 }

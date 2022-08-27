@@ -5,7 +5,7 @@ import emotes from '../emotes.json'
 export default class BattleUser {
     user: Discord.User
     member: Discord.GuildMember
-    interaction: Discord.ButtonInteraction
+    interaction: Discord.ButtonInteraction | Discord.SelectMenuInteraction
     battle: UserData['battle']
     id: string
     team: number
@@ -94,17 +94,18 @@ export default class BattleUser {
     }
 
     async updateMessage(options: Discord.MessageEditOptions) {
-        return this.interaction.safeUpdate(options)
+        if(this.interaction.replied) return await this.interaction.message.edit(options)
+        return await this.interaction.update(options)
     }
 
     modifySkills() {}
 
-    async ready(imageUrl?: string) {
+    async ready(imageUrl: string) {
         let embed = new Discord.EmbedBuilder()
             .setColor(this.color.yellow)
             .setTitle('Kampfvorbereitung')
             .setDescription('Du hast noch etwas Zeit, dich auf den Kampf vorzubereiten. Drück den Knopf, sobald du bereit bist.')
-            //TODO .setImage(imageUrl)
+            .setImage(imageUrl)
             .setFooter({ text: 'Nach 2 Minuten wird das Matchmaking abgebrochen.' })
         let button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
