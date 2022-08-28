@@ -5,10 +5,11 @@ import emotes from '../emotes.json'
 import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
-    #actions: [{
-        user: string,
+    #actions: {
+        targets: string[],
         action: string,
-    }?]
+        user: BattleUser
+    }[]
     users: Discord.Collection<string, BattleUser>
     private: boolean
     message: Discord.Message
@@ -119,6 +120,7 @@ export default class BaseBattle {
     async round() {
         let status: any = {}
         this.#actions = []
+        let userarray = this.users.map(u => {return { name: u.name, team: u.team, id: u.id }})
         await Promise.all(this.users.map(async u => {
             let users = []
             users.push({
@@ -139,7 +141,7 @@ export default class BaseBattle {
                     })
                 }
             }
-            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`).catch()
+            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch()
             status[u.id] = true
             if(status.values().length != this.users.size) await u.updateMessage({
                 embeds: [
@@ -161,10 +163,7 @@ export default class BaseBattle {
             return this.client.battles.delete(this.id)
         }
         for (const user of this.users.values()) {
-            this.#actions.push({
-                user: user.id,
-                action: user.interaction.customId.split(':')[2]
-            })
+            this.#actions.push(user.move)
         }
     }
 

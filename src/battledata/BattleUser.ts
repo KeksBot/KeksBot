@@ -14,8 +14,9 @@ export default class BattleUser {
     color: Color
     name: string
     move?: {
-        targets: [string],
-        action: string
+        targets?: string[],
+        action: string,
+        user: BattleUser
     }
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
@@ -131,12 +132,12 @@ export default class BattleUser {
         return true
     }
 
-    async chooseAction(imageUrl: string) {
+    async chooseAction(imageUrl: string, users: { name: string, team: any, id: string }[]) {
         let imageEmbed = new Discord.EmbedBuilder()
             .setColor(this.color.normal)
             .setTitle('Insert Name here')
             .setImage(imageUrl)
-        do {
+        loop: do {
             if (this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
                 let embed = new Discord.EmbedBuilder()
                     .setColor(this.color.normal)
@@ -178,14 +179,15 @@ export default class BattleUser {
                     )
                 await this.updateMessage({ embeds: [imageEmbed, embed], components: [components] })
             } else switch (this.interaction.customId.split('.')[1]) {
-                case 'battle':
+                case 'attack': {
+                    delete this.move
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.color.normal)
                         .setTitle('Kampfmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
                         new Discord.SelectMenuBuilder()
-                            .setCustomId('battle:user.exit')
+                            .setCustomId('battle:user.attackTargetSelection')
                             .setMinValues(1)
                             .setMaxValues(1)
                             .setPlaceholder('Attacke auswählen')
@@ -212,10 +214,72 @@ export default class BattleUser {
                             .setEmoji(emotes.back)
                             .setStyle(Discord.ButtonStyle.Danger)
                     )
-                    await this.updateMessage({ embeds: [imageEmbed, embed], components: [ menu, buttons ] })
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: [menu, buttons] })
                     break
+                }
+                case 'attackTargetSelection': {
+                    /*
+                        target:
+                            0: Einzelnes Ziel Gegner
+                            1: Einzelnes Ziel: man selbst
+                            2: Einzelnes Ziel: Teammitglied
+                            3: Einzelnes Ziel: Irgendwer (exklusiv)
+                            4: Einzelnes Ziel: Irgendwer (inklusiv)
+                            5: Mehrere Ziele: eigenes Team (exklusiv)
+                            6: Mehrere Ziele: eigenes Team (inklusiv)
+                            7: Mehrere Ziele: gegnerisches Team
+                            8: Mehrere Ziele: alle Teilnehmer (exklusiv man selbst)
+                            9: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
+                    */
+                    //@ts-ignore
+                    let move = usable[this.interaction.values[0]]
+                    let targetType = move.targets || 0
+                    this.move = {
+                        targets: [],
+                        action: move.name,
+                        user: this
+                    }
+                    if (targetType != 0 && targetType != 2 && targetType != 3) break loop
+                    let targets = users.filter(u => {
+                        return (
+                            targetType == 0 && u.team != this.team ||
+                            targetType == 2 && u.team == this.team ||
+                            targetType == 3
+                        )
+                    })
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(this.color.normal)
+                        .setTitle('Zielauswahl')
+                        .setDescription('Bitte wähle das Ziel für deinen Angriff aus')
+                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
+                        new Discord.SelectMenuBuilder()
+                            .setCustomId('battle:user.exit.attack')
+                            .setMinValues(1)
+                            .setMaxValues(1)
+                            .setPlaceholder('Ziel auswählen')
+                            .addOptions(targets.map(u => {
+                                return {
+                                    label: u.name,
+                                    value: u.id
+                                }
+                            }))
+                    )
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId('battle:user.attack')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger)
+                        )
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: [menu, buttons] })
+                    break
+                }
             }
             this.interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 })
         } while (!this.interaction.customId.includes('exit'))
+        if(this.interaction.customId.endsWith('exit.attack')) {
+            //@ts-ignore
+            this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
+        }
     }
 }
