@@ -13,6 +13,10 @@ export default class BattleUser {
     attacks: [{ id: string, uses: number }]
     color: Color
     name: string
+    move?: {
+        targets: [string],
+        action: string
+    }
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -75,30 +79,30 @@ export default class BattleUser {
         let levelcount = 0
 
         while (scanning) {
-            if(user.data.level <= 15 && (user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3) <= user.data.xp) {
+            if (user.data.level <= 15 && (user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3) <= user.data.xp) {
                 user.data.level++
                 levelup = true
                 levelcount++
-            } else if(user.data.level <= 36 && user.data.level > 15 && (user.data.level + 1) ** 3 * ((15 + user.data.level) / 3) <= user.data.xp) {
+            } else if (user.data.level <= 36 && user.data.level > 15 && (user.data.level + 1) ** 3 * ((15 + user.data.level) / 3) <= user.data.xp) {
                 user.data.level++
                 levelup = true
                 levelcount++
-            } else if(user.data.level < 100 && user.data.level > 37 && (user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) {
+            } else if (user.data.level < 100 && user.data.level > 37 && (user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) {
                 user.data.level++
                 levelup = true
                 levelcount++
             } else scanning = false
         }
 
-        if(levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client)
+        if (levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client)
     }
 
     async updateMessage(options: Discord.MessageEditOptions) {
-        if(this.interaction.replied) return await this.interaction.message.edit(options)
+        if (this.interaction.replied) return await this.interaction.message.edit(options)
         return await this.interaction.update(options)
     }
 
-    modifySkills() {}
+    modifySkills() { }
 
     async ready(imageUrl: string) {
         let embed = new Discord.EmbedBuilder()
@@ -117,12 +121,12 @@ export default class BattleUser {
         await this.updateMessage({ embeds: [embed], components: [button] })
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
             .catch(() => { return null })
-        if(!interaction) return false
+        if (!interaction) return false
         this.interaction = interaction
         if (this.interaction?.customId != 'battle:user.ready')
-        embed
-            .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
-            //TODO: .setImage(editedImageUrl)
+            embed
+                .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
+        //TODO: .setImage(editedImageUrl)
         this.updateMessage({ embeds: [embed], components: [] })
         return true
     }
@@ -133,7 +137,7 @@ export default class BattleUser {
             .setTitle('Insert Name here')
             .setImage(imageUrl)
         do {
-            if(this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
+            if (this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
                 let embed = new Discord.EmbedBuilder()
                     .setColor(this.color.normal)
                     .setTitle('Hauptmenü')
@@ -173,13 +177,20 @@ export default class BattleUser {
                             .setDisabled(true)
                     )
                 await this.updateMessage({ embeds: [imageEmbed, embed], components: [components] })
-            } else switch(this.interaction.customId.split('.')[1]) {
+            } else switch (this.interaction.customId.split('.')[1]) {
                 case 'battle':
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.color.normal)
                         .setTitle('Kampfmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
-                    let buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
+                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
+                        new Discord.SelectMenuBuilder()
+                            .setCustomId('battle:user.exit')
+                            .setMinValues(1)
+                            .setMaxValues(1)
+                            .setPlaceholder('Attacke auswählen')
+                    )
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                     for (const attack of this.attacks) {
                         //@ts-ignore
                         let attackData = usable[attack.id]
@@ -188,23 +199,20 @@ export default class BattleUser {
                             value: `${attackData.description}\n**Stärke**: ${attackData.stength}\n**Genauigkeit**: ${attackData.accuracy}\n**AP**: ${attack.uses}/${attackData.maxUses}`,
                             inline: true
                         }])
-                        buttons[0].components.length == 3 && buttons.unshift(new Discord.ActionRowBuilder<Discord.ButtonBuilder>())
-                        buttons[0].addComponents(
-                            new Discord.ButtonBuilder()
-                                .setCustomId(`battle:user.exit:${attack.id}`)
-                                .setLabel(attackData.name)
-                                .setStyle(Discord.ButtonStyle.Secondary)
-                        )
+                        menu.components[0].addOptions([
+                            {
+                                label: attackData.name,
+                                value: attack.id
+                            }
+                        ])
                     }
-                    buttons.reverse().push(new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-                        .addComponents(
-                            new Discord.ButtonBuilder()
-                                .setCustomId('battle:user.home')
-                                .setEmoji(emotes.back)
-                                .setStyle(Discord.ButtonStyle.Danger)
-                        )
+                    buttons.addComponents(
+                        new Discord.ButtonBuilder()
+                            .setCustomId('battle:user.home')
+                            .setEmoji(emotes.back)
+                            .setStyle(Discord.ButtonStyle.Danger)
                     )
-                    await this.updateMessage({ embeds: [imageEmbed, embed], components: buttons })
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: [ menu, buttons ] })
                     break
             }
             this.interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 })
