@@ -222,7 +222,7 @@ export default class BattleUser {
                         target:
                             0: Einzelnes Ziel Gegner
                             1: Einzelnes Ziel: man selbst
-                            2: Einzelnes Ziel: Teammitglied
+                            2: Einzelnes Ziel: Teammitglied (exklusiv)
                             3: Einzelnes Ziel: Irgendwer (exklusiv)
                             4: Einzelnes Ziel: Irgendwer (inklusiv)
                             5: Mehrere Ziele: eigenes Team (exklusiv)
@@ -239,12 +239,20 @@ export default class BattleUser {
                         action: move.name,
                         user: this
                     }
-                    if (targetType != 0 && targetType != 2 && targetType != 3) break loop
+                    move.targets = 
+                        targetType == 1 ? [this.id] :
+                        targetType == 5 ? users.filter(u => u.team == this.team && u.id != this.id).map(u => u.id) :
+                        targetType == 6 ? users.filter(u => u.team == this.team).map(u => u.id) :
+                        targetType == 7 ? users.filter(u => u.team != this.team).map(u => u.id) :
+                        targetType == 8 ? users.filter(u => u.id != this.id).map(u => u.id) :
+                        targetType == 9 ? users.map(u => u.id) : []
+                    if (targetType != 0 && targetType != 2 && targetType != 3 && targetType != 4) break loop
                     let targets = users.filter(u => {
                         return (
-                            targetType == 0 && u.team != this.team ||
-                            targetType == 2 && u.team == this.team ||
-                            targetType == 3
+                            (targetType == 0 && u.team != this.team) ||
+                            (targetType == 2 && u.team == this.team && u.id != this.id) ||
+                            (targetType == 3 && u.id != this.id) ||
+                            (targetType == 4)
                         )
                     })
                     let embed = new Discord.EmbedBuilder()
@@ -281,5 +289,6 @@ export default class BattleUser {
             //@ts-ignore
             this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
         }
+        return true
     }
 }

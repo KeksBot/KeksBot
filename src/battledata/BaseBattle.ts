@@ -6,7 +6,7 @@ import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
     #actions: {
-        targets: string[],
+        targets?: string[],
         action: string,
         user: BattleUser
     }[]
@@ -141,8 +141,7 @@ export default class BaseBattle {
                     })
                 }
             }
-            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch()
-            status[u.id] = true
+            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(err => {console.error(err)})
             if(status.values().length != this.users.size) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
@@ -150,7 +149,7 @@ export default class BaseBattle {
             })
         }))
         if(status.values().length != this.users.size) {
-            for await (const u of this.users.values()) {
+            for (const u of this.users.values()) {
                 await u.updateMessage({
                     embeds: [
                         new Discord.EmbedBuilder()
