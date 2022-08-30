@@ -6,7 +6,7 @@ import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
     #actions: {
-        targets: string[],
+        targets?: string[],
         action: string,
         user: BattleUser
     }[]
@@ -82,21 +82,31 @@ export default class BaseBattle {
                     let embedWaitingForOthers = new Discord.EmbedBuilder()
                         .setColor(this.color.yellow)
                         .setTitle('Kampfvorbereitung')
-                        .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
+                        .setDescription('Bitte warte noch einen Moment, bis die anderen Teilnehmer auch bereit sind.')
                         .setFooter({ text: 'Nach 2 Minuten wird das Matchmaking abgebrochen.' })
                         .setImage(imageUrl)
 
-                    await Promise.all(this.users.map(async u => {
+                    for (const u of this.users.values()) {
                         if(ready[u.id]) await u.updateMessage({ embeds: [embedWaitingForOthers] })   
                         else await u.updateMessage({ embeds: [embedWaiting] }) 
-                    }))
+                    }
                 }
                 oldReady = {...ready}
-            }), 2000, ready, this.users)
+            }), 2000)
             ready[u.id] = output
+            if(Object.values(ready).includes(false)) {
+                let embed = Discord.EmbedBuilder.from(u.interaction.message.embeds[0])
+                let imageUrl: string 
+                let image = JSON.parse(embed.data.image.url.split('=')[1])
+                image[u.name] = true
+                imageUrl = `${imageRendererAPI}/r?users=${JSON.stringify(image)}`
+                embed.setDescription('Bitte warte noch einen Moment, bis die anderen Teilnehmer auch bereit sind.')
+                    .setImage(imageUrl)
+                await u.updateMessage({ embeds: [embed] })
+            }
         }))
         interval && clearInterval(interval)
-        if ((ready.values().length < this.users.size) && !ready.values().includes(false)) {
+        if ((Object.values(ready).length < this.users.size) && !Object.values(ready).includes(false)) {
             await Promise.all(this.users.map(u => u.updateMessage({
                 embeds: [
                     new Discord.EmbedBuilder()

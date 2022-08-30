@@ -99,8 +99,8 @@ export default class BattleUser {
     }
 
     async updateMessage(options: Discord.MessageEditOptions) {
-        if (this.interaction.replied) return await this.interaction.message.edit(options)
-        return await this.interaction.update(options)
+        if (this.interaction.replied || this.interaction.deferred) return await this.interaction.editReply(options)
+        return await this.interaction.update(Object.assign(options, { fetchReply: true }))
     }
 
     modifySkills() { }
@@ -119,16 +119,12 @@ export default class BattleUser {
                     .setStyle(Discord.ButtonStyle.Secondary)
                     .setCustomId('battle:user.ready')
             )
-        await this.updateMessage({ embeds: [embed], components: [button] })
+        if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
+        else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] })
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
-            .catch(() => { return null })
+            .catch((e) => { return null })
         if (!interaction) return false
         this.interaction = interaction
-        if (this.interaction?.customId != 'battle:user.ready')
-            embed
-                .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
-        //TODO: .setImage(editedImageUrl)
-        this.updateMessage({ embeds: [embed], components: [] })
         return true
     }
 
