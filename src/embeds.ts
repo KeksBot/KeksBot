@@ -66,10 +66,11 @@ export default {
             .setColor(color.red)
             .setTitle(`${emotes.denied} ${title}`)
             .setDescription(text)
+        let message
         if(!edit) {
-            var message = await msg.channel.send({embeds: [embed], components: []})
+            message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit({embeds: [embed], components: []}).catch()
+        else message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
@@ -112,10 +113,11 @@ export default {
             .setColor(color.red)
             .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl auszuführen, benötigst du \`${permission}\`.`)
+        let message
         if(!edit) {
-            var message = await msg.channel.send({embeds: [embed]})
+            message = await msg.channel.send({embeds: [embed]})
         }
-        else var message = await msg.edit({embeds: [embed], components: []}).catch()
+        else message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)
@@ -158,10 +160,11 @@ export default {
             .setColor(color.lime)
             .setTitle(`${emotes.accept} ${title}`)
             .setDescription(text)
+        let message
         if(!edit) {
-            var message = await msg.channel.send({embeds: [embed], components: []})
+            message = await msg.channel.send({embeds: [embed], components: []})
         }
-        else var message = await msg.edit({embeds: [embed], components: []}).catch()
+        else message = await msg.edit({embeds: [embed], components: []}).catch()
         await delay(7500)
         if(!keep && message.deletable) message.delete().catch()
         return Promise.resolve(message)

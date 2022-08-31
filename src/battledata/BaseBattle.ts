@@ -47,6 +47,7 @@ export default class BaseBattle {
     }
 
     async load() {
+        !this.private && this.message.deletable && this.message.delete()
         for (const user of this.users.values()) {
             user.setup(this.color)
         }
@@ -82,21 +83,31 @@ export default class BaseBattle {
                     let embedWaitingForOthers = new Discord.EmbedBuilder()
                         .setColor(this.color.yellow)
                         .setTitle('Kampfvorbereitung')
-                        .setDescription('Bitte warte noch einen Moment, bis alle anderen auch bereit sind...')
+                        .setDescription('Bitte warte noch einen Moment, bis die anderen Teilnehmer auch bereit sind.')
                         .setFooter({ text: 'Nach 2 Minuten wird das Matchmaking abgebrochen.' })
                         .setImage(imageUrl)
 
-                    await Promise.all(this.users.map(async u => {
+                    for (const u of this.users.values()) {
                         if(ready[u.id]) await u.updateMessage({ embeds: [embedWaitingForOthers] })   
                         else await u.updateMessage({ embeds: [embedWaiting] }) 
-                    }))
+                    }
                 }
                 oldReady = {...ready}
-            }), 2000, ready, this.users)
+            }), 2000)
             ready[u.id] = output
+            if(Object.values(ready).includes(false)) {
+                let embed = Discord.EmbedBuilder.from(u.interaction.message.embeds[0])
+                let imageUrl: string 
+                let image = JSON.parse(embed.data.image.url.split('=')[1])
+                image[u.name] = true
+                imageUrl = `${imageRendererAPI}/r?users=${JSON.stringify(image)}`
+                embed.setDescription('Bitte warte noch einen Moment, bis die anderen Teilnehmer auch bereit sind.')
+                    .setImage(imageUrl)
+                await u.updateMessage({ embeds: [embed] })
+            }
         }))
         interval && clearInterval(interval)
-        if ((ready.values().length < this.users.size) && !ready.values().includes(false)) {
+        if ((Object.values(ready).length < this.users.size) && !Object.values(ready).includes(false)) {
             await Promise.all(this.users.map(u => u.updateMessage({
                 embeds: [
                     new Discord.EmbedBuilder()
@@ -110,7 +121,7 @@ export default class BaseBattle {
         for (const user of this.users.values()) {
             user.init()
         }
-        this.afterLoading()
+        return await this.afterLoading()
     }
 
     async afterLoading() {
@@ -141,15 +152,15 @@ export default class BaseBattle {
                     })
                 }
             }
-            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(err => {console.error(err)})
-            if(status.values().length != this.users.size) await u.updateMessage({
+            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => {return false})
+            if(Object.values(status).length != this.users.size && status[u.id]) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
                 ]
             })
         }))
-        if(status.values().length != this.users.size) {
-            for (const u of this.users.values()) {
+        if(Object.values(status).length != this.users.size || Object.values(status).includes(false)) {
+            for await (const u of this.users.values()) {
                 await u.updateMessage({
                     embeds: [
                         new Discord.EmbedBuilder()
