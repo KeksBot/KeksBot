@@ -102,7 +102,7 @@ const options: CommandOptions = {
         //@ts-ignore
         battle.addUser(new BattleUser(ita, 0))
         battle.addUser(new BattleUser(interaction, 1))
-        battle.load()
+        if(await battle.load()) await battle.game()
     }
 }
 

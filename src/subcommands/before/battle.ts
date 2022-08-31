@@ -263,7 +263,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 priority,
                 skills,
                 ready: true,
-                currentHP: skills.find(skill => skill.name == 'HP').value
+                currentHP: skills.find(skill => skill.name == 'HP').value,
+                attacks: ['0']
             }
             await user.setData({ battle })
         }
@@ -272,7 +273,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 embed
                     .setTitle('Daten gespeichert')
                     .setDescription('Alle erforderlichen Daten wurden angelegt.')
-                    .setFooter({text: ''})
+                    .setFooter(null)
                     .setFields([])
                     .setColor(color.lime)
                 await interaction.update({ embeds: [embed], components: [] })
@@ -281,7 +282,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 embed
                     .setTitle('Daten gespeichert')
                     .setDescription('Alle erforderlichen Daten wurden angelegt. Der Prozess wird nun fortgesetzt.')
-                    .setFooter({text: ''})
+                    .setFooter(null)
                     .setFields([])
                     .setColor(color.lime)
                 await interaction.update({ embeds: [embed], components: [] })

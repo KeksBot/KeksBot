@@ -47,6 +47,7 @@ export default class BaseBattle {
     }
 
     async load() {
+        !this.private && this.message.deletable && this.message.delete()
         for (const user of this.users.values()) {
             user.setup(this.color)
         }
@@ -120,7 +121,7 @@ export default class BaseBattle {
         for (const user of this.users.values()) {
             user.init()
         }
-        this.afterLoading()
+        return await this.afterLoading()
     }
 
     async afterLoading() {
@@ -151,15 +152,14 @@ export default class BaseBattle {
                     })
                 }
             }
-            await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch()
-            status[u.id] = true
-            if(status.values().length != this.users.size) await u.updateMessage({
+            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => {return false})
+            if(Object.values(status).length != this.users.size && status[u.id]) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
                 ]
             })
         }))
-        if(status.values().length != this.users.size) {
+        if(Object.values(status).length != this.users.size || Object.values(status).includes(false)) {
             for await (const u of this.users.values()) {
                 await u.updateMessage({
                     embeds: [

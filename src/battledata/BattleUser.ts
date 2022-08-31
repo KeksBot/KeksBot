@@ -10,7 +10,7 @@ export default class BattleUser {
     id: string
     team: number
     skills: UserData['battle']['skills']
-    attacks: [{ id: string, uses: number }]
+    attacks: { id: string, uses: number }[]
     color: Color
     name: string
     move?: {
@@ -37,7 +37,6 @@ export default class BattleUser {
     init() {
         //TODO: Ausrüstung auf Werte anwenden
         this.skills = [...this.battle.skills]
-        //@ts-ignore
         this.attacks = []
         for (const i of this.battle.attacks) {
             this.attacks.push({
@@ -165,7 +164,7 @@ export default class BattleUser {
                             .setDisabled(true),
                         new Discord.ButtonBuilder()
                             .setCustomId('battle:user.attack')
-                            .setLabel('Angriff')
+                            .setLabel('Kampf')
                             .setStyle(Discord.ButtonStyle.Primary),
                         new Discord.ButtonBuilder()
                             .setCustomId('battle:user.surrender')
@@ -271,11 +270,16 @@ export default class BattleUser {
                     break
                 }
             }
-            this.interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 })
+            //@ts-ignore
+            let interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 }).catch((e) => { return false })
+            if (!interaction) return false
+            //@ts-ignore
+            this.interaction = interaction
         } while (!this.interaction.customId.includes('exit'))
         if(this.interaction.customId.endsWith('exit.attack')) {
             //@ts-ignore
             this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
         }
+        return true
     }
 }
