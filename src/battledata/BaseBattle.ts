@@ -1,14 +1,15 @@
 import Discord from 'discord.js'
 import BattleUser from './BattleUser'
-import usable from './usable.js'
+import usable from './usable'
 import emotes from '../emotes.json'
 import { imageRendererAPI } from '../config.json'
 
 export default class BaseBattle {
     #actions: {
         targets?: string[],
-        action: string,
-        user: BattleUser
+        action: number,
+        user: BattleUser,
+        move: BattleAction
     }[]
     users: Discord.Collection<string, BattleUser>
     private: boolean
@@ -173,8 +174,15 @@ export default class BaseBattle {
             return this.client.battles.delete(this.id)
         }
         for (const user of this.users.values()) {
-            this.#actions.push(user.move)
+            this.#actions.push(Object.assign(user.move, { move: usable[user.move.action]}))
         }
+        this.#actions.sort((a, b) => {
+            if(a.move.priority > b.move.priority) return -1
+            if(a.move.priority < b.move.priority) return 1
+
+            if(a.user.skills.find(s => s.name == 'spd') > b.user.skills.find(s => s.name == 'spd')) return -1
+            if(a.user.skills.find(s => s.name == 'spd') < b.user.skills.find(s => s.name == 'spd')) return 1
+        })
     }
 
     async game() {

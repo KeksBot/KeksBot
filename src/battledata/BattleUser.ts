@@ -1,5 +1,5 @@
 import Discord from 'discord.js'
-import usable from './usable.js'
+import usable from './usable'
 import emotes from '../emotes.json'
 
 export default class BattleUser {
@@ -15,7 +15,7 @@ export default class BattleUser {
     name: string
     move?: {
         targets?: string[],
-        action: string,
+        action: number,
         user: BattleUser
     }
 
@@ -193,7 +193,7 @@ export default class BattleUser {
                         let attackData = usable[attack.id]
                         embed.addFields([{
                             name: attackData.name,
-                            value: `${attackData.description}\n**Stärke**: ${attackData.stength}\n**Genauigkeit**: ${attackData.accuracy}\n**AP**: ${attack.uses}/${attackData.maxUses}`,
+                            value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${attackData.accuracy}\n**AP**: ${attack.uses}/${attackData.uses}`,
                             inline: true
                         }])
                         menu.components[0].addOptions([
@@ -231,10 +231,11 @@ export default class BattleUser {
                     let targetType = move.targets || 0
                     this.move = {
                         targets: [],
-                        action: move.name,
+                        //@ts-ignore
+                        action: parseInt(this.interaction.values[0]),
                         user: this
                     }
-                    move.targets = 
+                    this.move.targets = 
                         targetType == 1 ? [this.id] :
                         targetType == 5 ? users.filter(u => u.team == this.team && u.id != this.id).map(u => u.id) :
                         targetType == 6 ? users.filter(u => u.team == this.team).map(u => u.id) :
@@ -279,7 +280,7 @@ export default class BattleUser {
                 }
             }
             //@ts-ignore
-            let interaction = await this.interaction.message.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 60000 }).catch((e) => { return false })
+            let interaction = await this.interaction.message.awaitMessageComponent({ time: 60000 }).catch((e) => { return false })
             if (!interaction) return false
             //@ts-ignore
             this.interaction = interaction

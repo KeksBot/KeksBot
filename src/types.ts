@@ -150,4 +150,16 @@ declare global {
         global?: boolean
         execute(interaction: Discord.CommandInteraction, args: any, client: Discord.Client): any
     }
+
+    interface BattleAction {
+        name: string
+        type: string
+        description: string
+        uses?: number
+        strength?: number
+        priority: number
+        targets?: number
+        accuracy?: number
+        onUse?(battle: BaseBattle, user: BattleUser, targets: [BattleUser]): void
+    }
 }

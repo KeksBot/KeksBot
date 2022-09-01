@@ -20,8 +20,8 @@
         0: Angriffe
 */
 
-export default {
-    '0': {
+const usable: BattleAction[] =  [
+    {
         name: 'Angriff',
         type: 'atk/normal',
         description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz.',
@@ -31,10 +31,12 @@ export default {
         targets: 0,
         priority: 0
     },
-    '1': {
+    {
         name: 'Spezi',
         type: 'item/heal',
         description: 'Das einzigwahre Getränk dieser Welt. Leider aber eigentlich nur ein Platzhalter für ein Item. Hab keinen mehr im Keller :c',
         priority: 9
     }
-}
+]
+
+export default usable
