@@ -50,7 +50,7 @@ const translatepermission = (p: string) => {
     return p
 }
 
-export default {
+const exp = {
     /**
      * 
      * @param {Discord.Message} msg 
@@ -194,12 +194,34 @@ export default {
     }
 }
 
+export default exp
+
 //@ts-ignore
-Discord.BaseInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
-    return await module.exports.success(this, title, description, ephemeral, del)
+Discord.CommandInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.success(this, title, description, ephemeral, del)
 }
 
 //@ts-ignore
-Discord.BaseInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
-    return await exports.error(this, title, description, ephemeral, del)
+Discord.ButtonInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.success(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.SelectMenuInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.success(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.CommandInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.error(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.ButtonInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.error(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.SelectMenuInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await exp.error(this, title, description, ephemeral, del)
 }
