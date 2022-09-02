@@ -155,7 +155,7 @@ export default class BaseBattle {
                     })
                 }
             }
-            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => {return false})
+            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => { return false })
             if(Object.values(status).length != this.users.size && status[u.id]) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),

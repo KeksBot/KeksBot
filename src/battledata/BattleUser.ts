@@ -160,8 +160,9 @@ export default class BattleUser {
             .setColor(this.color.normal)
             .setImage(imageUrl)
             .setFooter(null)
+        let loops = 0
         loop: do {
-            if (this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
+            if (!loops || this.interaction.customId == 'battle:user.home') {
                 let embed = new Discord.EmbedBuilder()
                     .setColor(this.color.normal)
                     .setTitle('Hauptmenü')
@@ -317,12 +318,13 @@ export default class BattleUser {
             if (!interaction) return false
             //@ts-ignore
             this.interaction = interaction
+            loops++
         } while (!this.interaction.customId.includes('exit'))
-        if(this.interaction.customId.endsWith('exit.attack')) {
+        if(this.interaction.customId.endsWith('exit.attack') || this.interaction.customId.endsWith('attackTargetSelection')) {
             //@ts-ignore
-            this.attacks.find(this.move.action).uses--
+            this.attacks.find(a => a.id == this.move.action).uses--
             //@ts-ignore
-            this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
+            if(this.interaction.customId.endsWith('exit.attack')) this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
         }
         return true
     }
