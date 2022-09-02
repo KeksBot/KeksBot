@@ -109,6 +109,8 @@ export default class BattleUser {
             } else scanning = false
         }
 
+        await this.user.save()
+
         if (levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client, false)
     }
 

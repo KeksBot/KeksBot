@@ -116,7 +116,7 @@ export default {
                 {
                     name: 'Statuswerte',
                     //@ts-ignore
-                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
+                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'),
                     inline: true
                 },
                 {
@@ -142,10 +142,10 @@ export default {
     
             skills.forEach((skill: any) => {
                 if(skill.name == 'HP') user.data.battle.currentHP += skill.added
-                skill.added = 0
+                delete skill.added
             })
         }
 
-        await user.setData({ battle: user.data.battle })
+        await user.save()
     }
 }
