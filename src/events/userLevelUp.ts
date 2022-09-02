@@ -7,7 +7,7 @@ import delay from 'delay'
 export default {
     name: 'Level Up Message',
     event: 'userLevelUp',
-    async on(ita: Discord.CommandInteraction | Discord.ButtonInteraction, levelCount: number, client: Discord.Client) {
+    async on(ita: Discord.CommandInteraction | Discord.ButtonInteraction, levelCount: number, client: Discord.Client, followUp?: boolean) {
         const { user, color } = ita
         let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
         let embed = new Discord.EmbedBuilder()
@@ -26,8 +26,12 @@ export default {
         }
         let reply
         let replied = !ita.replied
-        if(!ita.replied) reply = await ita.reply({ embeds: [embed], ephemeral: true, fetchReply: true }) 
-        else reply = await ita.followUp({ embeds: [embed], ephemeral: true, fetchReply: true })
+        if(!ita.replied) reply = await ita.reply({ embeds: [embed], ephemeral: true, fetchReply: true })
+        else if(followUp) reply = await ita.followUp({ embeds: [embed], ephemeral: true })
+        else {
+            reply = await ita.editReply({ embeds: [embed], components: [] })
+            replied = true
+        }
         if(!user.data.battle.ready) return
         await delay(2000)
 

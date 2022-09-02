@@ -1,4 +1,4 @@
-import Discord from 'discord.js'
+import Discord, { CommandInteractionOptionResolver } from 'discord.js'
 import BattleUser from './BattleUser'
 import usable from './usable'
 import emotes from '../emotes.json'
@@ -133,7 +133,8 @@ export default class BaseBattle {
     async round() {
         let status: any = {}
         this.#actions = []
-        let userarray = this.users.map(u => {return { name: u.name, team: u.team, id: u.id }})
+        //@ts-ignore
+        let userarray = this.users.filter(u => u.battle.currentHP).map(u => {return { name: u.name, team: u.team, id: u.id }})
         await Promise.all(this.users.map(async u => {
             let users = []
             users.push({
@@ -161,9 +162,7 @@ export default class BaseBattle {
                 ],
                 components: []
             })
-            else try {
-                await u.interaction?.deferUpdate()
-            } catch (e) {}
+            else await u.updateMessage({ embeds: [Discord.EmbedBuilder.from(u.interaction.message.embeds[0])], components: [] })
         }))
         if(Object.values(status).length != this.users.size || Object.values(status).includes(false)) {
             for await (const u of this.users.values()) {
@@ -185,8 +184,8 @@ export default class BaseBattle {
             if(a.move.priority > b.move.priority) return -1
             if(a.move.priority < b.move.priority) return 1
 
-            if(a.user.skills.find(s => s.name == 'spd') > b.user.skills.find(s => s.name == 'spd')) return -1
-            if(a.user.skills.find(s => s.name == 'spd') < b.user.skills.find(s => s.name == 'spd')) return 1
+            if(a.user.skills.find(s => s.name == 'Geschwindigkeit') > b.user.skills.find(s => s.name == 'Geschwindigkeit')) return -1
+            if(a.user.skills.find(s => s.name == 'Geschwindigkeit') < b.user.skills.find(s => s.name == 'Geschwindigkeit')) return 1
         })
         let calc = this.calculations()
         let done = false
@@ -194,10 +193,9 @@ export default class BaseBattle {
             let { value: text, done: isDone } = await calc.next()
             if(isDone) done = true
             if(done || !text) break
-            const updateDuration = Math.round(2000 / this.users.size)
+            const updateDuration = Math.round(3000 / this.users.size)
 
             let embed = new Discord.EmbedBuilder()
-                .setColor(this.color.normal)
                 .setFooter({ text: text })
             for (const u of this.users.values()) {
                 let users = []
@@ -220,7 +218,8 @@ export default class BaseBattle {
                     }
                 }
                 embed.setImage(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
-                await u.updateMessage({ embeds: [embed] })
+                embed.setColor(u.battle.currentHP <= 0.25 * u.getSkillValue('HP') ? this.color.red : this.color.normal)
+                await u.updateMessage({ embeds: [embed], components: [] })
                 await delay(updateDuration)
             }
             if(text.trim().includes('\n')) await delay(text.trim().split('\n').length * 500)
@@ -228,7 +227,34 @@ export default class BaseBattle {
     }
 
     async game() {
-        this.round()
+        while(true) {
+            await this.round()
+            if(!this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
+            if(!this.users.filter(u => u.team != this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
+        }
+        let winners = !this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.currentHP).includes(true) 
+            ? this.users.filter(u => u.team != this.users.first().team).map(u => u) 
+            : this.users.filter(u => u.team == this.users.first().team).map(u => u)
+        await Promise.all(this.users.map(async (u) => {
+            let embed = new Discord.EmbedBuilder()
+                .setTitle('Kampf beendet')
+                .setColor(this.color.normal)
+                .setDescription(`${winners.map(u => u.name).join(', ').replaceLast(', ', ' und ')} ${winners.length == 1 ? 'hat' : 'haben'} gewonnen!`)
+            let xp = 0
+            if(winners.find(w => w.id == u.id) && u.battle.currentHP > 0) {
+                for (const user of this.users.filter(u => !winners.find(us => us.id == u.id)).values()) {
+                    xp += Math.floor(((((user.user.data.level * 2.7 + 30) * user.user.data.level) / 4 * (((2 * user.user.data.level + 10) ** 2.2) / (u.user.data.level + user.user.data.level + 10) ** 2)) + 1) * 2.3)
+                }
+                embed.setDescription(embed.data.description + `\nDu erhältst ${xp} Erfahrungspunkte`)
+            }
+            await u.updateMessage({ embeds: [embed], components: [] })
+            if(xp) {
+                await delay(3000)
+                await u.addXP(xp)
+            }
+        }))
+        this.client.battles.delete(this.id)
+        return
     }
 
     async * calculations() {
@@ -255,7 +281,7 @@ export default class BaseBattle {
                             )
                         }
                         if(action.move.modifiedSkills) {
-                            for (const skill of action.move.modifiedSkills.filter(s => s.onTarget)) {
+                            for (const skill of action.move.modifiedSkills?.filter(s => s.onTarget)) {
                                 if(skill.probability && Math.random() * 100 >= skill.probability) continue
                                 target.modifySkills(skill.name, skill.value)
                                 text += `${skill.name} von ${target.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
@@ -266,10 +292,12 @@ export default class BaseBattle {
                         //@ts-ignore
                         if(action.move.rHeal?.onTarget) await user.heal(Math.round(target.battle.currentHP / 100 * action.move.rHeal.value))
                     }
-                    for (const skill of action.move.modifiedSkills.filter(s => !s.onTarget)) {
-                        if(skill.probability && Math.random() * 100 >= skill.probability) continue
-                        user.modifySkills(skill.name, skill.value)
-                        text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                    if(action.move.modifiedSkills) {
+                        for (const skill of action.move.modifiedSkills?.filter(s => !s.onTarget)) {
+                            if(skill.probability && Math.random() * 100 >= skill.probability) continue
+                            user.modifySkills(skill.name, skill.value)
+                            text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                        }
                     }
                     if(action.move.onUse) {
                         let out = await action.move.onUse(this, user, action.targets.map(t => this.users.get(t)))
@@ -280,9 +308,11 @@ export default class BaseBattle {
                     //@ts-ignore
                     if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
                     yield text
+                    break
                 case 'item':
 
                     yield ''
+                    break
             }
         }
     }

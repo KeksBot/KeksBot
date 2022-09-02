@@ -80,7 +80,8 @@ export default class BattleUser {
     }
 
     async setHP(hp: number) {
-        this.battle.currentHP = hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp
+        this.battle.currentHP = Math.round(hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp)
+        this.battle.healTimestamp = this.battle.currentHP < this.getSkillValue('HP') ? Date.now() : 0
         await this.user.save()
     }
 
@@ -108,7 +109,7 @@ export default class BattleUser {
             } else scanning = false
         }
 
-        if (levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client)
+        if (levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client, false)
     }
 
     async updateMessage(options: Discord.MessageEditOptions) {
@@ -157,7 +158,6 @@ export default class BattleUser {
     async chooseAction(imageUrl: string, users: { name: string, team: any, id: string }[]) {
         let imageEmbed = new Discord.EmbedBuilder()
             .setColor(this.color.normal)
-            .setTitle('Insert Name here')
             .setImage(imageUrl)
             .setFooter(null)
         loop: do {
