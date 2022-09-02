@@ -35,7 +35,7 @@ var userdataSchema = Schema({
             id: String,
             count: Number,
         }],
-        attacks: [String],
+        attacks: [Number],
     }
 }, { strict: true })
 

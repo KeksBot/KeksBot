@@ -18,9 +18,10 @@ export default {
             })
             .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.data.level} erreicht!`)
         if(user.data.battle.ready) {
-            var { skills }: any = user.data.battle
+            var { skills } = user.data.battle
             embed
-                .addFields([{name: 'Statuswerte', value: skills.map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
+                //@ts-ignore
+                .addFields([{name: 'Statuswerte', value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
                 .setDescription(embed.data.description)
         }
         let reply
@@ -33,6 +34,7 @@ export default {
         skills = user.data.battle.skills
 
         for (let l = levelCount || 0; l > 0; l--) {
+            //@ts-ignore
             skills.forEach((skill: any) => {
                 //@ts-ignore
                 let added = (skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2
@@ -49,12 +51,14 @@ export default {
         embed.setFields([
             {
                 name: 'Statuswerte',
-                value: skills.map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
+                //@ts-ignore
+                value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
                 inline: true
             },
             {
                 name: '​',
-                value: skills.map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                //@ts-ignore
+                value: skills.filter(s => !skillinformation[s.name].hidden).map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
                 inline: true
             }
         ])
@@ -91,7 +95,6 @@ export default {
             const interaction = await reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita
             //@ts-ignore
             const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
-            user.data.battle.priority
     
             skills.forEach((skill: any) => {
                 if(skill.name != sk) return skill.added = 0
@@ -108,12 +111,14 @@ export default {
             embed.setFields([
                 {
                     name: 'Statuswerte',
-                    value: skills.map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
+                    //@ts-ignore
+                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
                     inline: true
                 },
                 {
                     name: '​',
-                    value: skills.map((skill: any) => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                    //@ts-ignore
+                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
                     inline: true
                 }
             ])

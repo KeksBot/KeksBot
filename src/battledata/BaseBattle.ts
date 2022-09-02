@@ -3,6 +3,7 @@ import BattleUser from './BattleUser'
 import usable from './usable'
 import emotes from '../emotes.json'
 import { imageRendererAPI } from '../config.json'
+import delay from 'delay'
 
 export default class BaseBattle {
     #actions: {
@@ -157,8 +158,12 @@ export default class BaseBattle {
             if(Object.values(status).length != this.users.size && status[u.id]) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
-                ]
+                ],
+                components: []
             })
+            else try {
+                await u.interaction?.deferUpdate()
+            } catch (e) {}
         }))
         if(Object.values(status).length != this.users.size || Object.values(status).includes(false)) {
             for await (const u of this.users.values()) {
@@ -183,6 +188,43 @@ export default class BaseBattle {
             if(a.user.skills.find(s => s.name == 'spd') > b.user.skills.find(s => s.name == 'spd')) return -1
             if(a.user.skills.find(s => s.name == 'spd') < b.user.skills.find(s => s.name == 'spd')) return 1
         })
+        let calc = this.calculations()
+        let done = false
+        while(!done) {
+            let { value: text, done: isDone } = await calc.next()
+            if(isDone) done = true
+            if(done || !text) break
+            const updateDuration = Math.round(2000 / this.users.size)
+
+            let embed = new Discord.EmbedBuilder()
+                .setColor(this.color.normal)
+                .setFooter({ text: text })
+            for (const u of this.users.values()) {
+                let users = []
+                users.push({
+                    n: u.member.displayName,
+                    h: u.battle.currentHP,
+                    m: u.skills.find(s => s.name == 'HP').value,
+                    l: u.user.data.level,
+                    t: u.team
+                })
+                for (const user of this.users.values()) {
+                    if (user.id != u.id) {
+                        users.push({
+                            n: user.member.displayName,
+                            h: user.battle.currentHP,
+                            m: user.skills.find(s => s.name == 'HP').value,
+                            l: user.user.data.level,
+                            t: user.team
+                        })
+                    }
+                }
+                embed.setImage(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
+                await u.updateMessage({ embeds: [embed] })
+                await delay(updateDuration)
+            }
+            if(text.trim().includes('\n')) await delay(text.trim().split('\n').length * 500)
+        }
     }
 
     async game() {
@@ -190,6 +232,58 @@ export default class BaseBattle {
     }
 
     async * calculations() {
+        for (const action of this.#actions) {
+            let actionType = action.move.type.split('/')[0]
+            const { user } = action
+            if(user.battle.currentHP <= 0) continue
+            switch(actionType) {
+                case 'atk':
+                    let text = `${user.name} setzt ${action.move.name} ein.\n`
+                    for (const t of action.targets) {
+                        const target = this.users.get(t)
+                        let hit = Math.random() * 100
+                        let acu = user.getSkillValue('Genauigkeit') * action.move.accuracy
+                        acu = acu > 100 ? 100 : acu
+                        if(hit >= acu) {
+                            if(action.targets.length == 1) yield 'Daneben!'
+                            text += `${target.name} ist ausgewichen!\n`
+                            continue
+                        }
+                        if(action.move.strength) {
+                            await target.setHP(target.battle.currentHP - 
+                                ((user.getSkillValue('Angriff') * action.move.strength / target.getSkillValue('Verteidigung')) * 1.6 * (1 + user.user.data.level / 100))
+                            )
+                        }
+                        if(action.move.modifiedSkills) {
+                            for (const skill of action.move.modifiedSkills.filter(s => s.onTarget)) {
+                                if(skill.probability && Math.random() * 100 >= skill.probability) continue
+                                target.modifySkills(skill.name, skill.value)
+                                text += `${skill.name} von ${target.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                            }
+                        }
+                        //@ts-ignore
+                        if(action.move.aHeal?.onTarget) await target.heal(action.move.aHeal.value)
+                        //@ts-ignore
+                        if(action.move.rHeal?.onTarget) await user.heal(Math.round(target.battle.currentHP / 100 * action.move.rHeal.value))
+                    }
+                    for (const skill of action.move.modifiedSkills.filter(s => !s.onTarget)) {
+                        if(skill.probability && Math.random() * 100 >= skill.probability) continue
+                        user.modifySkills(skill.name, skill.value)
+                        text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                    }
+                    if(action.move.onUse) {
+                        let out = await action.move.onUse(this, user, action.targets.map(t => this.users.get(t)))
+                        if(out) text += out
+                    }
+                    //@ts-ignore
+                    if(action.move.aHeal && !action.move.aHeal.onTarget) await user.heal(action.move.aHeal.value)
+                    //@ts-ignore
+                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
+                    yield text
+                case 'item':
 
+                    yield ''
+            }
+        }
     }
 }

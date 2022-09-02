@@ -9,7 +9,11 @@ export default class BattleUser {
     battle: UserData['battle']
     id: string
     team: number
-    skills: UserData['battle']['skills']
+    skills: {
+        name: string
+        value: number
+        getValue?: () => number
+    }[]
     attacks: { id: string, uses: number }[]
     color: Color
     name: string
@@ -18,6 +22,7 @@ export default class BattleUser {
         action: number,
         user: BattleUser
     }
+    skillChanges?: UserData['battle']['skills']
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -37,13 +42,23 @@ export default class BattleUser {
     init() {
         //TODO: Ausrüstung auf Werte anwenden
         this.skills = [...this.battle.skills]
+        this.skillChanges = []
         this.attacks = []
         for (const i of this.battle.attacks) {
             this.attacks.push({
-                id: i,
-                //@ts-ignore
+                id: String(i),
                 uses: usable[i].uses
             })
+        }
+        for (const skill of this.skills) {
+            let index = this.skills.findIndex(s => s.name == skill.name)
+            this.skillChanges[index] = {
+                name: skill.name,
+                value: 1
+            }
+        }
+        for (const s of this.skills) {
+            s.getValue = () => Math.round(s.value * this.skillChanges.find(skill => skill.name == s.name).value)
         }
     }
 
@@ -66,7 +81,6 @@ export default class BattleUser {
 
     async setHP(hp: number) {
         this.battle.currentHP = hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp
-        this.battle.currentHP = hp
         await this.user.save()
     }
 
@@ -102,7 +116,20 @@ export default class BattleUser {
         return await this.interaction.update(Object.assign(options, { fetchReply: true }))
     }
 
-    modifySkills() { }
+    modifySkills(skill: string, value: number) {
+        let index = this.skillChanges.findIndex(s => s.name == skill)
+        let oldValue = this.skillChanges[index].value
+        for (let i = 0; i < Math.abs(value); i++) {
+            if (value > 0 && oldValue < 3) this.skillChanges[index].value /= 0.8
+            else if(value < 0 && oldValue > 0.3) this.skillChanges[index].value *= 0.8
+        }
+        if(oldValue == this.skillChanges[index].value) return false
+        return true
+    }
+
+    getSkillValue(skill: string) {
+        return this.skills.find(s => s.name == skill).getValue()
+    }
 
     async ready(imageUrl: string) {
         let embed = new Discord.EmbedBuilder()
@@ -132,6 +159,7 @@ export default class BattleUser {
             .setColor(this.color.normal)
             .setTitle('Insert Name here')
             .setImage(imageUrl)
+            .setFooter(null)
         loop: do {
             if (this.interaction.customId.includes('exit') || this.interaction.customId.includes('ready') || this.interaction.customId.includes('home')) {
                 let embed = new Discord.EmbedBuilder()
@@ -193,7 +221,7 @@ export default class BattleUser {
                         let attackData = usable[attack.id]
                         embed.addFields([{
                             name: attackData.name,
-                            value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${attackData.accuracy}\n**AP**: ${attack.uses}/${attackData.uses}`,
+                            value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
                             inline: true
                         }])
                         menu.components[0].addOptions([

@@ -34,8 +34,9 @@ const usable: BattleAction[] =  [
     {
         name: 'Spezi',
         type: 'item/heal',
-        description: 'Das einzigwahre Getränk dieser Welt. Leider aber eigentlich nur ein Platzhalter für ein Item. Hab keinen mehr im Keller :c',
-        priority: 9
+        description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut.',
+        priority: 9,
+        aHeal: 500
     }
 ]
 

@@ -89,19 +89,31 @@ declare global {
                 id: string,
                 count: number,
             }?],
-            attacks?: [string],
+            attacks?: [number],
         }
     }
 
     interface BattleUser {
         user: Discord.User
         member: Discord.GuildMember
-        interaction: Discord.ButtonInteraction
+        interaction: Discord.ButtonInteraction | Discord.SelectMenuInteraction
         battle: UserData['battle']
         id: string
         team: number
-        skills: UserData['battle']['skills']
-        attacks: [{ id: string, uses: number }]
+        skills: {
+            name: string
+            value: number
+            getValue?: () => number
+        }[]
+        attacks: { id: string, uses: number }[]
+        color: Color
+        name: string
+        move?: {
+            targets?: string[],
+            action: number,
+            user: BattleUser
+        }
+        skillChanges?: UserData['battle']['skills']
     }
 
     interface BaseBattle {
@@ -160,6 +172,20 @@ declare global {
         priority: number
         targets?: number
         accuracy?: number
-        onUse?(battle: BaseBattle, user: BattleUser, targets: [BattleUser]): void
+        onUse?(battle: BaseBattle, user: BattleUser, targets: BattleUser[]): Promise<string | void> | string | void
+        aHeal?: {
+            onTarget?: boolean
+            value: number
+        } | number
+        rHeal?: {
+            onTarget?: boolean
+            value: number
+        } | number
+        modifiedSkills?: {
+            name: string
+            value: number
+            onTarget?: boolean
+            probability?: number
+        }[]
     }
 }
