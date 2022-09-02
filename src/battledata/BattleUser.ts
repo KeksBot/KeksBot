@@ -224,12 +224,13 @@ export default class BattleUser {
                             value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
                             inline: true
                         }])
-                        menu.components[0].addOptions([
-                            {
-                                label: attackData.name,
-                                value: attack.id
-                            }
-                        ])
+                        if(attack.uses > 0) 
+                            menu.components[0].addOptions([
+                                {
+                                    label: attackData.name,
+                                    value: attack.id
+                                }
+                            ])
                     }
                     buttons.addComponents(
                         new Discord.ButtonBuilder()
@@ -279,6 +280,10 @@ export default class BattleUser {
                             (targetType == 4)
                         )
                     })
+                    if(targets.length < 2) {
+                        this.move.targets = targets.map(u => u.id)
+                        break loop
+                    } 
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.color.normal)
                         .setTitle('Zielauswahl')
@@ -314,6 +319,8 @@ export default class BattleUser {
             this.interaction = interaction
         } while (!this.interaction.customId.includes('exit'))
         if(this.interaction.customId.endsWith('exit.attack')) {
+            //@ts-ignore
+            this.attacks.find(this.move.action).uses--
             //@ts-ignore
             this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
         }
