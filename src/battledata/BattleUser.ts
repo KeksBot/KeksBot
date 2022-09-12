@@ -151,7 +151,7 @@ export default class BattleUser {
         if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
         else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] })
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
-            .catch((e) => { return null })
+            .catch((e) => { console.log(e); return null })
         if (!interaction) return false
         this.interaction = interaction
         return true
@@ -159,14 +159,14 @@ export default class BattleUser {
 
     async chooseAction(imageUrl: string, users: { name: string, team: any, id: string }[]) {
         let imageEmbed = new Discord.EmbedBuilder()
-            .setColor(this.color.normal)
+            .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
             .setImage(imageUrl)
             .setFooter(null)
         let loops = 0
         loop: do {
             if (!loops || this.interaction.customId == 'battle:user.home') {
                 let embed = new Discord.EmbedBuilder()
-                    .setColor(this.color.normal)
+                    .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                     .setTitle('Hauptmenü')
                     .setDescription('Bitte wähle eine Aktion aus')
                     .addFields([
@@ -208,7 +208,7 @@ export default class BattleUser {
                 case 'attack': {
                     delete this.move
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.color.normal)
+                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle('Kampfmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
@@ -288,7 +288,7 @@ export default class BattleUser {
                         break loop
                     } 
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.color.normal)
+                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle('Zielauswahl')
                         .setDescription('Bitte wähle das Ziel für deinen Angriff aus')
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
@@ -316,7 +316,7 @@ export default class BattleUser {
                 }
             }
             //@ts-ignore
-            let interaction = await this.interaction.message.awaitMessageComponent({ time: 60000 }).catch((e) => { return false })
+            let interaction = await this.interaction.message.awaitMessageComponent({ time: 60000 }).catch((e) => { console.log(e); return false })
             if (!interaction) return false
             //@ts-ignore
             this.interaction = interaction

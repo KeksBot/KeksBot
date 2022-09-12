@@ -155,7 +155,7 @@ export default class BaseBattle {
                     })
                 }
             }
-            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => { return false })
+            status[u.id] = await u.chooseAction(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`, userarray).catch(e => { console.log(e); return false })
             if(Object.values(status).length != this.users.size && status[u.id]) await u.updateMessage({
                 embeds: [
                     Discord.EmbedBuilder.from(u.interaction.message.embeds[0]).setFooter({ text: 'Bitte warte noch einen Moment, bis alle anderen eine Eingabe getätigt haben.'}),
@@ -277,7 +277,7 @@ export default class BaseBattle {
                         }
                         if(action.move.strength) {
                             await target.setHP(target.battle.currentHP - 
-                                ((user.getSkillValue('Angriff') * action.move.strength / target.getSkillValue('Verteidigung')) * 1.6 * (1 + user.user.data.level / 100))
+                                ((user.getSkillValue('Angriff') / target.getSkillValue('Verteidigung')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.data.level / 100)
                             )
                         }
                         if(action.move.modifiedSkills) {
