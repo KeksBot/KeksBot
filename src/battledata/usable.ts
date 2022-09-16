@@ -12,8 +12,9 @@
         9: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
     
     Prioritäten: -10 - 10
-        9: Erstzug Items
-        8: Items
+        9: Flucht
+        8: Erstzug Items
+        7: Items
         3: Erstzug Angriffe T3
         2: Erstzug Angriffe T2
         1: Erstzug Angriffe T1
@@ -24,7 +25,7 @@ const usable: BattleAction[] =  [
     {
         name: 'Angriff',
         type: 'atk/normal',
-        description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz.',
+        description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz',
         uses: 40,
         strength: 40,
         accuracy: 100,
@@ -33,10 +34,21 @@ const usable: BattleAction[] =  [
     },
     {
         name: 'Spezi',
-        type: 'item/heal',
-        description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut.',
-        priority: 9,
-        aHeal: 500
+        type: 'item/med',
+        description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut',
+        priority: 8,
+        aHeal: 500,
+        fightUsable: true
+    },
+    {
+        name: 'Sternenstaub',
+        type: 'item/item',
+        description: 'Ein kleiner Haufen kosmischen Staubs. Eröffnet neue Wege'
+    },
+    {
+        name: 'Kometenstück',
+        type: 'item/item',
+        description: 'Fragment eines Kometen'
     }
 ]
 

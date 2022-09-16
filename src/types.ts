@@ -169,23 +169,24 @@ declare global {
         description: string
         uses?: number
         strength?: number
-        priority: number
+        priority?: number
         targets?: number
         accuracy?: number
         onUse?(battle: BaseBattle, user: BattleUser, targets: BattleUser[]): Promise<string | void> | string | void
         aHeal?: {
-            onTarget?: boolean
+            onTarget?: boolean // Anwender oder Ziel 
             value: number
         } | number
         rHeal?: {
-            onTarget?: boolean
+            onTarget?: boolean // Anwender oder Ziel 
             value: number
         } | number
         modifiedSkills?: {
             name: string
             value: number
-            onTarget?: boolean
+            onTarget?: boolean // Anwender oder Ziel 
             probability?: number
-        }[]
+        }[],
+        fightUsable?: boolean
     }
 }

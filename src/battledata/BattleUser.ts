@@ -191,8 +191,7 @@ export default class BattleUser {
                         new Discord.ButtonBuilder()
                             .setLabel('Beutel')
                             .setStyle(Discord.ButtonStyle.Secondary)
-                            .setCustomId('battle:user.inventory')
-                            .setDisabled(true),
+                            .setCustomId('battle:user.inventory'),
                         new Discord.ButtonBuilder()
                             .setCustomId('battle:user.attack')
                             .setLabel('Kampf')
@@ -314,9 +313,138 @@ export default class BattleUser {
                     await this.updateMessage({ embeds: [imageEmbed, embed], components: [menu, buttons] })
                     break
                 }
+                case 'inventory': {
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setTitle('Hauptmenü')
+                        .setDescription('Bitte wähle eine Aktion aus')
+                        .addFields([
+                            {
+                                name: 'Beutel',
+                                value: 'Öffnet dein Inventar, um Items zu benutzen',
+                                inline: true
+                            },
+                            {
+                                name: 'Kampf',
+                                value: 'Öffnet das Kampfmenü',
+                                inline: true
+                            },
+                            {
+                                name: 'Flucht',
+                                value: 'Beendet deine Teilnahme am Kampf und kann zu einer Niederlage führen',
+                                inline: true
+                            }
+                        ])
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setLabel('Beutel')
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setCustomId('battle:user.inventory'),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('battle:user.attack')
+                                .setLabel('Kampf')
+                                .setStyle(Discord.ButtonStyle.Primary),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('battle:user.surrender')
+                                .setLabel('Flucht')
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(true)
+                        )
+                    let selectMenu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                        .addComponents(
+                            new Discord.SelectMenuBuilder()
+                                .setCustomId('battle:user.selectInvCategory')
+                                .setPlaceholder('Kategorie auswählen')
+                                .addOptions([
+                                    {
+                                        label: 'Medizin',
+                                        value: 'med',
+                                    },
+                                    {
+                                        label: 'Kampf',
+                                        value: 'atk'
+                                    },
+                                    {
+                                        label: 'Items',
+                                        value: 'item'
+                                    },
+                                    {
+                                        label: 'Basis-Items',
+                                        value: 'base'
+                                    }
+                                ])
+                                .setMaxValues(1)
+                        )
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: [selectMenu, buttons] })
+                    break
+                }
+                case 'selectInvCategory': {
+                    //@ts-ignore
+                    let type = `item/${this.interaction.values[0] || this.interaction.customId.split('.')[2]}`
+                    //@ts-ignore
+                    let items = this.battle.inventory.filter(i => usable[i.id].type == type).map(i => { return { id: i.id, count: i.count, name: usable[i.id].name, description: usable[i.id].description, u: usable[i.id].fightUsable } })
+                    let page = parseInt(this.interaction.customId.split('.')[3]) || 1
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setTitle(
+                            type == 'item/med' ? 'Medizintasche' :
+                            type == 'item/atk' ? 'Kampfbeutel' :
+                            type == 'item/item' ? 'Itembeutel' :
+                            type == 'item/base' ? 'Basis-Itembeutel' : 'Inventar'
+                        )
+                        .addFields(items.slice(page * 25 - 25, page * 25).map(i => {
+                            return {
+                                name: `${i.name} (${i.count}x)`,
+                                value: i.description || 'Keine Beschreibung verfügbar' + !i.u ? '\nKann nicht in einem Kampf benutzt werden' : '',
+                                inline: true
+                            }
+                        }))
+                    if(items.length > 25) {
+                        embed.setFooter({ text: `Seite ${page} von ${Math.ceil(items.length / 25)}` })
+                    }
+                    let selectMenu = items.slice(page * 25 - 25, page * 25).filter(i => i.u).length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                        .addComponents(
+                            new Discord.SelectMenuBuilder()
+                                .setCustomId('battle:user.selectItem')
+                                .setPlaceholder('Item auswählen')
+                                .addOptions(items.slice(page * 25 - 25, page * 25).filter(i => i.u).map(i => {
+                                    return {
+                                        label: `${i.name} (${i.count}x)`,
+                                        value: i.id
+                                    }
+                                }))
+                                .setMaxValues(1)
+                        ) : null
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId('battle:user.inventory')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger)
+                        )
+                    if(items.length > 25) {
+                        buttons.addComponents(
+                            new Discord.ButtonBuilder()
+                                //@ts-ignore
+                                .setCustomId(`battle:user.selectInvCategory.${this.interaction.values[0] || this.interaction.customId.split('.')[2]}.${page - 1}`)
+                                .setEmoji(emotes.next)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(page <= 1),
+                            new Discord.ButtonBuilder()
+                                //@ts-ignore
+                                .setCustomId(`battle:user.selectInvCategory.${this.interaction.values[0] || this.interaction.customId.split('.')[2]}.${page + 1}`)
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(page >= Math.ceil(items.length / 25))
+                        )
+                    }
+                    await this.updateMessage({ embeds: [embed], components: selectMenu ? [selectMenu, buttons] : [buttons] })
+                    break
+                }
             }
             //@ts-ignore
-            let interaction = await this.interaction.message.awaitMessageComponent({ time: 60000 }).catch((e) => { console.log(e); return false })
+            let interaction = await this.interaction.message.awaitMessageComponent({ time: 120000 }).catch((e) => { console.log(e); return false })
             if (!interaction) return false
             //@ts-ignore
             this.interaction = interaction
