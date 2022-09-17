@@ -100,7 +100,6 @@ export default class BaseBattle {
             if(Object.values(ready).includes(false)) {
                 let embed = Discord.EmbedBuilder.from(u.interaction.message.embeds[0])
                 let imageUrl: string 
-                console.log(decodeURIComponent(embed.data.image.url.split('=')[1]))
                 let image = JSON.parse(decodeURIComponent(embed.data.image.url.split('=')[1]))
                 image[u.name] = true
                 imageUrl = `${imageRendererAPI}/r?users=${JSON.stringify(image)}`
@@ -179,7 +178,7 @@ export default class BaseBattle {
             return this.client.battles.delete(this.id)
         }
         for (const user of this.users.values()) {
-            this.#actions.push(Object.assign(user.move, { move: usable[user.move.action]}))
+            this.#actions.push(Object.assign(user.move, { move: usable.get(user.move.action) }))
         }
         this.#actions.sort((a, b) => {
             if(a.move.priority > b.move.priority) return -1

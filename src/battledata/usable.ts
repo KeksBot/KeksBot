@@ -21,36 +21,47 @@
         0: Angriffe
 */
 
-const usable: BattleAction[] =  [
-    {
-        name: 'Angriff',
-        type: 'atk/normal',
-        description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz',
-        uses: 40,
-        strength: 40,
-        accuracy: 100,
-        targets: 0,
-        priority: 0
-    },
-    {
-        name: 'Spezi',
-        type: 'item/med',
-        description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut',
-        priority: 8,
-        aHeal: { value: 500 },
-        fightUsable: true,
-        usageMessage: '{user} trinkt eine Flasche Spezi'
-    },
-    {
-        name: 'Sternenstaub',
-        type: 'item/item',
-        description: 'Ein kleiner Haufen kosmischen Staubs. Eröffnet neue Wege'
-    },
-    {
-        name: 'Kometenstück',
-        type: 'item/item',
-        description: 'Fragment eines Kometen'
-    }
-]
+const usable: Map<Number, BattleAction> = new Map(
+    [
+        [
+            0, {
+                name: 'Angriff',
+                type: 'atk/normal',
+                description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz',
+                uses: 40,
+                strength: 40,
+                accuracy: 100,
+                targets: 0,
+                priority: 0
+            }
+        ],
+        [
+            1, {
+                name: 'Spezi',
+                type: 'item/med',
+                description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut',
+                priority: 8,
+                aHeal: { value: 500 },
+                fightUsable: true,
+                usageMessage: '{user} trinkt eine Flasche Spezi'
+        
+            }
+        ],
+        [
+            2, {
+                name: 'Sternenstaub',
+                type: 'item/item',
+                description: 'Ein kleiner Haufen kosmischen Staubs. Eröffnet neue Wege'        
+            }
+        ],
+        [
+            3, {
+                name: 'Kometenstück',
+                type: 'item/item',
+                description: 'Fragment eines Kometen'        
+            }
+        ]
+    ]
+)
 
 export default usable

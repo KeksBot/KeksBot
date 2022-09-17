@@ -43,7 +43,7 @@ export default async (interaction: CommandInteraction | ButtonInteraction | Moda
             .setColor(interaction?.color?.red || 'Red')
             .setTitle(`Fehler`)
             .setDescription(`Ein Fehler ist aufgetreten und der Command konnte nicht ordnungsgemäß ausgeführt werden.\nFehler-Code: ${errorId}`)
-        await interaction.followUp({ embeds: [embed], ephemeral: true })
-    } catch (error) {console.error}
-
+        if(interaction.replied) await interaction.followUp({ embeds: [embed], ephemeral: true })
+        else await interaction.reply({ embeds: [embed], ephemeral: true })
+    } catch (error) {console.error(error)}
 }

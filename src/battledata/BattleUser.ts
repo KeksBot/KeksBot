@@ -47,7 +47,7 @@ export default class BattleUser {
         for (const i of this.battle.attacks) {
             this.attacks.push({
                 id: String(i),
-                uses: usable[i].uses
+                uses: usable.get(i).uses
             })
         }
         for (const skill of this.skills) {
@@ -225,8 +225,7 @@ export default class BattleUser {
                     )
                     let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                     for (const attack of this.attacks) {
-                        //@ts-ignore
-                        let attackData = usable[attack.id]
+                        let attackData = usable.get(parseInt(attack.id))
                         embed.addFields([{
                             name: attackData.name,
                             value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
@@ -264,7 +263,7 @@ export default class BattleUser {
                             9: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
                     */
                     //@ts-ignore
-                    let move = usable[this.interaction.values[0]]
+                    let move = usable.get(parseInt(this.interaction.values[0]))
                     let targetType = move.targets || 0
                     this.move = {
                         targets: [],
@@ -389,7 +388,7 @@ export default class BattleUser {
                     //@ts-ignore
                     let type = `item/${this.interaction.values[0] || this.interaction.customId.split('.')[2]}`
                     //@ts-ignore
-                    let items = this.battle.inventory.filter(i => usable[i.id].type == type).map(i => { return { id: i.id, count: i.count, name: usable[i.id].name, description: usable[i.id].description, u: usable[i.id].fightUsable } })
+                    let items = this.battle.inventory.filter(i => usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: usable.get(i.id).name, description: usable.get(i.id).description, u: usable.get(i.id).fightUsable } })
                     let page = parseInt(this.interaction.customId.split('.')[3]) || 1
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)

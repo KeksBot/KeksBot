@@ -34,6 +34,7 @@ var userdataSchema = Schema({
         inventory: [{
             id: Number,
             count: Number,
+            _id: false
         }],
         attacks: [Number],
     }
