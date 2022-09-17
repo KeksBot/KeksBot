@@ -264,7 +264,9 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 skills,
                 ready: true,
                 currentHP: skills.find(skill => skill.name == 'HP').value,
-                attacks: ['0']
+                attacks: ['0'],
+                inventory: [{ id: 1, count: 3 }],
+                healTimestamp: Date.now()
             }
             await user.setData({ battle })
         }

@@ -118,9 +118,9 @@ export default class BattleUser {
         if (levelup) this.interaction.client.emit('userLevelUp', this.interaction, levelcount, this.interaction.client, false)
     }
 
-    async updateMessage(options: Discord.MessageEditOptions) {
-        if (this.interaction.replied || this.interaction.deferred) return await this.interaction.editReply(options)
-        return await this.interaction.update(Object.assign(options, { fetchReply: true }))
+    updateMessage(options: Discord.MessageEditOptions) {
+        if (this.interaction.replied || this.interaction.deferred) return this.interaction.editReply(options)
+        return this.interaction.update(Object.assign(options, { fetchReply: true }))
     }
 
     modifySkills(skill: string, value: number) {
@@ -152,8 +152,10 @@ export default class BattleUser {
                     .setStyle(Discord.ButtonStyle.Secondary)
                     .setCustomId('battle:user.ready')
             )
-        if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true })
-        else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] })
+        //@ts-ignore
+        if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true }).catch(error => console.error)
+        //@ts-ignore
+        else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] }).catch(error => console.error(error))
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
             .catch((e) => { console.log(e); return null })
         if (!interaction) return false

@@ -64,7 +64,7 @@ export default class BaseBattle {
         for (const id in ready) {
             imageObject[this.users.get(id).name] = ready[id]
         }
-        imageUrl += JSON.stringify(imageObject)
+        imageUrl += encodeURIComponent(JSON.stringify(imageObject))
         await Promise.all(this.users.map(async u => {
             let output = await u.ready(imageUrl)
             //TODO: Set updater to embed update promise timeout
@@ -75,7 +75,7 @@ export default class BaseBattle {
                     for (const id in ready) {
                         imageObject[this.users.get(id).name] = ready[id]
                     }
-                    imageUrl += JSON.stringify(imageObject)
+                    imageUrl += encodeURIComponent(JSON.stringify(imageObject))
                     let embedWaiting = new Discord.EmbedBuilder()
                         .setColor(this.color.yellow)
                         .setTitle('Kampfvorbereitung')
@@ -100,12 +100,13 @@ export default class BaseBattle {
             if(Object.values(ready).includes(false)) {
                 let embed = Discord.EmbedBuilder.from(u.interaction.message.embeds[0])
                 let imageUrl: string 
-                let image = JSON.parse(embed.data.image.url.split('=')[1])
+                console.log(decodeURIComponent(embed.data.image.url.split('=')[1]))
+                let image = JSON.parse(decodeURIComponent(embed.data.image.url.split('=')[1]))
                 image[u.name] = true
                 imageUrl = `${imageRendererAPI}/r?users=${JSON.stringify(image)}`
                 embed.setDescription('Bitte warte noch einen Moment, bis die anderen Teilnehmer auch bereit sind.')
                     .setImage(imageUrl)
-                await u.updateMessage({ embeds: [embed] })
+                await u.updateMessage({ embeds: [embed] }).catch(e => console.error(e))
             }
         }))
         interval && clearInterval(interval)
