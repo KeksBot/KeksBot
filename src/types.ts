@@ -176,17 +176,18 @@ declare global {
         aHeal?: {
             onTarget?: boolean // Anwender oder Ziel 
             value: number
-        } | number
+        }
         rHeal?: {
             onTarget?: boolean // Anwender oder Ziel 
             value: number
-        } | number
+        }
         modifiedSkills?: {
             name: string
             value: number
             onTarget?: boolean // Anwender oder Ziel 
             probability?: number
         }[],
-        fightUsable?: boolean
+        fightUsable?: boolean,
+        usageMessage?: string
     }
 }

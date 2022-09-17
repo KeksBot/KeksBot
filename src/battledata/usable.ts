@@ -37,8 +37,9 @@ const usable: BattleAction[] =  [
         type: 'item/med',
         description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 500 HP wieder her und schmeckt außerdem noch gut',
         priority: 8,
-        aHeal: 500,
-        fightUsable: true
+        aHeal: { value: 500 },
+        fightUsable: true,
+        usageMessage: '{user} trinkt eine Flasche Spezi'
     },
     {
         name: 'Sternenstaub',

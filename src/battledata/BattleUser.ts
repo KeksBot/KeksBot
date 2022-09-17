@@ -62,6 +62,10 @@ export default class BattleUser {
         }
     }
 
+    async save() {
+        return await this.user.save()
+    }
+
     async heal() {
         let { healTimestamp, skills, currentHP } = this.battle
         let maxHP = skills.find(skill => skill.name == 'HP').value
@@ -388,7 +392,7 @@ export default class BattleUser {
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle(
-                            type == 'item/med' ? 'Medizintasche' :
+                            type == 'item/med' ? 'Medizinbeutel' :
                             type == 'item/atk' ? 'Kampfbeutel' :
                             type == 'item/item' ? 'Itembeutel' :
                             type == 'item/base' ? 'Basis-Itembeutel' : 'Inventar'
@@ -396,22 +400,23 @@ export default class BattleUser {
                         .addFields(items.slice(page * 25 - 25, page * 25).map(i => {
                             return {
                                 name: `${i.name} (${i.count}x)`,
-                                value: i.description || 'Keine Beschreibung verfügbar' + !i.u ? '\nKann nicht in einem Kampf benutzt werden' : '',
+                                value: (i.description || 'Keine Beschreibung verfügbar') + (!i.u ? '\nKann nicht in einem Kampf benutzt werden' : ''),
                                 inline: true
                             }
                         }))
                     if(items.length > 25) {
                         embed.setFooter({ text: `Seite ${page} von ${Math.ceil(items.length / 25)}` })
                     }
+                    if(!items.length) embed.setDescription('Hier ist nichts')
                     let selectMenu = items.slice(page * 25 - 25, page * 25).filter(i => i.u).length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
                         .addComponents(
                             new Discord.SelectMenuBuilder()
-                                .setCustomId('battle:user.selectItem')
+                                .setCustomId('battle:user.exit.selectItem')
                                 .setPlaceholder('Item auswählen')
                                 .addOptions(items.slice(page * 25 - 25, page * 25).filter(i => i.u).map(i => {
                                     return {
                                         label: `${i.name} (${i.count}x)`,
-                                        value: i.id
+                                        value: String(i.id)
                                     }
                                 }))
                                 .setMaxValues(1)
@@ -439,7 +444,7 @@ export default class BattleUser {
                                 .setDisabled(page >= Math.ceil(items.length / 25))
                         )
                     }
-                    await this.updateMessage({ embeds: [embed], components: selectMenu ? [selectMenu, buttons] : [buttons] })
+                    await this.updateMessage({ embeds: [imageEmbed, embed], components: selectMenu ? [selectMenu, buttons] : [buttons] })
                     break
                 }
             }
@@ -455,6 +460,18 @@ export default class BattleUser {
             this.attacks.find(a => a.id == this.move.action).uses--
             //@ts-ignore
             if(this.interaction.customId.endsWith('exit.attack')) this.move.targets = users.filter(u => this.interaction.values.includes(u.id)).map(u => u.id)
+        }
+        if(this.interaction.customId.endsWith('exit.selectItem')) {
+            //@ts-ignore
+            let item = this.battle.inventory.find(i => i.id == this.interaction.values[0])
+            if(!item) return false
+            item.count--
+            if(!item.count) this.battle.inventory.splice(this.battle.inventory.indexOf(item), 1)
+            this.move = {
+                action: parseInt(item.id),
+                targets: [this.id],
+                user: this
+            }
         }
         return true
     }

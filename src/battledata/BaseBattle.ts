@@ -165,7 +165,7 @@ export default class BaseBattle {
             else await u.updateMessage({ embeds: [Discord.EmbedBuilder.from(u.interaction.message.embeds[0])], components: [] })
         }))
         if(Object.values(status).length != this.users.size || Object.values(status).includes(false)) {
-            for await (const u of this.users.values()) {
+            for (const u of this.users.values()) {
                 await u.updateMessage({
                     embeds: [
                         new Discord.EmbedBuilder()
@@ -224,11 +224,15 @@ export default class BaseBattle {
             }
             if(text.trim().includes('\n')) await delay(text.trim().split('\n').length * 500)
         }
+        for (const user of this.users.values()) {
+            await user.save()
+        }
     }
 
     async game() {
         while(true) {
             await this.round()
+            if(!this.client.battles.has(this.id)) return
             if(!this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
             if(!this.users.filter(u => u.team != this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
         }
@@ -263,8 +267,8 @@ export default class BaseBattle {
             const { user } = action
             if(user.battle.currentHP <= 0) continue
             switch(actionType) {
-                case 'atk':
-                    let text = `${user.name} setzt ${action.move.name} ein.\n`
+                case 'atk': {
+                    let text = `${user.name} setzt ${action.move.name} ein\n`
                     for (const t of action.targets) {
                         const target = this.users.get(t)
                         let hit = Math.random() * 100
@@ -288,9 +292,9 @@ export default class BaseBattle {
                             }
                         }
                         //@ts-ignore
-                        if(action.move.aHeal?.onTarget) await target.heal(action.move.aHeal.value)
+                        if(action.move.aHeal?.onTarget) await target.setHP(tagret.battle.currentHP + action.move.aHeal.value)
                         //@ts-ignore
-                        if(action.move.rHeal?.onTarget) await user.heal(Math.round(target.battle.currentHP / 100 * action.move.rHeal.value))
+                        if(action.move.rHeal?.onTarget) await user.setHP(target.battle.currentHP + Math.round(target.battle.currentHP / 100 * action.move.rHeal.value))
                     }
                     if(action.move.modifiedSkills) {
                         for (const skill of action.move.modifiedSkills?.filter(s => !s.onTarget)) {
@@ -304,14 +308,28 @@ export default class BaseBattle {
                         if(out) text += out
                     }
                     //@ts-ignore
-                    if(action.move.aHeal && !action.move.aHeal.onTarget) await user.heal(action.move.aHeal.value)
+                    if(action.move.aHeal && !action.move.aHeal.onTarget) await user.setHP(user.battle.currentHP + (action.move.aHeal.value))
                     //@ts-ignore
-                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
+                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.currentHP + Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
                     yield text
                     break
+                }
                 case 'item':
-
-                    yield ''
+                    let text = `${action.move.usageMessage?.replaceAll('{user}', user.name) || `${user.name} benutzt ${action.move.name}.`}\n`
+                    if(action.move.aHeal) await user.setHP(user.battle.currentHP + action.move.aHeal.value)
+                    if(action.move.rHeal) await user.setHP(user.battle.currentHP + Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
+                    if(action.move.modifiedSkills) {
+                        for (const skill of action.move.modifiedSkills) {
+                            if(skill.probability && Math.random() * 100 >= skill.probability) continue
+                            user.modifySkills(skill.name, skill.value)
+                            text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                        }
+                    }
+                    if(action.move.onUse) {
+                        let out = await action.move.onUse(this, user, action.targets.map(t => this.users.get(t)))
+                        if(out) text += out
+                    }
+                    yield text
                     break
             }
         }

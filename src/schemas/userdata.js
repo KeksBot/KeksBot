@@ -32,7 +32,7 @@ var userdataSchema = Schema({
         currentHP: Number,
         healTimestamp: Number,
         inventory: [{
-            id: String,
+            id: Number,
             count: Number,
         }],
         attacks: [Number],
