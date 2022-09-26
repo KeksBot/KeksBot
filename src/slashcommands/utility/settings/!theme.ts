@@ -1,6 +1,5 @@
 import Discord from 'discord.js'
 import delay from 'delay'
-import update from '../../../db/update'
 
 export default async function(ita: Discord.CommandInteraction, args: any, client: Discord.Client) {
     var { guild, color } = ita
@@ -44,7 +43,7 @@ export default async function(ita: Discord.CommandInteraction, args: any, client
                 //@ts-ignore
                 if(args.color.toLowerCase() == 'role') guild.data.theme.normal = 'role'
                 else guild.data.theme.normal = args.color.toUpperCase()
-                await update('serverdata', guild.id, { theme: guild.data.theme })
+                guild.setData({ theme: guild.data.theme })
                 embed = new Discord.EmbedBuilder()
                     .setColor(color.lime)
                     .setTitle('Änderungen übernommen')
@@ -120,7 +119,7 @@ export default async function(ita: Discord.CommandInteraction, args: any, client
         collector.on('collect', async function(i: Discord.ButtonInteraction) {
             switch(i.customId.replace('settings:theme:', '')) {
                 case 'save':
-                    await update('serverdata', guild.id, { theme })
+                    guild.setData({ theme })
                     embed = new Discord.EmbedBuilder()
                         .setColor(theme.lime)
                         .setTitle('Änderungen übernommen')

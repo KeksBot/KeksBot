@@ -37,6 +37,14 @@ var userdataSchema = Schema({
             _id: false
         }],
         attacks: [Number],
+    },
+    system: {
+        user: String,
+        bounduser: String,
+        password: String,
+        username: String,
+        permissionLevel: Number,
+        _id: false
     }
 }, { strict: true })
 

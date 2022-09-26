@@ -17,7 +17,13 @@ async function handle(data: any, name: string) {
                 changed = true
             }
             if(changed) await update('userdata', id, { banned: data.banned })
+            if(data.system?.user) {
+                data = await get('userdata', data.system.user) || data
+                if(!data.system) data.system = {}
+                data.system.discordUser = id
+            }
     }
+    return data
 }
 
 /**
@@ -33,7 +39,7 @@ async function get(name: string, id: string) {
     await db()
     try {
         let data = await model.findById(id)
-        if(data) await handle(data, name)
+        if(data) data = await handle(data, name)
         return data?._doc || data
     } catch (error) {
         return error

@@ -1,5 +1,4 @@
 import Discord, { ModalBuilder } from 'discord.js'
-import update from '../../../db/update'
 import embeds from '../../../embeds'
 import handleError from '../../../subcommands/handleError'
 
@@ -28,7 +27,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
     }
     if (informationtext.length) {
         if (error) return embeds.error(ita, 'Syntaxfehler', informationtext.join('\n'), true)
-        await update('serverdata', guild.id, { keksbox: guild.data.keksbox })
+        await guild.setData({ keksbox: guild.data.keksbox })
         return embeds.success(ita, 'Änderungen übernommen', informationtext.join('\n'), true)
     }
     let embed = new Discord.EmbedBuilder()

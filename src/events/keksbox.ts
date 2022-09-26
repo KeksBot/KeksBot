@@ -2,7 +2,7 @@ import Discord from 'discord.js'
 import getcolor from '../subcommands/getcolor'
 import emotes from '../emotes.json'
 import embeds from '../embeds'
-import { getData, update } from '../db'
+import { getData } from '../db'
 
 export default {
     name: 'KeksBox',
@@ -16,7 +16,7 @@ export default {
             if (serverdata.keksbox.channels?.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
         }
         if (!Math.floor(Math.random() * spawnrate)) {
-            if (!serverdata) serverdata = update('serverdata', msg.guild.id, {})
+            if (!serverdata) serverdata = await msg.guild.setData({})
             const color = await getcolor(msg.guild)
             let keksbox = serverdata.keksbox || {}
             if (keksbox.message) return
@@ -75,7 +75,7 @@ export default {
             let message = await msg.channel.send({ embeds: [embed], components: [button] })
             keksbox.message = message.id
             keksbox.channel = message.channel.id
-            await update('serverdata', msg.guild.id, { keksbox })
+            await msg.guild.setData({ keksbox })
             const filter = (ita: any) => ita.customId === 'keksbox:claim'
             const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: Discord.ComponentType.Button })
             collector.on('collect', async function (interaction): Promise<any> {
@@ -98,7 +98,7 @@ export default {
                 keksbox.channel = null
                 keksbox.multiplier = null
                 await interaction.guild.setData({ keksbox })
-                await update('userdata', interaction.user.id, { cookies: userdata.cookies })
+                await interaction.user.setData({ cookies: userdata.cookies })
             })
         }
     }

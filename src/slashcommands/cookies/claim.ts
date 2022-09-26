@@ -1,7 +1,4 @@
-import Discord from 'discord.js'
 import embeds from '../../embeds'
-import update from '../../db/update'
-import delay from 'delay'
 
 const options: CommandOptions = {
     name: 'claim',

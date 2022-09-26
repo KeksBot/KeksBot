@@ -45,7 +45,7 @@ const options: CommandOptions = {
         user.data.cookies += args.count
         client.thismin.set(user.id, client.thismin.get(user.id) + args.count)
         client.thismin.set(guild.id, client.thismin.get(guild.id) + args.count)
-        await update('userdata', ita.user.id, { cookies: Math.floor(user.data.cookies) })
+        ita.user.setData({ cookies: Math.floor(user.data.cookies) })
 
         let embed = new Discord.EmbedBuilder()
             .setColor(ita.color.normal)

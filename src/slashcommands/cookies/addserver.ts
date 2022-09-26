@@ -1,6 +1,5 @@
 import Discord from 'discord.js'
 import embeds from '../../embeds'
-import update from '../../db/update'
 
 const options: CommandOptions = {
     name: 'addserver',

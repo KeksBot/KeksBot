@@ -15,7 +15,7 @@ const options: CommandOptions = {
     async execute(ita, args, client) {
         var { color, guild, member } = ita
         //@ts-ignore
-        let targetMember: Discord.GuildMember = args.user == ita.user.id ? member : await guild.members.fetch(args.user)
+        let targetMember: Discord.GuildMember = args.user == ita.user.id ? member : await guild.members.fetch(args.user).catch(() => null)
         if (!targetMember) return ita.error('Fehler', 'Der Nutzer konnte nicht gefunden werden.', true)
         targetMember.data = await targetMember.user.getData()
         if (!targetMember.data) targetMember.data = { _id: targetMember.id }
