@@ -1,6 +1,6 @@
 import Discord from 'discord.js'
-import skillid from '../battledata/skillids.json'
-import skillinformation from '../battledata/skills.json'
+import skillid from '../battle/skillids.json'
+import skillinformation from '../battle/skills.json'
 import getcolor from '../subcommands/getcolor'
 import delay from 'delay'
 

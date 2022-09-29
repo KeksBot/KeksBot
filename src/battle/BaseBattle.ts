@@ -1,9 +1,9 @@
 import Discord, { CommandInteractionOptionResolver } from 'discord.js'
 import BattleUser from './BattleUser'
-import usable from './usable'
 import emotes from '../emotes.json'
 import { imageRendererAPI } from '../config.json'
 import delay from 'delay'
+import objectLoader from '../game/objectLoader'
 
 export default class BaseBattle {
     #actions: {
@@ -19,6 +19,7 @@ export default class BaseBattle {
     color: Color
     client: Discord.Client
     started: boolean
+    usable: Map<Number, BattleAction>
 
     /**
      * 
@@ -50,8 +51,15 @@ export default class BaseBattle {
 
     async load() {
         !this.private && this.message.deletable && this.message.delete()
+        let battleActions: number[] = []
         for (const user of this.users.values()) {
-            user.setup(this.color)
+            battleActions.push(...user.battle.attacks)
+            battleActions.push(...user.battle.inventory.map(i => parseInt(i.id)))
+        }
+        battleActions = [...new Set(battleActions)]
+        this.usable = objectLoader(battleActions)
+        for (const user of this.users.values()) {
+            user.setup(this.color, this.usable)
         }
         let ready: any = {}
         for (const user of this.users.values()) {
@@ -178,7 +186,7 @@ export default class BaseBattle {
             return this.client.battles.delete(this.id)
         }
         for (const user of this.users.values()) {
-            this.#actions.push(Object.assign(user.move, { move: usable.get(user.move.action) }))
+            this.#actions.push(Object.assign(user.move, { move: this.usable.get(user.move.action) }))
         }
         this.#actions.sort((a, b) => {
             if(a.move.priority > b.move.priority) return -1

@@ -190,4 +190,8 @@ declare global {
         fightUsable?: boolean,
         usageMessage?: string
     }
+
+    interface BattleActionBuilder extends BattleAction {
+        id: Number
+    }
 }

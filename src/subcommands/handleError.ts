@@ -1,10 +1,11 @@
 import { ButtonInteraction, CommandInteraction, EmbedBuilder, ModalSubmitInteraction, SelectMenuInteraction } from "discord.js";
-import { logChannel } from '../config.json'
+import { logChannel, ignoreLogs } from '../config.json'
 
 export default async (interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, error: unknown, args?: any) => {
+    if(ignoreLogs) return
     try {
         //@ts-ignore
-        console.error(`Error while executing ${interaction?.commandName || interaction?.customId} (${interaction?.user?.tag}, ${interaction?.guild?.name}) with arguments: ${args.replaceAll('"', '')}`)
+        console.error(`Error while executing ${interaction?.commandName || interaction?.customId} (${interaction?.user?.tag}, ${interaction?.guild?.name}) with arguments: ${args.replaceAll ? args.replaceAll('"', '') || 'undefined' : 'undefined'}`)
         console.error(error)
         let errorId = (Math.random() * Date.now()).toString(36)
         let channel = await interaction.client.channels.fetch(logChannel)
@@ -16,25 +17,26 @@ export default async (interaction: CommandInteraction | ButtonInteraction | Moda
             .setDescription(`**interaction**:\ncommand: /${interaction?.commandName || interaction?.customId}\nuser: <@${interaction?.user?.id}> (${interaction?.user?.id})\nguild: ${interaction?.guild?.name} (${interaction?.guild?.id})`)
             .addFields([
                 {
-                    name: 'args',
-                    value: args.replaceAll('"', '') || 'undefined',
+                    name: 'error',
+                    //@ts-ignore
+                    value: '```js\n' + (error?.message.substring() || 'undefined') + '```',
                     inline: true
                 },
                 {
-                    name: 'error',
-                    //@ts-ignore
-                    value: error.message || 'undefined',
+                    name: 'args',
+                    value: '```\n' + (args.replaceAll ? args.replaceAll('"', '') || 'undefined' : 'undefined') + '```',
                     inline: true
                 },
                 {
                     name: 'cause',
                     //@ts-ignore
-                    value: error.cause.toString() || 'undefined',
+                    value: '```\n' + (error?.cause?.toString() || 'undefined') + '```',
+                    inline: true
                 },
                 {
                     name: 'stack',
                     //@ts-ignore
-                    value: error.stack || 'undefined',
+                    value: '```\n' + (error?.stack || 'undefined') + '```',
                 }
             ])
         //@ts-ignore

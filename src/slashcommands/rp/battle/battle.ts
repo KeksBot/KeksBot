@@ -1,8 +1,8 @@
 import Discord from 'discord.js'
 import embeds from '../../../embeds'
-import BaseBattle from '../../../battledata/BaseBattle'
+import BaseBattle from '../../../battle/BaseBattle'
 import before from '../../../subcommands/before/battle'
-import BattleUser from '../../../battledata/BattleUser'
+import BattleUser from '../../../battle/BattleUser'
 
 const options: CommandOptions = {
     name: 'battle',
@@ -19,6 +19,8 @@ const options: CommandOptions = {
     execute: async function(ita, args, client) {
         let { user, color, guild } = ita
         let { user: target } = args
+
+        if(target == user.id) return ita.error('Fehler', 'Du kannst dich nicht selbst herausfordern.', true)
 
         //Angegebenen Nutzer überprüfen
         target = await guild.members.fetch(target).catch(async () => {

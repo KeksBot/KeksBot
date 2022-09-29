@@ -4,8 +4,9 @@
   "description": "NomNom",
   "main": "src/index.js",
   "scripts": {
-    "start": "tsc && cpy 'src/*.json' 'build' && node build/index",
-    "build": "tsc && cpy 'src/*.json' 'build'"
+    "start": "node build/index",
+    "build": "tsc && cpy 'src/*.json' 'build'",
+    "dev": "tsc && cpy 'src/*.json' 'build' && node build/index"
   },
   "author": "Clyde",
   "license": "MIT",

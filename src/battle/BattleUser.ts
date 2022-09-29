@@ -1,5 +1,4 @@
 import Discord from 'discord.js'
-import usable from './usable'
 import emotes from '../emotes.json'
 
 export default class BattleUser {
@@ -23,6 +22,7 @@ export default class BattleUser {
         user: BattleUser
     }
     skillChanges?: UserData['battle']['skills']
+    usable: Map<Number, BattleAction>
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -35,8 +35,9 @@ export default class BattleUser {
         this.name = this.member.displayName
     }
 
-    setup(color: Color) {
+    setup(color: Color, usable: Map<Number, BattleAction>) {
         this.color = color
+        this.usable = usable
     }
 
     init() {
@@ -47,7 +48,7 @@ export default class BattleUser {
         for (const i of this.battle.attacks) {
             this.attacks.push({
                 id: String(i),
-                uses: usable.get(i).uses
+                uses: this.usable.get(i).uses
             })
         }
         for (const skill of this.skills) {
@@ -153,7 +154,7 @@ export default class BattleUser {
                     .setCustomId('battle:user.ready')
             )
         //@ts-ignore
-        if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true }).catch(error => console.error)
+        if(!this.interaction.replied) this.interaction.message = await this.interaction.reply({ embeds: [embed], components: [button], ephemeral: true, fetchReply: true }).catch(error => console.error(error))
         //@ts-ignore
         else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] }).catch(error => console.error(error))
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
@@ -225,7 +226,7 @@ export default class BattleUser {
                     )
                     let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                     for (const attack of this.attacks) {
-                        let attackData = usable.get(parseInt(attack.id))
+                        let attackData = this.usable.get(parseInt(attack.id))
                         embed.addFields([{
                             name: attackData.name,
                             value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
@@ -263,7 +264,7 @@ export default class BattleUser {
                             9: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
                     */
                     //@ts-ignore
-                    let move = usable.get(parseInt(this.interaction.values[0]))
+                    let move = this.usable.get(parseInt(this.interaction.values[0]))
                     let targetType = move.targets || 0
                     this.move = {
                         targets: [],
@@ -388,7 +389,7 @@ export default class BattleUser {
                     //@ts-ignore
                     let type = `item/${this.interaction.values[0] || this.interaction.customId.split('.')[2]}`
                     //@ts-ignore
-                    let items = this.battle.inventory.filter(i => usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: usable.get(i.id).name, description: usable.get(i.id).description, u: usable.get(i.id).fightUsable } })
+                    let items = this.battle.inventory.filter(i => this.usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: this.usable.get(i.id).name, description: this.usable.get(i.id).description, u: this.usable.get(i.id).fightUsable } })
                     let page = parseInt(this.interaction.customId.split('.')[3]) || 1
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)

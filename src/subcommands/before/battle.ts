@@ -71,8 +71,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         if(!interaction) return
 
         //Skills initialisieren
-        let priority = require('../../battledata/skillids.json')[interaction.customId.split('.')[1]] || 'Ausgeglichen'
-        let skillinformation = require('../../battledata/skills.json')
+        let priority = require('../../battle/skillids.json')[interaction.customId.split('.')[1]] || 'Ausgeglichen'
+        let skillinformation = require('../../battle/skills.json')
         let skills = []
         for (const s in skillinformation) {
             if (Object.hasOwnProperty.call(skillinformation, s)) {
@@ -169,7 +169,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
                 if(!interaction) return
 
-                let sk = require('../../battledata/skillids.json')[interaction.customId.split('.')[1]]
+                let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]]
                 skills.forEach((skill) => {
                     if(skill.name != sk) return skill.added = 0
                     let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
