@@ -1,0 +1,16 @@
+const obj: BattleActionBuilder = {
+    id: 1021,
+    name: 'Defensivessenz',
+    type: 'item/atk',
+    description: 'Durch ein verbessertes Konzentrationsverfahren der Vorgängerstufen erhöht diese Essenz die Verteidigung extrem',
+    fightUsable: true,
+    usageMessage: '{user} verwendet eine Defensivessenz',
+    modifiedSkills: [
+        {
+            name: 'Verteidigung',
+            value: 3
+        }
+    ]
+}
+
+export default obj
