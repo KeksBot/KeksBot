@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Durch ein optimiertes Konzentrationsverfahren der Vorgängerstufen erhöht diese Essenz die Angriffskraft extrem',
     fightUsable: true,
     usageMessage: '{user} verwendet eine Offensivessenz',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Angriff',

@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Durch ein verbessertes Konzentrationsverfahren der Vorgängerstufen erhöht diese Essenz die Verteidigung extrem',
     fightUsable: true,
     usageMessage: '{user} verwendet eine Defensivessenz',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Verteidigung',

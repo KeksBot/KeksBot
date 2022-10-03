@@ -19,5 +19,9 @@
     "back": "<:kb_back:1008703850577924209>",
     "next": "<:kb_next:1020469724007649490>",
     "firstIndex": "<:kb_firstIndex:1025422419432845413>",
-    "lastIndex": "<:kb_lastIndex:1025422420749856838>"
+    "lastIndex": "<:kb_lastIndex:1025422420749856838>",
+    "items": {
+        "healPotion": "<:heal_potion:1026502683395366982>",
+        "potion": "<:potion:1026502708141768805>"
+    }
 }

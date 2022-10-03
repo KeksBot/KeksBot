@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Ein Trank, der bei Verwendung den Angriff stark erhöht',
     fightUsable: true,
     usageMessage: '{user} verwendet einen konzentrierten Offensivtrank',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Angriff',

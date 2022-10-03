@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Ein Trank, der bei Verwendung die Verteidigung erhöht',
     fightUsable: true,
     usageMessage: '{user} verwendet einen Defensivtrank',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Verteidigung',

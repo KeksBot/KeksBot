@@ -4,7 +4,9 @@ const obj: BattleActionBuilder = {
     name: 'Trank',
     priority: 8,
     description: 'Ein gewöhnlicher Trank\nStellt bei Verwendung 1000 HP wieder her',
-    aHeal: {
+    fightUsable: true,
+    usageMessage: '{user} verwendet einen Trank',
+    emote: 'healPotion',aHeal: {
         value: 1000,
     }
 }

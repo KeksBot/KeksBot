@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Diese hochkonzentrierte Essenz führt zu einer extremen Steigerung der Genauigkeit von Attacken',
     fightUsable: true,
     usageMessage: '{user} verwendet eine Präzisionsessenz',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Genauigkeit',

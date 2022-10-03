@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Ein Trank, dessen Wirkung die Geschwindigkeit stark erhöht',
     fightUsable: true,
     usageMessage: '{user} verwendet einen konzentrierten Tempotrank',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Geschwindigkeit',

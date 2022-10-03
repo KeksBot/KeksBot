@@ -188,7 +188,8 @@ declare global {
             probability?: number
         }[],
         fightUsable?: boolean,
-        usageMessage?: string
+        usageMessage?: string,
+        emote?: string
     }
 
     interface BattleActionBuilder extends BattleAction {

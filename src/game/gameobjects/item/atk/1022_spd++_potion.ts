@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Dank eines technisch hochkomplexen Konzentrationsverfahrens erhöht diese Essenz die Geschwindigkeit extrem',
     fightUsable: true,
     usageMessage: '{user} verwendet eine Tempoessenz',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Geschwindigkeit',

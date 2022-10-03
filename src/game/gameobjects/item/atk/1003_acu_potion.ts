@@ -6,6 +6,7 @@ const obj: BattleActionBuilder = {
     description: 'Ein Trank, durch dessen Wirkung die Genauigkeit steigt',
     fightUsable: true,
     usageMessage: '{user} verwendet einen Präzisionstrank',
+    emote: 'potion',
     modifiedSkills: [
         {
             name: 'Genauigkeit',
