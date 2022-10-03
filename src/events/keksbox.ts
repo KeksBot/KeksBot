@@ -9,7 +9,7 @@ export default {
     event: 'messageCreate',
     async on(msg: Discord.Message, client: Discord.Client) {
         if (!msg.guild || msg.author.bot || msg.author.system) return
-        var serverdata = await getData('serverdata', msg.guild.id)
+        var serverdata = await msg.guild.getData()
         var spawnrate = 100
         if (serverdata?.keksbox) {
             spawnrate = serverdata.keksbox.spawnrate || 100
@@ -79,8 +79,9 @@ export default {
             const filter = (ita: any) => ita.customId === 'keksbox:claim'
             const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: Discord.ComponentType.Button })
             collector.on('collect', async function (interaction): Promise<any> {
+                interaction.user.data = await interaction.user.getData() || { _id: interaction.user.id }
                 serverdata = await interaction.guild.getData()
-                var content = Math.random() * 10
+                let content = Math.random() * 10
                 if (!serverdata.keksbox?.message || (!message.deletable && !message.editable)) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
                 if (serverdata.keksbox.spawnrate) content *= serverdata.keksbox.spawnrate
                 else {
@@ -89,7 +90,7 @@ export default {
                 }
                 content = Math.round(content * serverdata.keksbox.multiplier)
                 embeds.successMessage(message, 'Paket eingesammelt', `<@!${interaction.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, serverdata.keksbox.keepmessage)
-                var userdata = await getData('userdata', interaction.user.id)
+                let userdata = interaction.user.data
                 if (!userdata) userdata = { _id: interaction.user.id }
                 if (!userdata.cookies) userdata.cookies = 0
                 userdata.cookies += content
