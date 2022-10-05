@@ -27,7 +27,6 @@ const options: CommandOptions = {
             i.count = inventory.find(_i => _i.id == i.id).count
         })
         items = groupBy(items, item => item.type.split('/')[1])
-        console.log(items)
         const itemtypes = [
             {
                 label: 'Medizin',
@@ -107,8 +106,10 @@ const options: CommandOptions = {
                                         .setPlaceholder('Item auswählen')
                                         .addOptions(filter.map((i: any) => {
                                             return {
-                                                label: `${i.name} ${i.count}x`,
-                                                value: i.id.toString()
+                                                label: `${i.name}`,
+                                                value: i.id.toString(),
+                                                //@ts-ignore
+                                                emoji: i.emote ? emotes.items[i.emote] : undefined
                                             }
                                         }))
                                 ) : null
