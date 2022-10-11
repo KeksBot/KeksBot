@@ -6,9 +6,11 @@ const obj: BattleActionBuilder = {
     description: 'Eine verbesserte Version des Tranks\nStellt bei Verwendung 2000 HP wieder her',
     fightUsable: true,
     usageMessage: '{user} verwendet einen verbesserten Trank',
-    emote: 'healPotion',aHeal: {
+    emote: 'healPotion',
+    aHeal: {
         value: 2000,
-    }
+    },
+    inventoryUsable: true
 }
 
 export default obj

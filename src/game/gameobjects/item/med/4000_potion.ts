@@ -9,7 +9,8 @@ const obj: BattleActionBuilder = {
     emote: 'healPotion',
     aHeal: {
         value: 500,
-    }
+    },
+    inventoryUsable: true
 }
 
 export default obj

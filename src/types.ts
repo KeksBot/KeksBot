@@ -189,7 +189,9 @@ declare global {
         }[],
         fightUsable?: boolean,
         usageMessage?: string,
-        emote?: string
+        emote?: string,
+        inventoryUsable?: boolean,
+        inventoryMessage?: string,
     }
 
     interface BattleActionBuilder extends BattleAction {
