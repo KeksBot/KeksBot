@@ -15,7 +15,7 @@ export default async (client: Discord.Client) => {
                     var { default: event } = await import(path.join(__dirname, dir, file))
                     event.path = path.join(__dirname, dir, file)
                     if(event.name && event.on && event.event) {
-                        console.log(`[${client.user.username}]: Event ${event.name} (${event.event}) wird geladen...`)
+                        console.log(`[${client.user.username}]: Event ${event.name} (${event.event}) wird geladen.`)
                     }
                     if(event.on) events.push(event)
                 }

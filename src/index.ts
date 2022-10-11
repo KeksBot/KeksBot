@@ -3,6 +3,7 @@ const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMe
 import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
+import autocompletehandler from './autocomplete'
 import uptimemonitoring from './uptimemonitoring'
 import { connect } from './db'
 
@@ -82,6 +83,7 @@ client.once('ready', async () => { //Status
     mongoose.connection.close()
     await commandhandler(client)
     await eventhandler(client)
+    await autocompletehandler(client)
     var end = Date.now()
     console.log(`[${client.user.username}]: System aktiv.`)
     console.log(`[${client.user.username}]: Startzeit betrug ${end - start} ms.`)
