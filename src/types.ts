@@ -53,6 +53,7 @@ declare module 'discord.js' {
 declare global {
     interface String {
         replaceLast(searchValue: string, replaceValue: string): string
+        title(): string
     }
 
     interface UserData {

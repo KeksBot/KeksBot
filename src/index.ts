@@ -62,6 +62,10 @@ String.prototype.replaceLast = function (searchValue: String, replaceValue: Stri
     return this.replace(new RegExp(searchValue + "([^" + searchValue + "]*)$"), replaceValue + "$1");
 }
 
+String.prototype.title = function () {
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase();});
+};
+
 var date = new Date()
 console.log(`Starte System am ${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`)
 

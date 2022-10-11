@@ -1,18 +1,15 @@
-import Discord from 'discord.js'
+import Discord, { EmbedAssertions } from 'discord.js'
 import objectLoader from '../../game/objectLoader'
 import emotes from '../../emotes.json'
-function groupBy(list: Map<any, any>, keyGetter: (item: any) => any) {
+
+function group(list: Map<any, any>) {
     const map = new Map();
-    list.forEach((item) => {
-        const key = keyGetter(item);
-        const collection = map.get(key);
-        if (!collection) {
-            map.set(key, [item]);
-        } else {
-            collection.push(item);
-        }
-    });
-    return map;
+    list.forEach((item, key) => {
+        const collection = map.get(item.type?.split('/')?.[1] || 'item');
+        if (!collection) map.set(item.type?.split('/')?.[1] || 'item', new Map([[key, item]]));
+        else collection.set(key, item);
+    })
+    return map
 }
 
 const options: CommandOptions = {
@@ -22,11 +19,13 @@ const options: CommandOptions = {
         let { user, color, guild } = ita
         let inventory = user.data?.battle?.inventory
         if (!inventory || !inventory.length) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
-        let items = objectLoader(inventory.map(i => parseInt(i.id)))
+        //@ts-ignore
+        let items: Map<String, Map<Number, BattleActionBuilder & { count: number }>> = objectLoader(inventory.map(i => parseInt(i.id)))
         items.forEach(i => {
+            //@ts-ignore
             i.count = inventory.find(_i => _i.id == i.id).count
         })
-        items = groupBy(items, item => item.type.split('/')[1])
+        items = group(items)
         const itemtypes = [
             {
                 label: 'Medizin',
@@ -55,12 +54,27 @@ const options: CommandOptions = {
         let embed = new Discord.EmbedBuilder()
             .setTitle('Inventar')
             .setColor(color.normal)
-            .setDescription(`Kekse: ${user.data.cookies || 0}\nSternenstaub: ${items.get(2)?.count || 0}\nKometenstücke: ${items.get(3)?.count || 0}`)
+            .addFields([
+                {
+                    name: 'Kekse',
+                    value: user.data.cookies.toString() || '0',
+                    inline: true
+                },
+                {
+                    name: 'Sternenstaub',
+                    value: items.get('item')?.get(2)?.count.toString() || '0',
+                    inline: true
+                },
+                {
+                    name: 'Kometenstücke',
+                    value: items.get('item')?.get(3)?.count.toString() || '0',
+                    inline: true
+                }
+            ])
         let response = await ita.reply({ embeds: [embed], components: [selectMenu], ephemeral: true })
         let interaction: Discord.ButtonInteraction | Discord.SelectMenuInteraction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null })
         if(!interaction) return
         while(true) {
-            //@ts-ignore
             switch(interaction.customId.split(':')[0]) {
                 case 'inventory': {
                     //@ts-ignore
@@ -69,15 +83,30 @@ const options: CommandOptions = {
                             let embed = new Discord.EmbedBuilder()
                                 .setTitle('Inventar')
                                 .setColor(color.normal)
-                                .setDescription(`Kekse: ${user.data.cookies || 0}\nSternenstaub: ${items.get(2)?.count || 0}\nKometenstücke: ${items.get(3)?.count || 0}`)
-                            //@ts-ignore
+                                .addFields([
+                                    {
+                                        name: 'Kekse',
+                                        value: user.data.cookies.toString() || '0',
+                                        inline: true
+                                    },
+                                    {
+                                        name: 'Sternenstaub',
+                                        value: items.get('item')?.get(2)?.count.toString() || '0',
+                                        inline: true
+                                    },
+                                    {
+                                        name: 'Kometenstücke',
+                                        value: items.get('item')?.get(3)?.count.toString() || '0',
+                                        inline: true
+                                    }
+                                ])
                             await interaction.update({ embeds: [embed], components: [selectMenu] })
                             break
                         }
                         default: {
                             //@ts-ignore
                             let type = interaction.values?.length ? interaction.values[0] : interaction.customId?.split(':')[1] || 'none'
-                            let filter: Array<any> = items.get(type) || new Map()
+                            let filter: Array<BattleActionBuilder & { count: number }> = [...items.get(type)?.values() || []]
                             let page = interaction.customId?.split(':')?.length > 2 ? parseInt(interaction.customId?.split(':')[2]) : 0
                             let embed = new Discord.EmbedBuilder()
                                 .setColor(color.normal)
@@ -92,7 +121,7 @@ const options: CommandOptions = {
                                 filter.slice(page * 10, page * 10 + 10).map((i: any) => {
                                     return {
                                         //@ts-ignore
-                                        name: i.emote ? `${emotes.items[i.emote] || '[ ]'} ${i.name}` : `[ ] ${i.name}`,
+                                        name: i.emote ? `${emotes.items[i.emote] || '[ ]'} ${i.name.title()}` : `[ ] ${i.name.title()}`,
                                         value: `Anzahl: **${i.count}**\n${i.description}` || `Anzahl: **${i.count}**\nKeine Beschreibung verfügbar`,
                                         inline: false
                                     }
@@ -102,11 +131,11 @@ const options: CommandOptions = {
                             let itemSelector = filter.length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
                                 .addComponents(
                                     new Discord.SelectMenuBuilder()
-                                        .setCustomId(`inventory.item`)
+                                        .setCustomId(`inventory.item::${page}`)
                                         .setPlaceholder('Item auswählen')
-                                        .addOptions(filter.map((i: any) => {
+                                        .addOptions(filter.slice(page * 10, page * 10 + 10).map((i: any) => {
                                             return {
-                                                label: `${i.name}`,
+                                                label: `${i.name.title()}`,
                                                 value: i.id.toString(),
                                                 //@ts-ignore
                                                 emoji: i.emote ? emotes.items[i.emote] : undefined
@@ -150,7 +179,49 @@ const options: CommandOptions = {
                     break
                 }
                 case 'inventory.item': {
-                    //TODO: Item-Interaktion
+                    //@ts-ignore
+                    let id = parseInt(interaction.values?.[0] || interaction.customId?.split(':')?.[1])
+                    if(!id) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
+                    let item: BattleActionBuilder & { count: number }
+                    let group: Map<Number, BattleActionBuilder & { count: number }>
+                    let groupname
+                    [...items.entries()].forEach((i) => {
+                        if(i[1].has(id)) {
+                            item = i[1].get(id)
+                            group = i[1]
+                            groupname = i[0]
+                        }
+                    })
+                    let _group = [...group.values()]
+                    if(!item) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(color.normal)
+                        //@ts-ignore
+                        .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
+                        .setDescription(`Anzahl: **${item.count}**\n${item.description}` || `Anzahl: **${item.count}**\nKeine Beschreibung verfügbar`)
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory:${groupname}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.item:${_group[_group.indexOf(item) - 1]?.id || 'a'}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(_group.indexOf(item) == 0),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.use:${item.id}`)
+                                .setLabel('Einsetzen')
+                                .setStyle(Discord.ButtonStyle.Primary)
+                                .setDisabled(item.count < 1|| !item.inventoryUsable),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.item:${_group[_group.indexOf(item) + 1]?.id || 'b'}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.next)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(_group.indexOf(item) == _group.length - 1)
+                        )
+                    await interaction.update({ embeds: [embed], components: [buttons] }).catch((e) => { console.log(e) })
                 }
             }
             interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null })
