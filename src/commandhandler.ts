@@ -156,8 +156,11 @@ export default async (client: Discord.Client) => {
             console.log(`${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()} | ${interaction.user.tag} | ID: ${interaction.user.id} | ${interaction.guild.name} | ID: ${interaction.guild.id} | ${command.name} | ${argsarray.replaceAll('"', '')}`)
             let execute = true
             if(command.before) execute = await command.before(interaction, args, client)
-            if(execute !== false) await command.execute(interaction, args, client)
-                .catch(async (error: Error) => await handleError(interaction, error, args))
+            try {
+                if(execute !== false) await command.execute(interaction, args, client)
+            } catch (error) {
+                await handleError(interaction, error, args)
+            }
         } catch (error) {
             console.error(error)
             return embeds.error(interaction, 'Fehler', 'Beim Ausführen des Commands ist ein unbekannter Fehler aufgetreten.\nBitte probiere es später erneut.', true, true)

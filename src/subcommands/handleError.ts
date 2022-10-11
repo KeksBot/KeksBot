@@ -2,11 +2,11 @@ import { ButtonInteraction, CommandInteraction, EmbedBuilder, ModalSubmitInterac
 import { logChannel, ignoreLogs } from '../config.json'
 
 export default async (interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, error: unknown, args?: any) => {
-    if(ignoreLogs) return
     try {
         //@ts-ignore
         console.error(`Error while executing ${interaction?.commandName || interaction?.customId} (${interaction?.user?.tag}, ${interaction?.guild?.name}) with arguments: ${args.replaceAll ? args.replaceAll('"', '') || 'undefined' : 'undefined'}`)
         console.error(error)
+        if(ignoreLogs) return
         let errorId = (Math.random() * Date.now()).toString(36)
         let channel = await interaction.client.channels.fetch(logChannel)
         let embed = new EmbedBuilder() 
