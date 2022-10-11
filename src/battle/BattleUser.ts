@@ -13,7 +13,7 @@ export default class BattleUser {
         value: number
         getValue?: () => number
     }[]
-    attacks: { id: string, uses: number }[]
+    attacks: { id: number, uses: number }[]
     color: Color
     name: string
     move?: {
@@ -47,7 +47,7 @@ export default class BattleUser {
         this.attacks = []
         for (const i of this.battle.attacks) {
             this.attacks.push({
-                id: String(i),
+                id: i,
                 uses: this.usable.get(i).uses
             })
         }
@@ -226,7 +226,7 @@ export default class BattleUser {
                     )
                     let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                     for (const attack of this.attacks) {
-                        let attackData = this.usable.get(parseInt(attack.id))
+                        let attackData = this.usable.get(attack.id)
                         embed.addFields([{
                             name: attackData.name,
                             value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
@@ -236,7 +236,7 @@ export default class BattleUser {
                             menu.components[0].addOptions([
                                 {
                                     label: attackData.name,
-                                    value: attack.id
+                                    value: String(attack.id)
                                 }
                             ])
                     }
@@ -470,7 +470,7 @@ export default class BattleUser {
             item.count--
             if(!item.count) this.battle.inventory.splice(this.battle.inventory.indexOf(item), 1)
             this.move = {
-                action: parseInt(item.id),
+                action: item.id,
                 targets: [this.id],
                 user: this
             }

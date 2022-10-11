@@ -87,7 +87,7 @@ declare global {
             currentHP?: number,
             healTimestamp?: number,
             inventory?: [{
-                id: string,
+                id: number,
                 count: number,
             }?],
             attacks?: [number],
@@ -106,7 +106,7 @@ declare global {
             value: number
             getValue?: () => number
         }[]
-        attacks: { id: string, uses: number }[]
+        attacks: { id: number, uses: number }[]
         color: Color
         name: string
         move?: {
@@ -162,6 +162,12 @@ declare global {
         before?: any
         global?: boolean
         execute(interaction: Discord.CommandInteraction, args: any, client: Discord.Client): any
+    }
+
+    type AutocompleteOptions = {
+        name: string,
+        option: string,
+        execute(interaction: Discord.AutocompleteInteraction): any
     }
 
     interface BattleAction {
