@@ -180,6 +180,7 @@ declare global {
         targets?: number
         accuracy?: number
         onUse?(battle: BaseBattle, user: BattleUser, targets: BattleUser[]): Promise<string | void> | string | void
+        onUse?(user: Discord.User): any
         aHeal?: {
             onTarget?: boolean // Anwender oder Ziel 
             value: number

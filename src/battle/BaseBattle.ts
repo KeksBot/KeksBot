@@ -318,14 +318,14 @@ export default class BaseBattle {
                     //@ts-ignore
                     if(action.move.aHeal && !action.move.aHeal.onTarget) await user.setHP(user.battle.currentHP + (action.move.aHeal.value))
                     //@ts-ignore
-                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.currentHP + Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
+                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.currentHP + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
                     yield text
                     break
                 }
                 case 'item':
                     let text = `${action.move.usageMessage?.replaceAll('{user}', user.name) || `${user.name} benutzt ${action.move.name}.`}\n`
                     if(action.move.aHeal) await user.setHP(user.battle.currentHP + action.move.aHeal.value)
-                    if(action.move.rHeal) await user.setHP(user.battle.currentHP + Math.round(user.battle.currentHP / 100 * action.move.rHeal.value))
+                    if(action.move.rHeal) await user.setHP(user.battle.currentHP + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
                     if(action.move.modifiedSkills) {
                         for (const skill of action.move.modifiedSkills) {
                             if(skill.probability && Math.random() * 100 >= skill.probability) continue

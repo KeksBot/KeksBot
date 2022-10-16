@@ -20,11 +20,19 @@ const options: AutocompleteOptions = {
             item.count = inventory.find(i => i.id === item.id)?.count || 0
         })
 
-        let firstResults = items.filter(i => i.name.toLowerCase() == input).array()
-        let secondResults = items.filter(i => i.name.toLowerCase().startsWith(input)).array().filter(i => !firstResults.includes(i))
-        let thirdResults = items.filter(i => i.name.toLowerCase().includes(input)).array().filter(i => !firstResults.includes(i) && !secondResults.includes(i))
+        let results = items.filter(item => item.name.toLowerCase().includes(input)).sort((a, b) => {
+            if(a.name.toLowerCase() == input && b.name.toLowerCase() != input) return -1
+            if(a.name.toLowerCase() != input && b.name.toLowerCase() == input) return 1
+            if(a.name.toLowerCase().startsWith(input) && !b.name.toLowerCase().startsWith(input)) return -1
+            if(!a.name.toLowerCase().startsWith(input) && b.name.toLowerCase().startsWith(input)) return 1
+        }).array().slice(0, 25)
 
-        let output = [firstResults, secondResults, thirdResults].flat().map(i => { return { name: i.name, value: i.id.toString() } }).slice(0, 25)
+        // let firstResults = items.filter(i => i.name.toLowerCase() == input).array()
+        // let secondResults = items.filter(i => i.name.toLowerCase().startsWith(input)).array().filter(i => !firstResults.includes(i))
+        // let thirdResults = items.filter(i => i.name.toLowerCase().includes(input)).array().filter(i => !firstResults.includes(i) && !secondResults.includes(i))
+
+        // let output = [firstResults, secondResults, thirdResults].flat().map(i => { return { name: i.name, value: i.id.toString() } }).slice(0, 25)
+        let output = results.map(i => { return { name: i.name, value: i.id.toString() } })
 
         await interaction.respond(output)
     }
