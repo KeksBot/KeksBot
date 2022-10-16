@@ -222,9 +222,66 @@ const options: CommandOptions = {
                                 .setDisabled(_group.indexOf(item) == _group.length - 1)
                         )
                     await interaction.update({ embeds: [embed], components: [buttons] }).catch((e) => { console.log(e) })
+                    break
+                }
+                case 'inventory.use': {
+                    let id = parseInt(interaction.customId?.split(':')?.[1])
+                    if(!id) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
+                    let item: BattleActionBuilder & { count: number }
+                    let group: Map<Number, BattleActionBuilder & { count: number }>
+                    let groupname
+                    [...items.entries()].forEach((i) => {
+                        if(i[1].has(id)) {
+                            item = i[1].get(id)
+                            group = i[1]
+                            groupname = i[0]
+                        }
+                    })
+                    let _group = [...group.values()]
+                    if(!item) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
+
+                    // Item usage
+                    if(!item.count) return interaction.error('Keine Items', 'Du hast dieses Item nicht', true)
+                    if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
+                    if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
+                    if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
+                    item.count --
+                    user.data.battle.inventory.find(i => i.id === id).count --
+                    if(user.data.battle.inventory.find(i => i.id === id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id === id), 1)
+                    await user.save()
+
+                    let embed = new Discord.EmbedBuilder()
+                        .setColor(color.normal)
+                        //@ts-ignore
+                        .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
+                        .setDescription(`Anzahl: **${item.count}**\n${item.description}` || `Anzahl: **${item.count}**\nKeine Beschreibung verfügbar`)
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory:${groupname}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.item:${_group[_group.indexOf(item) - 1]?.id || 'a'}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(_group.indexOf(item) == 0),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.use:${item.id}`)
+                                .setLabel('Einsetzen')
+                                .setStyle(Discord.ButtonStyle.Primary)
+                                .setDisabled(item.count < 1|| !item.inventoryUsable),
+                            new Discord.ButtonBuilder()
+                                .setCustomId(`inventory.item:${_group[_group.indexOf(item) + 1]?.id || 'b'}${interaction.customId?.split(':')?.length > 2 ? ':' + interaction.customId?.split(':')[2] : ''}`)
+                                .setEmoji(emotes.next)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(_group.indexOf(item) == _group.length - 1)
+                        )
+                    await interaction.update({ embeds: [embed], components: [buttons] }).catch((e) => { console.log(e) })
+                    break
                 }
             }
-            interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null })
+            interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => null)
             if(!interaction) break
         }
     }
