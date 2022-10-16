@@ -1,14 +1,14 @@
 import { ButtonInteraction, CommandInteraction, EmbedBuilder, ModalSubmitInteraction, SelectMenuInteraction } from "discord.js";
-import { logChannel, ignoreLogs } from '../config.json'
+import config from '../config.json'
 
 export default async (interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, error: unknown, args?: any) => {
     try {
         //@ts-ignore
         console.error(`Error while executing ${interaction?.commandName || interaction?.customId} (${interaction?.user?.tag}, ${interaction?.guild?.name}) with arguments: ${args.replaceAll ? args.replaceAll('"', '') || 'undefined' : 'undefined'}`)
         console.error(error)
-        if(ignoreLogs) return
+        if(config.ignoreLogs) return
         let errorId = (Math.random() * Date.now()).toString(36)
-        let channel = await interaction.client.channels.fetch(logChannel)
+        let channel = await interaction.client.channels.fetch(config.logChannel)
         let embed = new EmbedBuilder() 
             .setColor('Red')
             //@ts-ignore
