@@ -1,5 +1,4 @@
 import Discord = require('discord.js')
-const { default: EmbedRenderer } = require('./battledata/EmbedRenderer')
 
 declare module 'discord.js' {
     interface Collection<K, V> {
@@ -205,8 +204,15 @@ declare global {
     }
 
     interface DbInventoryItem {
-        id: string,
-        count: number,
-        metadata: any
+        id: string
+        count: number
+        metadata?: {
+            name?: string
+            prefix?: string
+            suffix?: string
+            description?: string
+            emote?: string
+            [key: string]: any
+        }
     }
 }
