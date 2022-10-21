@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1013,
+    id: 'acu_potion_t2',
     name: 'konzentrierter Präzisionstrank',
     type: 'item/atk',
     priority: 8,

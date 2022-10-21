@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1011,
+    id: 'def_potion_t2',
     name: 'konzentrierter Defensivtrank',
     type: 'item/atk',
     priority: 8,

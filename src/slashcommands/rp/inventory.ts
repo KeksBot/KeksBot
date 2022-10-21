@@ -20,7 +20,7 @@ const options: CommandOptions = {
         let inventory = user.data?.battle?.inventory
         if (!inventory || !inventory.length) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
         //@ts-ignore
-        let items: Map<String, Map<Number, BattleActionBuilder & { count: number }>> = objectLoader(inventory.map(i => parseInt(i.id)))
+        let items: Map<string, Map<string, BattleActionBuilder & { count: number }>> = objectLoader(inventory.map(i => i.id))
         items.forEach(i => {
             //@ts-ignore
             i.count = inventory.find(_i => _i.id == i.id).count
@@ -62,12 +62,12 @@ const options: CommandOptions = {
                 },
                 {
                     name: 'Sternenstaub',
-                    value: items.get('item')?.get(2)?.count.toString() || '0',
+                    value: items.get('item')?.get('sternenstaub')?.count.toString() || '0',
                     inline: true
                 },
                 {
                     name: 'Kometenstücke',
-                    value: items.get('item')?.get(3)?.count.toString() || '0',
+                    value: items.get('item')?.get('kometenstück')?.count.toString() || '0',
                     inline: true
                 }
             ])
@@ -91,12 +91,12 @@ const options: CommandOptions = {
                                     },
                                     {
                                         name: 'Sternenstaub',
-                                        value: items.get('item')?.get(2)?.count.toString() || '0',
+                                        value: items.get('item')?.get('sternenstaub')?.count.toString() || '0',
                                         inline: true
                                     },
                                     {
                                         name: 'Kometenstücke',
-                                        value: items.get('item')?.get(3)?.count.toString() || '0',
+                                        value: items.get('item')?.get('kometenstück')?.count.toString() || '0',
                                         inline: true
                                     }
                                 ])
@@ -180,10 +180,10 @@ const options: CommandOptions = {
                 }
                 case 'inventory.item': {
                     //@ts-ignore
-                    let id = parseInt(interaction.values?.[0] || interaction.customId?.split(':')?.[1])
+                    let id = interaction.values?.[0] || interaction.customId?.split(':')?.[1]
                     if(!id) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
                     let item: BattleActionBuilder & { count: number }
-                    let group: Map<Number, BattleActionBuilder & { count: number }>
+                    let group: Map<string, BattleActionBuilder & { count: number }>
                     let groupname
                     [...items.entries()].forEach((i) => {
                         if(i[1].has(id)) {
@@ -225,10 +225,10 @@ const options: CommandOptions = {
                     break
                 }
                 case 'inventory.use': {
-                    let id = parseInt(interaction.customId?.split(':')?.[1])
+                    let id = interaction.customId?.split(':')?.[1]
                     if(!id) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
                     let item: BattleActionBuilder & { count: number }
-                    let group: Map<Number, BattleActionBuilder & { count: number }>
+                    let group: Map<string, BattleActionBuilder & { count: number }>
                     let groupname
                     [...items.entries()].forEach((i) => {
                         if(i[1].has(id)) {
@@ -246,8 +246,8 @@ const options: CommandOptions = {
                     if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
                     if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
                     item.count --
-                    user.data.battle.inventory.find(i => i.id === id).count --
-                    if(user.data.battle.inventory.find(i => i.id === id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id === id), 1)
+                    user.data.battle.inventory.find(i => i.id == id).count --
+                    if(user.data.battle.inventory.find(i => i.id == id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id == id), 1)
                     await user.save()
 
                     let embed = new Discord.EmbedBuilder()

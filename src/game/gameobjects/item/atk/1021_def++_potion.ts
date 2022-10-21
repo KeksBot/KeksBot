@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1021,
+    id: 'atk_potion_t4',
     name: 'Defensivessenz',
     type: 'item/atk',
     priority: 8,

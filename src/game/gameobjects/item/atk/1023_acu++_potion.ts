@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1023,
+    id: 'atk_potion_t6',
     name: 'Präzisionsessenz',
     type: 'item/atk',
     priority: 8,

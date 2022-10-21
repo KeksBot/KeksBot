@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const _files: any = {}
-const objects: Map<Number, any> = new Map()
+const objects: Map<string, any> = new Map()
 
 const loadFiles = (dir: string) => {
     const files = fs.readdirSync(path.join(__dirname, dir))
@@ -21,7 +21,7 @@ const loadFiles = (dir: string) => {
 
 loadFiles('./gameobjects')
 
-export default (id: number[]) => {
+export default (id: string[]) => {
     for(const i of id) {
         if(_files[i]) {
             objects.set(i, require(_files[i]).default)

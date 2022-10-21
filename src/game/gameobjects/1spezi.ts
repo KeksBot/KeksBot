@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1,
+    id: 'spezi',
     name: 'Spezi',
     type: 'item/med',
     description: 'Das einzigwahre Getränk dieser Welt. Stellt bei Konsum 75% der maximalen HP wieder her und schmeckt außerdem noch gut',

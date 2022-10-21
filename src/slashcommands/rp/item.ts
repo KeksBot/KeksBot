@@ -16,7 +16,7 @@ const options: CommandOptions = {
     ],
     execute: async function (interaction: Discord.CommandInteraction | Discord.ButtonInteraction, args, client) {
         const { user, color } = interaction
-        const id = parseInt(args.item)
+        const id = args.item
 
         let item: BattleActionBuilder & { count: number } = objectLoader([id]).get(id) || {}
         item.count = user.data.battle?.inventory?.find(i => i.id === id)?.count || 0
@@ -54,8 +54,8 @@ const options: CommandOptions = {
             if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
             // TODO: Stat modifiers
             item.count --
-            user.data.battle.inventory.find(i => i.id === id).count --
-            if(user.data.battle.inventory.find(i => i.id === id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id === id), 1)
+            user.data.battle.inventory.find(i => i.id == id).count --
+            if(user.data.battle.inventory.find(i => i.id == id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id === id), 1)
             await user.save()
             let embed = new Discord.EmbedBuilder()
                 .setColor(color.normal)

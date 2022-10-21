@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 1022,
+    id: 'atk_potion_t5',
     name: 'Tempoessenz',
     type: 'item/atk',
     priority: 8,

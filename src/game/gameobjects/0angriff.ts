@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 0,
+    id: 'angriff',
     name: 'Angriff',
     type: 'atk/normal',
     description: 'Eine ganz gewöhnliche Attacke mit vollem Körpereinsatz',

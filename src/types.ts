@@ -86,11 +86,8 @@ declare global {
             priority?: string,
             currentHP?: number,
             healTimestamp?: number,
-            inventory?: [{
-                id: number,
-                count: number,
-            }?],
-            attacks?: [number],
+            inventory?: DbInventoryItem[],
+            attacks?: [string],
         }
     }
 
@@ -106,12 +103,12 @@ declare global {
             value: number
             getValue?: () => number
         }[]
-        attacks: { id: number, uses: number }[]
+        attacks: { id: string, uses: number }[]
         color: Color
         name: string
         move?: {
             targets?: string[],
-            action: number,
+            action: string,
             user: BattleUser
         }
         skillChanges?: UserData['battle']['skills']
@@ -170,7 +167,12 @@ declare global {
         execute(interaction: Discord.AutocompleteInteraction): any
     }
 
-    interface BattleAction {
+    interface BattleAction extends DbInventoryItem, BattleActionBuilder {
+        id: undefined | string
+    }
+
+    interface BattleActionBuilder {
+        id: string
         name: string
         type: string
         description: string
@@ -202,7 +204,9 @@ declare global {
         inventoryMessage?: string,
     }
 
-    interface BattleActionBuilder extends BattleAction {
-        id: Number
+    interface DbInventoryItem {
+        id: string,
+        count: number,
+        metadata: any
     }
 }

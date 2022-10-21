@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 2,
+    id: 'sternenstaub',
     name: 'Sternenstaub',
     type: 'item/item',
     description: 'Ein kleiner Haufen kosmischen Staubs. Eröffnet neue Wege'

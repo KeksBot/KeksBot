@@ -13,16 +13,16 @@ export default class BattleUser {
         value: number
         getValue?: () => number
     }[]
-    attacks: { id: number, uses: number }[]
+    attacks: { id: string, uses: number }[]
     color: Color
     name: string
     move?: {
         targets?: string[],
-        action: number,
+        action: string,
         user: BattleUser
     }
     skillChanges?: UserData['battle']['skills']
-    usable: Map<Number, BattleAction>
+    usable: Map<string, BattleAction>
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -35,7 +35,7 @@ export default class BattleUser {
         this.name = this.member.displayName
     }
 
-    setup(color: Color, usable: Map<Number, BattleAction>) {
+    setup(color: Color, usable: Map<string, BattleAction>) {
         this.color = color
         this.usable = usable
     }
@@ -264,12 +264,12 @@ export default class BattleUser {
                             9: Mehrere Ziele: alle Teilnehmer (inklusiv man selbst)
                     */
                     //@ts-ignore
-                    let move = this.usable.get(parseInt(this.interaction.values[0]))
+                    let move = this.usable.get(this.interaction.values[0])
                     let targetType = move.targets || 0
                     this.move = {
                         targets: [],
                         //@ts-ignore
-                        action: parseInt(this.interaction.values[0]),
+                        action: this.interaction.values[0],
                         user: this
                     }
                     this.move.targets = 

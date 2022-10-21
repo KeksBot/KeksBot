@@ -8,7 +8,7 @@ import objectLoader from '../game/objectLoader'
 export default class BaseBattle {
     #actions: {
         targets?: string[],
-        action: number,
+        action: string,
         user: BattleUser,
         move: BattleAction
     }[]
@@ -19,7 +19,7 @@ export default class BaseBattle {
     color: Color
     client: Discord.Client
     started: boolean
-    usable: Map<Number, BattleAction>
+    usable: Map<string, BattleAction>
 
     /**
      * 
@@ -51,7 +51,7 @@ export default class BaseBattle {
 
     async load() {
         !this.private && this.message.deletable && this.message.delete()
-        let battleActions: number[] = []
+        let battleActions: string[] = []
         for (const user of this.users.values()) {
             battleActions.push(...user.battle.attacks)
             battleActions.push(...user.battle.inventory.map(i => i.id))

@@ -1,5 +1,5 @@
 const obj: BattleActionBuilder = {
-    id: 3,
+    id: 'kometenstück',
     name: 'Kometenstück',
     type: 'item/item',
     description: 'Fragment eines Kometen'        
