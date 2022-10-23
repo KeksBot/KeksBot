@@ -8,8 +8,8 @@ const options: AutocompleteOptions = {
         const { user } = interaction
 
         if(!user.data) user.data = await user.getData()
-        if(!user.data?.battle?.inventory) return interaction.respond([])
-        const inventory = user.data.battle.inventory
+        if(!user.data?.inventory) return interaction.respond([])
+        const inventory = user.data.inventory
 
         let input = interaction.options.getFocused().toLowerCase()
         if(input.length < 3) return interaction.respond([])

@@ -15,9 +15,10 @@ function group(list: Map<any, any>) {
 const options: CommandOptions = {
     name: 'inventory',
     description: 'Zeigt dir dein Inventar an.',
+    battlelock: true,
     execute: async function (ita, args, client) {
         let { user, color, guild } = ita
-        let inventory = user.data?.battle?.inventory
+        let inventory = user.data?.inventory
         if (!inventory || !inventory.length) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
         //@ts-ignore
         let items: Map<string, Map<string, BattleActionBuilder & { count: number }>> = objectLoader(inventory.map(i => i.id))
@@ -242,19 +243,32 @@ const options: CommandOptions = {
 
                     // Item usage
                     if(!item.count) return interaction.error('Keine Items', 'Du hast dieses Item nicht', true)
-                    if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
-                    if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
-                    if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
-                    item.count --
-                    user.data.battle.inventory.find(i => i.id == id).count --
-                    if(user.data.battle.inventory.find(i => i.id == id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id == id), 1)
-                    await user.save()
-
+                    let output = true
+                    if(item.onInvUse) {
+                        //@ts-ignore
+                        output = await item.onInvUse(item, interaction, user)
+                    }
                     let embed = new Discord.EmbedBuilder()
                         .setColor(color.normal)
                         //@ts-ignore
                         .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
-                        .setDescription(`Anzahl: **${item.count}**\n${item.description}` || `Anzahl: **${item.count}**\nKeine Beschreibung verfügbar`)
+
+                    if(output) {
+                        if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
+                        if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
+                        if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
+                        // TODO: Stat modifiers
+                        item.count --
+                        user.data.inventory.find(i => i.id == id).count --
+                        if(user.data.inventory.find(i => i.id == id).count <= 0) user.data.inventory.splice(user.data.inventory.findIndex(i => i.id === id), 1)
+                        await user.save()
+                        embed.setFooter({ text: typeof output === 'string' ? output : 'Das Item wurde erfolgreich angewandt.' })
+                    } else {
+                        embed.setFooter({ text: 'Das Item konnte nicht benutzt werden.' })
+                    }
+
+                    embed.setDescription(`Anzahl: **${item.count}**\n${item.description}` || `Anzahl: **${item.count}**\nKeine Beschreibung verfügbar`)
+
                     let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                         .addComponents(
                             new Discord.ButtonBuilder()

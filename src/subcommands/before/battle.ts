@@ -264,11 +264,10 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 skills,
                 ready: true,
                 currentHP: skills.find(skill => skill.name == 'HP').value,
-                attacks: ['0'],
-                inventory: [{ id: 1, count: 3 }],
+                attacks: ['angriff'],
                 healTimestamp: Date.now()
             }
-            await user.setData({ battle })
+            await user.setData({ battle, inventory: [{ id: 'potion_t1', count: 5 }] })
         }
         switch(interaction.customId.split(':')[1]) {
             case 'saveandexit':

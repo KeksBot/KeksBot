@@ -7,6 +7,7 @@ import BattleUser from '../../../battle/BattleUser'
 const options: CommandOptions = {
     name: 'battle',
     description: 'Woäk in pwogwess',
+    battlelock: true,
     options: [
         {
             name: 'user',

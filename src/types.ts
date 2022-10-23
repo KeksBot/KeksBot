@@ -19,8 +19,8 @@ declare module 'discord.js' {
 
     interface BaseInteraction<Cached extends Discord.CacheType = Discord.CacheType> {
         color?: Color
-        success(title: string, description: string, ephemeral?: boolean, del?: boolean): this
-        error(title: string, description: string, ephemeral?: boolean, del?: boolean): this
+        success(title: string, description: string, ephemeral?: boolean, del?: boolean): Promise<this>
+        error(title: string, description: string, ephemeral?: boolean, del?: boolean): Promise<this>
     }
 
     interface Client<Ready extends boolean = boolean> {
@@ -74,6 +74,7 @@ declare global {
             time?: number,
             reason?: string
         },
+        inventory?: DbInventoryItem[],
         battle?: {
             skills?: [
                 {
@@ -85,7 +86,6 @@ declare global {
             priority?: string,
             currentHP?: number,
             healTimestamp?: number,
-            inventory?: DbInventoryItem[],
             attacks?: [string],
         }
     }
@@ -181,7 +181,7 @@ declare global {
         targets?: number
         accuracy?: number
         onUse?(battle: BaseBattle, user: BattleUser, targets: BattleUser[]): Promise<string | void> | string | void
-        onUse?(user: Discord.User): any
+        onInvUse?(item: BattleAction, user: Discord.User, interaction: Discord.ButtonInteraction): any
         aHeal?: {
             onTarget?: boolean // Anwender oder Ziel 
             value: number

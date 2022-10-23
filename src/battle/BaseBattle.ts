@@ -54,7 +54,7 @@ export default class BaseBattle {
         let battleActions: string[] = []
         for (const user of this.users.values()) {
             battleActions.push(...user.battle.attacks)
-            battleActions.push(...user.battle.inventory.map(i => i.id))
+            battleActions.push(...user.inventory.map(i => i.id))
         }
         battleActions = [...new Set(battleActions)]
         this.usable = objectLoader(battleActions)

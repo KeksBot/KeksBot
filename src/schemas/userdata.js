@@ -31,13 +31,13 @@ var userdataSchema = Schema({
         priority: String,
         currentHP: Number,
         healTimestamp: Number,
-        inventory: [{
-            id: String,
-            count: Number,
-            _id: false
-        }],
         attacks: [String],
     },
+    inventory: [{
+        id: String,
+        count: Number,
+        _id: false
+    }],
     system: {
         user: String,
         bounduser: String,

@@ -23,6 +23,7 @@ export default class BattleUser {
     }
     skillChanges?: UserData['battle']['skills']
     usable: Map<string, BattleAction>
+    inventory: UserData['inventory']
 
     constructor(interaction: Discord.ButtonInteraction, team: 0 | 1) {
         this.user = interaction?.user
@@ -229,7 +230,7 @@ export default class BattleUser {
                         let attackData = this.usable.get(attack.id)
                         embed.addFields([{
                             name: attackData.name,
-                            value: `${attackData.description}\n**Stärke**: ${attackData.strength}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
+                            value: `${attackData.description}\n**Stärke**: ${attackData.strength || '-'}\n**Genauigkeit**: ${String(attackData.accuracy).replace('Infinity', '—')}\n**AP**: ${attack.uses}/${attackData.uses}`,
                             inline: true
                         }])
                         if(attack.uses > 0) 
@@ -389,7 +390,7 @@ export default class BattleUser {
                     //@ts-ignore
                     let type = `item/${this.interaction.values[0] || this.interaction.customId.split('.')[2]}`
                     //@ts-ignore
-                    let items = this.battle.inventory.filter(i => this.usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: this.usable.get(i.id).name, description: this.usable.get(i.id).description, u: this.usable.get(i.id).fightUsable } })
+                    let items = this.inventory.filter(i => this.usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: this.usable.get(i.id).name, description: this.usable.get(i.id).description, u: this.usable.get(i.id).fightUsable } })
                     let page = parseInt(this.interaction.customId.split('.')[3]) || 1
                     let embed = new Discord.EmbedBuilder()
                         .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
@@ -399,7 +400,7 @@ export default class BattleUser {
                             type == 'item/item' ? 'Itembeutel' :
                             type == 'item/base' ? 'Basis-Itembeutel' : 'Inventar'
                         )
-                        .addFields(items.slice(page * 25 - 25, page * 25).map(i => {
+                        .addFields(items.slice(page * 25 - 25, page * 25).map((i: any) => {
                             return {
                                 name: `${i.name} (${i.count}x)`,
                                 value: (i.description || 'Keine Beschreibung verfügbar') + (!i.u ? '\nKann nicht in einem Kampf benutzt werden' : ''),
@@ -410,12 +411,12 @@ export default class BattleUser {
                         embed.setFooter({ text: `Seite ${page} von ${Math.ceil(items.length / 25)}` })
                     }
                     if(!items.length) embed.setDescription('Hier ist nichts')
-                    let selectMenu = items.slice(page * 25 - 25, page * 25).filter(i => i.u).length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let selectMenu = items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
                         .addComponents(
                             new Discord.SelectMenuBuilder()
                                 .setCustomId('battle:user.exit.selectItem')
                                 .setPlaceholder('Item auswählen')
-                                .addOptions(items.slice(page * 25 - 25, page * 25).filter(i => i.u).map(i => {
+                                .addOptions(items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).map((i: any) => {
                                     return {
                                         label: `${i.name} (${i.count}x)`,
                                         value: String(i.id)
@@ -468,7 +469,7 @@ export default class BattleUser {
             let item = this.battle.inventory.find(i => i.id == this.interaction.values[0])
             if(!item) return false
             item.count--
-            if(!item.count) this.battle.inventory.splice(this.battle.inventory.indexOf(item), 1)
+            if(!item.count) this.inventory.splice(this.inventory.indexOf(item), 1)
             this.move = {
                 action: item.id,
                 targets: [this.id],

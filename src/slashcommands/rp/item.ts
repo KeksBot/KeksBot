@@ -5,6 +5,7 @@ import emotes from '../../emotes.json'
 const options: CommandOptions = {
     name: 'item',
     description: 'Benutze ein Item',
+    battlelock: true,
     options: [
         {
             name: 'item',
@@ -18,8 +19,8 @@ const options: CommandOptions = {
         const { user, color } = interaction
         const id = args.item
 
-        let item: BattleActionBuilder & { count: number } = objectLoader([id]).get(id) || {}
-        item.count = user.data.battle?.inventory?.find(i => i.id === id)?.count || 0
+        let item: BattleAction = objectLoader([id]).get(id) || {}
+        item.count = user.data.inventory?.find(i => i.id === id)?.count || 0
 
         if(!item.name) return interaction.error('Unbekanntes Item', 'Dieses Item scheint nicht zu existieren', true)
         if(!item.count) return interaction.error('Keine Items', 'Du hast dieses Item nicht', true)
@@ -47,23 +48,38 @@ const options: CommandOptions = {
 
         interaction = await res.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 120000 }).catch(() => null)
         while(interaction) {
+            interaction.color = color
             //@ts-ignore
             if(!item.count) return interaction.error('Keine Items', 'Du hast dieses Item nicht', true)
-            if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
-            if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
-            if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
-            // TODO: Stat modifiers
-            item.count --
-            user.data.battle.inventory.find(i => i.id == id).count --
-            if(user.data.battle.inventory.find(i => i.id == id).count <= 0) user.data.battle.inventory.splice(user.data.battle.inventory.findIndex(i => i.id === id), 1)
-            await user.save()
-            let embed = new Discord.EmbedBuilder()
+            let output = true
+            if(item.onInvUse) {
+                //@ts-ignore
+                output = await item.onInvUse(item, interaction, user)
+            }
+            let embed
+            if(output) {
+                if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
+                if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
+                if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
+                // TODO: Stat modifiers
+                item.count --
+                user.data.inventory.find(i => i.id == id).count --
+                if(user.data.inventory.find(i => i.id == id).count <= 0) user.data.inventory.splice(user.data.inventory.findIndex(i => i.id === id), 1)
+                await user.save()
+                embed = new Discord.EmbedBuilder()
+                    .setColor(color.normal)
+                    //@ts-ignore
+                    .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
+                    .setDescription(`Anzahl: **${item.count}**\nTyp: **${type}**\n${item.description}` || `Anzahl: **${item.count}**\nTyp: **${type}**\nKeine Beschreibung verfügbar`)
+                    .setFooter({ text: typeof output === 'string' ? output : 'Das Item wurde erfolgreich angewandt.' })
+                button.components[0].setDisabled(!item.count)
+            } else embed = new Discord.EmbedBuilder()
                 .setColor(color.normal)
                 //@ts-ignore
                 .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
                 .setDescription(`Anzahl: **${item.count}**\nTyp: **${type}**\n${item.description}` || `Anzahl: **${item.count}**\nTyp: **${type}**\nKeine Beschreibung verfügbar`)
-                .setFooter({ text: 'Das Item wurde erfolgreich angewandt.' })
-            button.components[0].setDisabled(!item.count)
+                .setFooter({ text: 'Das Item konnte nicht benutzt werden.' })
+
             //@ts-ignore
             await interaction.update({ embeds: [embed], components: [button] })
             interaction = await res.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 120000 }).catch(() => null)
