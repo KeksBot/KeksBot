@@ -36,6 +36,7 @@ var userdataSchema = Schema({
     inventory: [{
         id: String,
         count: Number,
+        metadata: Object,
         _id: false
     }],
     system: {

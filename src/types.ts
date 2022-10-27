@@ -182,6 +182,7 @@ declare global {
         accuracy?: number
         onUse?(battle: BaseBattle, user: BattleUser, targets: BattleUser[]): Promise<string | void> | string | void
         onInvUse?(item: BattleAction, user: Discord.User, interaction: Discord.ButtonInteraction): any
+        onLoad?(this: BattleAction): void
         aHeal?: {
             onTarget?: boolean // Anwender oder Ziel 
             value: number

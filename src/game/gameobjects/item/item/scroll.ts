@@ -11,9 +11,10 @@ const obj: BattleActionBuilder = {
     async onInvUse(item, user, interaction: ButtonInteraction | SelectMenuInteraction) {
         const { color } = interaction
         if(!user || !interaction || !item) return false
-        if(!item.metadata.skill) return false
-        const skill: BattleActionBuilder = objectLoader([item.metadata.skill]).get(item.metadata.skill)
+        if(!item.metadata?.skill) return false
+        const skill: BattleActionBuilder = objectLoader([item.metadata.skill]).get(item.metadata.skill) 
         if(!skill) return false
+        if(user.data.battle.attacks.includes(skill.id)) return [false, 'Du hast diese Attacke bereits gelernt'] 
         let embed = new EmbedBuilder()
             .setDescription('Möchtest du den Skill **' + skill.name + '** lernen?')
             .addFields([
@@ -46,13 +47,11 @@ const obj: BattleActionBuilder = {
                     .setStyle(ButtonStyle.Danger)
             )
 
-        let reply = await interaction.reply({ embeds: [embed], components: [buttons], ephemeral: true })
-        interaction = await reply.awaitMessageComponent({ time: 300000, componentType: ComponentType.Button }).catch(() => null) || interaction
+        let reply = await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
+        interaction = await reply.awaitMessageComponent({ time: 300000, componentType: ComponentType.Button }).catch((e) => { console.error(e); return null })
+        if(!interaction) return false
 
-        if(interaction.customId != 'scroll.learn') {
-            await interaction?.update({ embeds: [embed.setColor(color.red).setTitle('Vorgang abgebrochen').setFields([]).setDescription('Du hast den Skill nicht erlernt')], components: [] })
-            return false
-        }
+        if(interaction.customId != 'scroll:learn') return null
 
         let skills = objectLoader(user.data.battle.attacks)
         if(user.data.battle.attacks.length > maxSkillAmount) {
@@ -84,8 +83,9 @@ const obj: BattleActionBuilder = {
                         }))
                         .setMaxValues(1)
                 )
-            reply = (await interaction.update({ embeds: [embed], components: [choices] }))
+            reply = await interaction.update({ embeds: [embed], components: [choices], fetchReply: true })
             interaction = (await reply.awaitMessageComponent({ time: 300000, componentType: ComponentType.SelectMenu }).catch(() => null) || interaction) as SelectMenuInteraction
+            if(!interaction) return
             let selected: BattleActionBuilder = skills.get(interaction.values[0])
             embed = new EmbedBuilder()
                 .setColor(color.yellow)
@@ -111,14 +111,19 @@ const obj: BattleActionBuilder = {
             //@ts-ignore
             reply = await interaction.editReply({ embeds: [embed], components: [buttons] })
             interaction = await reply.awaitMessageComponent({ time: 300000, componentType: ComponentType.Button }).catch(() => null) || interaction
-            if(interaction.customId != 'scroll.forget') {
-                await interaction.success('Vorgang abgebrochen', 'Du hast den Skill nicht erlernt')
-                return false
-            }
+            if(interaction?.customId != 'scroll:forget') return null
             user.data.battle.attacks.splice(user.data.battle.attacks.indexOf(selected.id), 1, skill.id)
         } else user.data.battle.attacks.push(skill.id)
         await user.save()
-        await interaction.success('Skill erlernt', 'Du hast den Skill **' + skill.name + '** erlernt')
+        interaction.deferUpdate()
+        return 'Du hast den Skill ' + skill.name + ' erlernt'
+    },
+    async onLoad() {
+        if(this.metadata?.name) this.name = this.metadata.name
+        if(this.metadata?.description) this.description = this.metadata.description
+        if(this.metadata?.prefix) this.name = this.metadata.prefix + ' ' + this.name
+        if(this.metadata?.suffix) this.name = this.name + ' ' + this.metadata.suffix
+        if(this.metadata?.emote) this.emote = this.metadata.emote
     }
 }
 

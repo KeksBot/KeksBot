@@ -34,6 +34,7 @@ export default class BattleUser {
         this.id = this.user.id
         this.team = team
         this.name = this.member.displayName
+        this.inventory = this.user.data.inventory
     }
 
     setup(color: Color, usable: Map<string, BattleAction>) {
