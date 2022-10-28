@@ -57,7 +57,6 @@ const options: CommandOptions = {
             if(item.onInvUse) {
                 //@ts-ignore
                 output = await item.onInvUse(item, user, interaction)
-                console.log(output)
             }
             let embed
             if(output && (!output?.length || output?.[0])) {
