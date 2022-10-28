@@ -24,10 +24,10 @@ loadFiles('./gameobjects')
 export default (id: string[]) => {
     for(const i of id) {
         if(_files[i]) {
-            objects.set(i, require(_files[i]).default)
+            if(!objects.has(i)) objects.set(i, require(_files[i]).default)
             objects.get(i).timeout && clearTimeout(objects.get(i).timeout)
             objects.get(i).timeout = setTimeout((i: any) => {
-                delete require.cache[require.resolve(_files[i])]
+                delete require.cache[_files[i]]
                 objects.delete(i)
             }, 3600000)
         }
