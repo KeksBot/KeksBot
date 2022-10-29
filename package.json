@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node build/index",
-    "build": "tsc && cpy 'src/*.json' 'build'",
+    "build": "tsc && cpy 'src/*.json' 'build' && node build/build.js",
     "dev": "tsc && cpy 'src/*.json' 'build' && node build/index"
   },
   "author": "Clyde",

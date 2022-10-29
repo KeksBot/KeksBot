@@ -36,28 +36,7 @@ export default async (client: Discord.Client) => {
     }
     console.log(`[${client.user.username}]: Commands werden geladen.`)
     await readCommands('./slashcommands')
-    console.log(`[${client.user.username}]: Commands werden initialisiert.`)
-
-    await client.application.commands.set(client.commands.filter(c => c.global).array())
-    await client.guilds.fetch()
-    let progress = 0
-    let failedguilds = 0
-    let end = false
-    client.guilds.cache.array().forEach(async guild => {
-        try {
-            await guild.commands.set(client.commands.filter(c => !c.global).array())
-        } catch (error) {
-            console.error(error)
-            console.log(`[${client.user.username}]: Server nicht geladen: ${guild.id} | ${guild.name} | ${guild.ownerId}`)
-            failedguilds++
-        } finally {
-            progress ++
-            if(progress == client.guilds.cache.size) end = true
-        }
-    })
-    while(!end) {await delay(500)}
-    console.log(`[${client.user.username}]: Initialisierung abgeschlossen.`)
-    if(failedguilds) console.log('Commands wurden auf ' + failedguilds + ' Servern NICHT geladen.')
+    console.log(`[${client.user.username}]: Commands geladen.`)
 
     //@ts-ignore
     client.on('interactionCreate', async function(interaction: Discord.CommandInteraction) {
