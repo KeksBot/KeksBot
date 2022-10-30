@@ -12,7 +12,9 @@ const obj: BattleActionBuilder = {
             name: 'Genauigkeit',
             value: 1
         }
-    ]
+    ],
+    purchasable: true,
+    value: 2000,
 }
 
 export default obj

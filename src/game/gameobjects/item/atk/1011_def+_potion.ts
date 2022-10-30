@@ -12,7 +12,9 @@ const obj: BattleActionBuilder = {
             name: 'Verteidigung',
             value: 2
         }
-    ]
+    ],
+    purchasable: true,
+    value: 8000,
 }
 
 export default obj

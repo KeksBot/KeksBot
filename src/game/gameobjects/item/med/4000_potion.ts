@@ -10,7 +10,9 @@ const obj: BattleActionBuilder = {
     aHeal: {
         value: 500,
     },
-    inventoryUsable: true
+    inventoryUsable: true,
+    purchasable: true,
+    value: 500,
 }
 
 export default obj

@@ -197,11 +197,19 @@ declare global {
             onTarget?: boolean // Anwender oder Ziel 
             probability?: number
         }[],
-        fightUsable?: boolean,
-        usageMessage?: string,
-        emote?: string,
-        inventoryUsable?: boolean,
-        inventoryMessage?: string,
+        fightUsable?: boolean
+        usageMessage?: string
+        emote?: string
+        inventoryUsable?: boolean
+        inventoryMessage?: string
+        value?: number
+        purchasable?: boolean
+        storeOptions?: {
+            metadata: [
+                any
+            ],
+            onLoad(this: BattleAction, metadata: DbInventoryItem['metadata']): BattleAction['metadata']
+        }
     }
 
     interface DbInventoryItem {
