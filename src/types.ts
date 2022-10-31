@@ -205,10 +205,8 @@ declare global {
         value?: number
         purchasable?: boolean
         storeOptions?: {
-            metadata: [
-                any
-            ],
-            onLoad(this: BattleAction, metadata: DbInventoryItem['metadata']): BattleAction['metadata']
+            metadata: any[]
+            onLoad(this: BattleAction, metadata: number): BattleAction
         }
     }
 

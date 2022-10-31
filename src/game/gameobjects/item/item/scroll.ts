@@ -8,6 +8,7 @@ const obj: BattleActionBuilder = {
     description: 'Eine geheimnisvolle Schriftrolle, die Informationen zu einer Attacke enthält',
     type: 'item/item',
     inventoryUsable: true,
+    purchasable: true,
     async onInvUse(item, user, interaction: ButtonInteraction | SelectMenuInteraction) {
         const { color } = interaction
         if(!user || !interaction || !item) return false
@@ -124,6 +125,24 @@ const obj: BattleActionBuilder = {
         if(this.metadata?.prefix) this.name = this.metadata.prefix + ' ' + this.name
         if(this.metadata?.suffix) this.name = this.name + ' ' + this.metadata.suffix
         if(this.metadata?.emote) this.emote = this.metadata.emote
+        if(this.metadata?.value) this.value = this.metadata.value
+    },
+    storeOptions: {
+        metadata: [
+            {
+                id: 'bonk',
+                price: 3000
+            }
+        ],
+        onLoad(index) {
+            let meta = this.storeOptions.metadata[index]
+            let skill: BattleActionBuilder = objectLoader([meta.id]).get(meta.id)
+            this.metadata.suffix = `${(skill.name)}`
+            this.metadata.description = skill.description
+            this.metadata.value = meta.price
+            this.onLoad.call(this)
+            return this
+        },
     }
 }
 
