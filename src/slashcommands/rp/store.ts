@@ -91,8 +91,10 @@ const obj: CommandOptions = {
         let interaction = await reply.awaitMessageComponent({ time: 300000 }) as Discord.ButtonInteraction | Discord.SelectMenuInteraction
         let categoryPage = 0
         let metaPage = 0
-        let cartContent: (DbInventoryItem & { price: number })[] = []
+        let cartPage = 0
+        let cartContent: (DbInventoryItem & { price: number, emote?: string, name: string, description: string, type: string })[] = []
         let currentItem: BattleActionBuilder & { metadata?: DbInventoryItem['metadata'] }
+        let oldPath = ''
 
         while (interaction) {
             switch(interaction.customId) {
@@ -106,7 +108,8 @@ const obj: CommandOptions = {
                 case 'store.item.next': path = `/${path.split('/')[1]}/${storeItems[path.split('/')[1]][storeItems[path.split('/')[1]].findIndex(item => item.item === path.split('/')[2]) + 1].item}`; break
                 case 'store.item.prev': path = `/${path.split('/')[1]}/${storeItems[path.split('/')[1]][storeItems[path.split('/')[1]].findIndex(item => item.item === path.split('/')[2]) - 1].item}`; break //@ts-ignore
                 case 'store.item.addToCart': interaction.values[0] != 'remove' ? cartContent.find(i => i.id == currentItem?.id && equals(i.metadata, currentItem.metadata)) ? cartContent[cartContent.findIndex(i => i.id == currentItem?.id && equals(i.metadata, currentItem.metadata))].count += parseInt(interaction.values[0]) : //@ts-ignore
-                    cartContent.push({ price: currentItem.value, count: parseInt(interaction.values[0]), id: currentItem?.id, metadata: currentItem?.metadata }) : cartContent.splice(cartContent.findIndex(i => i.id == currentItem?.id && equals(i.metadata, currentItem.metadata))); break //@ts-ignore
+                    cartContent.push({ price: currentItem.value, count: parseInt(interaction.values[0]), id: currentItem?.id, metadata: currentItem?.metadata, name: currentItem.name, emote: currentItem.emote, description: currentItem.description, type: currentItem.type }) : 
+                    cartContent.splice(cartContent.findIndex(i => i.id == currentItem?.id && equals(i.metadata, currentItem.metadata))); break //@ts-ignore
                 case 'store.meta.select': path += `/${interaction.values[0]}`; break
                 case 'store.meta.nextPage': metaPage++; break
                 case 'store.meta.prevPage': metaPage--; break
@@ -114,9 +117,139 @@ const obj: CommandOptions = {
                 case 'store.meta.lastPage': metaPage = Math.floor(storeItems[path.split('/')[1]].find(item => item.item === path.split('/')[2]).metadata.length / 10); break
                 case 'store.meta.prev': path = `/${path.split('/')[1]}/${path.split('/')[2]}/${parseInt(path.split('/')[3]) - 1}`; break
                 case 'store.meta.next': path = `/${path.split('/')[1]}/${path.split('/')[2]}/${parseInt(path.split('/')[3]) + 1}`; break
+                case 'store.cart': path = 'cart'; break
+                case 'store.cart.back': path = oldPath; break
+                case 'store.cart.nextPage': cartPage++; break
+                case 'store.cart.prevPage': cartPage--; break //@ts-ignore
+                case 'store.cart.item': path = `/${cartContent[parseInt(interaction.values[0])].type.split('/')[1]}/${cartContent[parseInt(interaction.values[0])].id}`; break
+                case 'store.checkout': path = 'cart/checkout'; break
+                case 'store.payment': path = 'cart/checkout/payment'; break
             }
 
-            switch(path.split('/').length) {
+            if(path.startsWith('cart')) switch(path.split('/').length) {
+                case 1: {
+                    if(!cartContent.length) {
+                        let embed = new Discord.EmbedBuilder()
+                            .setTitle(`${emotes.cart} Warenkorb`)
+                            .setDescription('Dein Warenkorb ist leer')
+                            .setColor(color.normal)
+                        let menu = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                            .addComponents(
+                                new Discord.ButtonBuilder()
+                                    .setCustomId('store.cart.back')
+                                    .setEmoji(emotes.back)
+                                    .setStyle(Discord.ButtonStyle.Danger)
+                            )
+                        await interaction.safeUpdate({ embeds: [embed], components: [menu] })
+                        break
+                    }
+                    let embed = new Discord.EmbedBuilder()
+                        .setTitle(`${emotes.cart} Warenkorb`)
+                        .setColor(color.normal)
+                        .addFields(cartContent.slice(cartPage * 10, cartPage * 10 + 10).map(item => {
+                            return { //@ts-ignore
+                                name: `${item.emote ? emotes.items[item.emote] : '[ ]'} ${item.name}`,
+                                value: `${item.description || 'Es ist keine Beschreibung verfügbar'}\n${item.count}x ${item.price} Kekse`
+                            }
+                        }))
+                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                        .addComponents(
+                            new Discord.SelectMenuBuilder()
+                                .setCustomId('store.cart.item')
+                                .setPlaceholder('Artikel ändern')
+                                .addOptions(cartContent.slice(cartPage * 10, cartPage * 10 + 10).map((item, index) => {
+                                    return {
+                                        label: item.name,
+                                        value: index.toString(), //@ts-ignore
+                                        emoji: emotes.items[item.emote]
+                                    }
+                                }))
+                        )
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.cart.back')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.cart.prevPage')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(cartPage == 0),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.checkout')
+                                .setEmoji(emotes.store)
+                                .setStyle(Discord.ButtonStyle.Success),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.cart.nextPage')
+                                .setEmoji(emotes.next)
+                                .setStyle(Discord.ButtonStyle.Secondary)
+                                .setDisabled(cartContent.length <= cartPage * 10 + 10)
+                        )
+                    await interaction.safeUpdate({ embeds: [embed], components: [menu, buttons] })
+                    break
+                }
+                case 2: {
+                    let embed = new Discord.EmbedBuilder()
+                        .setTitle(`${emotes.cart} Zahlung`)
+                        .setDescription(`Du hast ${cartContent.reduce((a, b) => a + b.count, 0)} Artikel im Warenkorb für insgesamt ${cartContent.reduce((a, b) => a + b.count * b.price, 0)} Kekse.`)
+                        .setColor(color.normal)
+                        .addFields([
+                            {
+                                name: 'Aktuelles Guthaben',
+                                value: `${user.data.cookies} Kekse`,
+                                inline: true
+                            },
+                            {
+                                name: 'Anfallende Kosten',
+                                value: `${cartContent.reduce((a, b) => a + b.count * b.price, 0)} Kekse`,
+                                inline: true
+                            },
+                            {
+                                name: 'Verbleibendes Guthaben',
+                                value: `${user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0)} Kekse`,
+                                inline: true
+                            }
+                        ])
+                    if(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) embed.setFooter({ text: 'Du hast nicht genügend Kekse, um diesen Kauf abzuschließen.' })
+                    let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+                        .addComponents(
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.back')
+                                .setEmoji(emotes.back)
+                                .setStyle(Discord.ButtonStyle.Danger),
+                            new Discord.ButtonBuilder()
+                                .setCustomId('store.payment')
+                                .setEmoji(emotes.store)
+                                .setStyle(Discord.ButtonStyle.Success)
+                                .setDisabled(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0)
+                        )
+                    await interaction.safeUpdate({ embeds: [embed], components: [buttons] })
+                    break
+                }
+                case 3: {
+                    if(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) {
+                        let embed = new Discord.EmbedBuilder()
+                            .setTitle(`${emotes.denied} Zahlung verweigert`)
+                            .setColor(color.red)
+                            .setDescription('Du hast nicht genügend Kekse, um diesen Kauf abzuschließen.')
+                        return interaction.safeUpdate({ embeds: [embed], components: [] })
+                    }
+                    for (const item of cartContent) {
+                        let index = user.data.inventory.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
+                        if(index == -1) {
+                            user.data.inventory.push({ id: item.id, count: item.count, metadata: item.metadata })
+                        } else user.data.inventory[index].count += item.count
+                        user.data.cookies -= item.count * item.price
+                    }
+                    await user.save()
+                    let embed = new Discord.EmbedBuilder()
+                        .setTitle(`${emotes.store} Vielen Dank für deinen Einkauf!`)
+                        .setColor(color.normal)
+                        .setDescription(`Bitte beehre uns bald wieder`)
+                    await interaction.safeUpdate({ embeds: [embed], components: [] })
+                }
+            } else switch(path.split('/').length) {
                 case 1: {
                     categoryPage = 0
                     let embed = new Discord.EmbedBuilder()
@@ -238,8 +371,8 @@ const obj: CommandOptions = {
                     let item: BattleAction = objectLoader([path.split('/')[2]]).get(path.split('/')[2])
                     if(item.storeOptions?.metadata?.length) {
                         item.count = 0
-                        let items = item.storeOptions.metadata.map(meta => {
-                            return item.storeOptions.onLoad.call(item, meta)
+                        let items = item.storeOptions.metadata.map((meta, index) => {
+                            return item.storeOptions.onLoad.call({...item}, index)
                         })
                         let embed = new Discord.EmbedBuilder()
                             .setTitle(`${emotes.store} KeksBot Store | ${item.name}`)
@@ -259,7 +392,7 @@ const obj: CommandOptions = {
                                     .addOptions(items.slice(metaPage * 10, metaPage * 10 + 1).map(item => {
                                         return {
                                             label: item.name,
-                                            value: item.name, //@ts-ignore
+                                            value: items.findIndex(i => i.id == item.id).toString(), //@ts-ignore
                                             emoji: emotes.items[item.emote]
                                         }
                                     }))
@@ -359,11 +492,11 @@ const obj: CommandOptions = {
                     break
                 }
                 case 4: {
-                    let item = objectLoader([path.split('/')[2]]).get(path.split('/')[2]) as typeof currentItem //@ts-ignore
-                    currentItem = item.storeOptions.onLoad(item.storeOptions.metadata[parseInt(interaction.values[0])])
+                    let item = {...objectLoader([path.split('/')[2]]).get(path.split('/')[2])} as typeof currentItem //@ts-ignore
+                    currentItem = item.storeOptions.onLoad.call(item, parseInt(path.split('/')[3]))
                     let embed = new Discord.EmbedBuilder()
                         .setTitle(`${emotes.store} KeksBot Store | ${item.name}`) //@ts-ignore
-                        .setDescription(`${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}**${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis unbekannt'}`)
+                        .setDescription(`**${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis unbekannt'}`)
                         .setColor(color.normal)
                         .setFooter({
                             text: `${user.data.inventory.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
@@ -422,7 +555,9 @@ const obj: CommandOptions = {
                     await interaction.safeUpdate({ embeds: [embed], components: [menu, buttons] })
                 }
             }
+            if(!path.startsWith('cart')) oldPath = path
             interaction = await reply.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction | Discord.SelectMenuInteraction
+            console.log(oldPath)
             if(!interaction) break
         }
     }

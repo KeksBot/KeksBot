@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ComponentType, EmbedBuilder, InteractionResponse, SelectMenuBuilder, SelectMenuInteraction } from "discord.js"
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ComponentType, EmbedBuilder, SelectMenuBuilder, SelectMenuInteraction } from "discord.js"
 import objectLoader from "../../../objectLoader"
 import { maxSkillAmount } from "../../../../config.json"
 
@@ -137,7 +137,8 @@ const obj: BattleActionBuilder = {
         onLoad(index) {
             let meta = this.storeOptions.metadata[index]
             let skill: BattleActionBuilder = objectLoader([meta.id]).get(meta.id)
-            this.metadata.suffix = `${(skill.name)}`
+            if(!this.metadata) this.metadata = {}
+            this.metadata.suffix = `(${skill.name})`
             this.metadata.description = skill.description
             this.metadata.value = meta.price
             this.onLoad.call(this)
