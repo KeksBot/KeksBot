@@ -96,7 +96,7 @@ export default {
         else reply = await ita.editReply({ embeds: [embed], components: [buttons] }) 
 
         for(let l = levelCount; l > 0; l--) {
-            const interaction = await reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita
+            const interaction = await (reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita) as Discord.ButtonInteraction | Discord.SelectMenuInteraction | Discord.CommandInteraction
             //@ts-ignore
             const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
     

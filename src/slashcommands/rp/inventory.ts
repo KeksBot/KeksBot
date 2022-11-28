@@ -65,7 +65,7 @@ const options: CommandOptions = {
                 }
             ])
         let response = await ita.reply({ embeds: [embed], components: [selectMenu], ephemeral: true })
-        let interaction: Discord.ButtonInteraction | Discord.SelectMenuInteraction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null })
+        let interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null }) as Discord.ButtonInteraction | Discord.SelectMenuInteraction
         if(!interaction) return
         while(true) {
             let objects = objectLoader(inventory.map(i => i.id))
@@ -280,7 +280,7 @@ const options: CommandOptions = {
                     break
                 }
             }
-            interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => null)
+            interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => null) as Discord.ButtonInteraction | Discord.SelectMenuInteraction | null
             if(!interaction) break
         }
     }

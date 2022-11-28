@@ -19,7 +19,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setStyle(Discord.ButtonStyle.Primary)
             )
         const message = await ita.reply({ embeds: [embed], components: [buttons], fetchReply: true, ephemeral: true })
-        let interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+        let interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
 
         //Allgemein
@@ -35,7 +35,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setStyle(Discord.ButtonStyle.Primary)
             )
         await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
-        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
         if(!interaction) return
 
         //Skill Priorität
@@ -67,7 +67,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setStyle(Discord.ButtonStyle.Secondary),
             )
         await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
-        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
 
         //Skills initialisieren
@@ -125,7 +125,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 skill.added = 0
             })
             await interaction.editReply({ embeds: [embed], components: [buttons] })
-            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
             if(!interaction) return
 
             //Skillpunkte setzen
@@ -166,7 +166,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         }
                     ])
                 await interaction.update({ embeds: [embed], components: [buttons] })
-                interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+                interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
                 if(!interaction) return
 
                 let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]]
@@ -208,7 +208,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         .setStyle(Discord.ButtonStyle.Primary)
                 )
             await interaction.update({ embeds: [embed], components: [buttons] })
-            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
             if(!interaction) return
         } else {
             //Kein-Level-Fehler
@@ -225,7 +225,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         .setStyle(Discord.ButtonStyle.Primary)
                 )
             await interaction.update({ embeds: [embed], components: [buttons] })
-            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+            interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
             if(!interaction) return    
         }
 
@@ -256,7 +256,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setStyle(Discord.ButtonStyle.Danger)
             )
         await interaction.update({ embeds: [embed], components: [buttons] })
-        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => {})
+        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
         if(interaction.customId.split(':')[1].startsWith('save')) {
             let battle = {
