@@ -2,7 +2,6 @@ import Discord from 'discord.js'
 import getcolor from '../subcommands/getcolor'
 import emotes from '../emotes.json'
 import embeds from '../embeds'
-import { getData } from '../db'
 
 export default {
     name: 'KeksBox',

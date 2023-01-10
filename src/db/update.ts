@@ -33,12 +33,12 @@ async function set(name: string, id: string, value: any) {
 export default set
 
 Guild.prototype.setData = async function(value) {
-    this.data = await set('serverdata', this.data._id, value)
+    this.data = await set('serverdata', this.data?._id || this.id, value)
     return this.data
 }
 
 User.prototype.setData = async function(value) {
-    this.data = await set('userdata', this.data._id, value)
+    this.data = await set('userdata', this.data?._id || this.id, value)
     return this.data
 }
 

@@ -4,5 +4,6 @@ export default {
     event: 'guildCreate',
     async on(guild, client) {
         await guild.commands.set(client.commands.filter(c => !c.global).array())
+        await guild.setData({})
     }
 }
