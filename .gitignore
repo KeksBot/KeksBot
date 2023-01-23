@@ -9,3 +9,4 @@ errors/
 .vscode/
 package-lock.json
 build/
+.env

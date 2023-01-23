@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model user {
+    id                     String         @id @unique
+    xp                     Int            @default(0)
+    level                  Int            @default(1)
+    cookies                Int            @default(0)
+    banned                 BigInt?        @default(0)
+    banReason              String?
+    settings               usersettings?
+    badges                 Int            @default(0)
+    inventory              userinventory?
+    battle                 userbattle?
+    sysUserName            String?
+    boundTo                user?          @relation("systemuser_bound", fields: [boundId], references: [id])
+    boundSysUser           user?          @relation("systemuser_bound")
+    boundId                String?        @unique
+    loggedInAs             user?          @relation("systemuser_loggedin", fields: [loggedInId], references: [id])
+    loggedInUser           user?          @relation("systemuser_loggedin")
+    loggedInId             String?        @unique
+    sysUserPassword        String?
+    sysUserPermissionLevel Int?
+}
+
+model usersettings {
+    id     String  @id @unique
+    user   user    @relation(fields: [id], references: [id])
+    giftDm Boolean @default(false)
+}
+
+model userinventory {
+    id    String @id @unique
+    user  user   @relation(fields: [id], references: [id])
+    items Json[]
+    // id: string
+    // count: number,
+    // metadata: any
+}
+
+model userbattle {
+    id            String   @id @unique
+    user          user     @relation(fields: [id], references: [id])
+    skills        Json
+    ready         Boolean  @default(false)
+    priority      String
+    hp            String
+    healTimestamp DateTime @default(now())
+    class         String
+    attacks       String[]
+}
+
+model server {
+    id String @id @unique
+    xp Int   @default(0)
+    level Int @default(1)
+    theme Json @default("{\"red\": \"#E62535\", \"yellow\": \"#F2E03F\", \"lime\": \"#25D971\", \"normal\": \"#00b99b\"}")
+    keksbox serverkeksbox?
+}
+
+model serverkeksbox {
+    id String @id @unique
+    server server @relation(fields: [id], references: [id])
+    spawnrate Int @default(100)
+    channels String[] @default([])
+    message String?
+    multiplier Int?
+    keepmessage Boolean @default(false)
+}
