@@ -15,21 +15,21 @@ model user {
     xp                     Int            @default(0)
     level                  Int            @default(1)
     cookies                Int            @default(0)
-    banned                 BigInt?        @default(0)
+    banned                 BigInt?
     banReason              String?
     settings               usersettings?
     badges                 Int            @default(0)
     inventory              userinventory?
     battle                 userbattle?
-    sysUserName            String?
-    boundTo                user?          @relation("systemuser_bound", fields: [boundId], references: [id])
-    boundSysUser           user?          @relation("systemuser_bound")
+    sysUserName            String? //Systemuser
+    boundTo                user?          @relation("systemuser_bound", fields: [boundId], references: [id]) //Systemuser
+    boundSysUser           user?          @relation("systemuser_bound") //User
     boundId                String?        @unique
-    loggedInAs             user?          @relation("systemuser_loggedin", fields: [loggedInId], references: [id])
-    loggedInUser           user?          @relation("systemuser_loggedin")
+    loggedInAs             user?          @relation("systemuser_loggedin", fields: [loggedInId], references: [id]) //User
+    loggedInUser           user?          @relation("systemuser_loggedin") //Systemuser
     loggedInId             String?        @unique
-    sysUserPassword        String?
-    sysUserPermissionLevel Int?
+    sysUserPassword        String? //Systemuser
+    sysUserPermissionLevel Int? //Systemuser
 }
 
 model usersettings {
@@ -50,7 +50,7 @@ model userinventory {
 model userbattle {
     id            String   @id @unique
     user          user     @relation(fields: [id], references: [id])
-    skills        Json
+    skills        Json     @default("{}")
     ready         Boolean  @default(false)
     priority      String
     hp            String
@@ -60,19 +60,22 @@ model userbattle {
 }
 
 model server {
-    id String @id @unique
-    xp Int   @default(0)
-    level Int @default(1)
-    theme Json @default("{\"red\": \"#E62535\", \"yellow\": \"#F2E03F\", \"lime\": \"#25D971\", \"normal\": \"#00b99b\"}")
-    keksbox serverkeksbox?
+    id       String         @id @unique
+    xp       Int            @default(0)
+    level    Int            @default(1)
+    theme    Json           @default("{\"red\": \"#E62535\", \"yellow\": \"#F2E03F\", \"lime\": \"#25D971\", \"normal\": \"#00b99b\"}")
+    partner  Int            @default(0)
+    verified Boolean        @default(false)
+    keksbox  serverkeksbox?
 }
 
 model serverkeksbox {
-    id String @id @unique
-    server server @relation(fields: [id], references: [id])
-    spawnrate Int @default(100)
-    channels String[] @default([])
-    message String?
-    multiplier Int?
-    keepmessage Boolean @default(false)
+    id          String   @id @unique
+    server      server   @relation(fields: [id], references: [id])
+    spawnrate   Int      @default(100)
+    channels    String[] @default([])
+    message     String?
+    channel     String?
+    multiplier  Int?
+    keepmessage Boolean  @default(false)
 }

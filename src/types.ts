@@ -55,39 +55,70 @@ declare global {
         title(): string
     }
 
-    interface UserData {
-        _id: string,
-        xp?: number,
-        level?: number,
-        cookies?: number,
-        giftdm?: number,
-        badges?: {
-            partner?: number,
-            verified?: boolean,
-            team?: boolean,
-            dev?: boolean,
-            mod?: boolean,
-            beta?: boolean,
-            vip?: boolean
-        },
-        banned?: {
-            time?: number,
-            reason?: string
-        },
-        inventory?: DbInventoryItem[],
-        battle?: {
-            skills?: [
-                {
-                    name: string,
-                    value: number
-                }?
-            ],
-            ready?: boolean,
-            priority?: string,
-            currentHP?: number,
-            healTimestamp?: number,
-            attacks?: [string],
+    interface GuildData {
+        __modules?: DbSchemas
+        id: string
+        xp: number
+        level: number
+        partner: number /*
+            2: Antrag gestellt
+            1: Partner
+            0: Kein Partner/Antrag
+            -1: Kein Partner/blockiert
+        */
+        verified: Boolean
+        theme: Color
+        keksbox?: {
+                id: string,
+                server?: GuildData,
+                spawnrate: number, //Durchschnittliche Anzahl zw. KeksBoxen
+                channels?: Array<Discord.Snowflake>, //Channel Whitelist
+                message?: Discord.MessageResolvable, //Nachricht vom Paket
+                multiplier?: number, //Für besondere KeksBoxen
+                keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
+                channel?: Discord.Snowflake, //Channel für die Nachricht
         }
+    }
+
+    interface UserData {
+        __modules?: DbSchemas
+        id: string,
+        xp: number,
+        level: number,
+        cookies: number,
+        badges: number,
+        banned?: number,
+        banreason?: string,
+        inventory?: {
+            id: string
+            user?: UserData
+            items: DbInventoryItem[]
+        }
+        battle?: {
+            skills: any
+            ready: boolean,
+            priority: string,
+            hp: number,
+            healTimestamp: number
+            attacks: string[],
+            class: string
+        }
+        settings?: {
+            id: string,
+            user?: UserData,
+            giftDm: boolean,
+        }
+
+        //Stystemuser
+        sysUserName?: string
+        boundTo?: UserData
+        boundSysUser?: UserData
+        boundId?: string
+        loggedInAs?: UserData
+        loggedInUser: UserData
+        loggedInId?: string
+        sysUserPassword?: string
+        sysUserPermissionLevel?: number
     }
 
     interface BattleUser {
@@ -128,28 +159,6 @@ declare global {
         yellow: Discord.ColorResolvable,
         lime: Discord.ColorResolvable,
         normal: Discord.ColorResolvable// | 'role'
-    }
-
-    interface GuildData {
-        _id: string
-        xp?: number,
-        level?: number,
-        partner?: number, /*
-            2: Antrag gestellt
-            1: Partner
-            0: Kein Partner/Antrag
-            -1: Kein Partner/blockiert
-        */
-        verified?: Boolean,
-        theme?: Color
-        keksbox?: {
-            spawnrate?: number, //Durchschnittliche Anzahl zw. KeksBoxen
-            channels?: Array<Discord.Snowflake>, //Channel Whitelist
-            message?: Discord.MessageResolvable, //Nachricht vom Paket
-            multiplier?: number, //Für besondere KeksBoxen
-            keepmessage?: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
-            channel?: Discord.Snowflake, //Channel für die Nachricht
-        }
     }
 
     type CommandOptions = Discord.ApplicationCommandData & {
@@ -222,4 +231,6 @@ declare global {
             [key: string]: any
         }
     }
+
+    type DbSchemas = ['usersettings'?, 'userinventory'?, 'userbattle'?, 'serverkeksbox'?, 'userinventory/items'?]
 }
