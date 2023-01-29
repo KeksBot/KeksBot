@@ -1,44 +1,37 @@
-import db from './database'
-import { Collection, User, Guild } from 'discord.js'
-import serverdata from '../schemas/serverdata'
-import userdata from '../schemas/userdata'
-const schemas = new Collection()
-schemas.set('serverdata', serverdata)
-schemas.set('userdata', userdata)
+import { User, Guild } from 'discord.js'
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
-/**
- * 
- * @param {String} name Name des Schemas
- * @param {String} id Discord ID
- * @param {Object} value Datenwerte
- */
-async function set(name: string, id: string, value: any) {
-    /** @type {Model} */
-    let model: any = schemas.get(name)
-    if(!model) return new Error('404: Model not found')
-    await db()
-    try {
-        let data = await model.findOneAndUpdate({
-            _id: id
-        }, value, {
-            upsert: true,
-            strict: true,
-            new: true
-        })
-        return data
-    } catch (error) {
-        return error
+async function set(schema: 'user' | 'server', id: string, data: any): Promise<any> {
+    const _data = {...data}
+    for (const d in _data) {
+        if(typeof _data[d] === 'object') {
+            _data[d] = {
+                upsert: {
+                    create: Object.assign({ id }, _data[d]),
+                    update: _data[d]
+                }
+            }
+        }
     }
+    const options: any = {
+        where: { id },
+        create: Object.assign({ id }, _data),
+        update: _data
+    } //@ts-ignore
+    data = await prisma[schema].upsert(options)
+    return data
 }
+
 export default set
 
 Guild.prototype.setData = async function(value) {
-    this.data = await set('serverdata', this.data?._id || this.id, value)
+    this.data = await set('server', this.data?.id || this.id, value)
     return this.data
 }
 
 User.prototype.setData = async function(value) {
-    this.data = await set('userdata', this.data?._id || this.id, value)
+    this.data = await set('user', this.data?.id || this.id, value)
     return this.data
 }
 

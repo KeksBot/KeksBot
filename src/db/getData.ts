@@ -16,19 +16,13 @@ const prisma = new PrismaClient()
 //     return data
 // }
 
-/**
- * 
- * @param {string} name Name des Tables
- * @param {string} id Discord ID des Objekts
- * @returns {Promise<any>} Zu ladende Daten
- */
 async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): Promise<any> {
     const include: any = {}
     modules.forEach(m => {
         if(m.includes('/')) {
-            if(typeof include[m.split('/')[0]] !== 'object') include[m.split('/')[0]] = { include: {} } //Nur falls Items irgendwann einzeln gespeichert werden
-            include[m.split('/')[0]].include[m.split('/')[1]] = true
-        } else !include[m] ? include[m] = true : null
+            if(typeof include[m.split('/')[0].replaceAll(/user|server/g, '')] !== 'object') include[m.split('/')[0].replaceAll(/user|server/g, '')] = { include: {} } //Nur falls Items irgendwann einzeln gespeichert werden
+            include[m.split('/')[0].replaceAll(/user|server/g, '')].include[m.split('/')[1].replaceAll(/user|server/g, '')] = true
+        } else !include[m.replaceAll(/user|server/g, '')] ? include[m.replaceAll(/user|server/g, '')] = true : null
     })
     include.loggedInAs = modules.length ? { include } : true
     const options: any = {
@@ -39,7 +33,7 @@ async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): 
     } //@ts-ignore
     let data = await prisma[schema].findUnique(options)
     // TODO: handle
-    data.__modules = modules
+    data ? data.__modules = modules : null
     return data
 }
 
@@ -49,7 +43,7 @@ Guild.prototype.getData = async function(modules?: DbSchemas) {
     this.data.__modules.forEach(m => {
         if(!modules.includes(m)) modules.push(m)
     })
-    this.data = await Object.assign(await get('server', this.id, modules), this.data)
+    this.data = await Object.assign(await get('server', this.id, modules) || {}, this.data)
     return this.data
 }
 

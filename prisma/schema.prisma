@@ -50,7 +50,7 @@ model userinventory {
 model userbattle {
     id            String   @id @unique
     user          user     @relation(fields: [id], references: [id])
-    skills        Json     @default("{}")
+    skills        Json
     ready         Boolean  @default(false)
     priority      String
     hp            String

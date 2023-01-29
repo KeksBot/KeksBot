@@ -95,6 +95,8 @@ declare global {
             items: DbInventoryItem[]
         }
         battle?: {
+            id: string
+            user?: UserData
             skills: any
             ready: boolean,
             priority: string,
@@ -232,5 +234,5 @@ declare global {
         }
     }
 
-    type DbSchemas = ['usersettings'?, 'userinventory'?, 'userbattle'?, 'serverkeksbox'?, 'userinventory/items'?]
+    type DbSchemas = ['usersettings'?, 'userinventory'?, 'userbattle'?, 'serverkeksbox'?]
 }
