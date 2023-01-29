@@ -2,10 +2,14 @@ import { User, Guild } from 'discord.js'
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
+const modules = ['loggedInAs', 'keksbox', 'settings', 'battle', 'inventory']
+
 async function set(schema: 'user' | 'server', id: string, data: any): Promise<any> {
+    console.log(data)
     const _data = {...data}
     for (const d in _data) {
-        if(typeof _data[d] === 'object') {
+        if(d.startsWith('__') || (modules.includes(d) && !_data[d])) delete _data[d]
+        if(modules.includes(d) && _data[d]) {
             _data[d] = {
                 upsert: {
                     create: Object.assign({ id }, _data[d]),
