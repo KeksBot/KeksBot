@@ -33,7 +33,7 @@ async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): 
     } //@ts-ignore
     let data = await prisma[schema].findUnique(options)
     // TODO: handle
-    data ? data.__modules = modules : null
+    data ? data.__modules = modules : { id }
     return data
 }
 

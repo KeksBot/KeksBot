@@ -21,7 +21,6 @@ process.on('beforeExit', async (code) => {
     //@ts-ignore
     channel.send({ embeds: [embed] })
     client.user.setStatus('invisible')
-    client.destroy()
 })
 
 Discord.Collection.prototype.array = function () { return [...this.values()] }

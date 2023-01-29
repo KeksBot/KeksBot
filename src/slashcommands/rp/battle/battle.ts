@@ -29,23 +29,23 @@ const options: CommandOptions = {
         })
 
         if(user.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, currentHP } = user.data.battle
-            let maxHP = skills.find(skill => skill.name == 'HP').value
-            if(currentHP != maxHP) {
-                let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
+            let { healTimestamp, skills, hp } = user.data.battle
+            let maxHP = skills.find((skill: any) => skill.name == 'HP').value
+            if(hp != maxHP) {
+                let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
                 let heal = maxHP / 100
-                currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
-                if(currentHP >= maxHP) {
-                    currentHP = maxHP
+                hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                if(hp >= maxHP) {
+                    hp = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
                 user.data.battle.healTimestamp = healTimestamp
-                user.data.battle.currentHP = currentHP
+                user.data.battle.hp = hp
                 await user.save()
             }
         }
 
-        if(user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
+        if(user.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
 
         await target.user?.getData()
         if(!target.user?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)

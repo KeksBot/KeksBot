@@ -236,10 +236,10 @@ const obj: CommandOptions = {
                         return interaction.safeUpdate({ embeds: [embed], components: [] })
                     }
                     for (const item of cartContent) {
-                        let index = user.data.inventory.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
+                        let index = user.data.inventory.items.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
                         if(index == -1) {
-                            user.data.inventory.push({ id: item.id, count: item.count, metadata: item.metadata })
-                        } else user.data.inventory[index].count += item.count
+                            user.data.inventory.items.push({ id: item.id, count: item.count, metadata: item.metadata })
+                        } else user.data.inventory.items[index].count += item.count
                         user.data.cookies -= item.count * item.price
                     }
                     await user.save()
@@ -434,8 +434,8 @@ const obj: CommandOptions = {
                             .setDescription(`${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}**${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis variiert zwischen unterschiedlichen Ausführungen'}`)
                             .setColor(color.normal)
                             .setFooter({ 
-                                text: `${user.data.inventory.find(i => i.id == item.id) ? 
-                                    `Du hast dieses Item ${user.data.inventory.find(i => i.id == item.id).count}x im Inventar\n` :
+                                text: `${user.data.inventory.items.find(i => i.id == item.id) ? 
+                                    `Du hast dieses Item ${user.data.inventory.items.find(i => i.id == item.id).count}x im Inventar\n` :
                                     ''
                                 }${
                                     cartContent.find(i => i.id == item.id) ?
@@ -499,8 +499,8 @@ const obj: CommandOptions = {
                         .setDescription(`**${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis unbekannt'}`)
                         .setColor(color.normal)
                         .setFooter({
-                            text: `${user.data.inventory.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
-                                `Du hast dieses Item ${user.data.inventory.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)).count}x im Inventar\n` :
+                            text: `${user.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
+                                `Du hast dieses Item ${user.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)).count}x im Inventar\n` :
                                 ''
                             }${
                                 cartContent.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?

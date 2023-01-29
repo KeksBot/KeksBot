@@ -18,7 +18,7 @@ model user {
     banned                 BigInt?
     banReason              String?
     settings               usersettings?
-    badges                 Int            @default(0)
+    badges                 Int            @default(0) //  PARTNER VERIFIED VIP TEAM
     inventory              userinventory?
     battle                 userbattle?
     sysUserName            String? //Systemuser

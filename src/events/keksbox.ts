@@ -17,7 +17,7 @@ export default {
         if (!Math.floor(Math.random() * spawnrate)) {
             if (!serverdata) serverdata = await msg.guild.setData({})
             const color = await getcolor(msg.guild)
-            let keksbox = serverdata.keksbox || {}
+            let keksbox = serverdata.keksbox
             if (keksbox.message) return
             let embed
             switch (Math.floor(Math.random() * 50)) {
@@ -78,7 +78,7 @@ export default {
             const filter = (ita: any) => ita.customId === 'keksbox:claim'
             const collector = message.createMessageComponentCollector({ filter, max: 1, componentType: Discord.ComponentType.Button })
             collector.on('collect', async function (interaction): Promise<any> {
-                interaction.user.data = await interaction.user.getData() || { _id: interaction.user.id }
+                interaction.user.data = await interaction.user.getData() || { id: interaction.user.id }
                 serverdata = await interaction.guild.getData()
                 let content = Math.random() * 10
                 if (!serverdata.keksbox?.message || (!message.deletable && !message.editable)) return embeds.errorMessage(message, 'Fehler', 'Bei der Verarbeitung der KeksBox ist ein Fehler aufgetreten.', true, false)
@@ -90,7 +90,7 @@ export default {
                 content = Math.round(content * serverdata.keksbox.multiplier)
                 embeds.successMessage(message, 'Paket eingesammelt', `<@!${interaction.user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, serverdata.keksbox.keepmessage)
                 let userdata = interaction.user.data
-                if (!userdata) userdata = { _id: interaction.user.id }
+                if (!userdata) userdata = { id: interaction.user.id }
                 if (!userdata.cookies) userdata.cookies = 0
                 userdata.cookies += content
                 let { keksbox } = serverdata

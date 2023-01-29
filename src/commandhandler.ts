@@ -58,28 +58,26 @@ export default async (client: Discord.Client) => {
         if(!interaction.guild.available) return
 
         //let newUser = false
-        let tempdata: any = await getData('serverdata', interaction.guild.id)
-        if(!tempdata) tempdata = await update('serverdata', interaction.guild.id, { level: 1, xp: 0 })
-        interaction.guild.data = tempdata
+        let tempdata: any = await getData('server', interaction.guild.id)
+        if(!tempdata) tempdata = await update('server', interaction.guild.id, {})
+        interaction.guild.data = {...tempdata}
         interaction.color = await getcolors(interaction.guild)
-        tempdata = await getData('userdata', interaction.user.id)
-        if(!tempdata) {
-            tempdata = await update('userdata', interaction.user.id, { level: 1, xp: 0, cookies: 0 })
-        }
+        tempdata = await getData('user', interaction.user.id)
+        if(!tempdata) tempdata = await update('user', interaction.user.id, {})
         interaction.user.data = tempdata
-        if(tempdata.banned && tempdata.banned.time) {
-            if(tempdata.banned.time > Date.now()) {
+        if(tempdata.banned) {
+            if(tempdata.banned > Date.now()) {
                 let reason = '_Es liegt keine Begründung vor._'
-                if(tempdata.banned.reason) reason = `Begründung: _${tempdata.banned.reason}_`
+                if(tempdata.banReason) reason = `Begründung: _${tempdata.banReason}_`
                 let timestamp = ''
-                if(tempdata.banned.time != -1) timestamp = `\n\nDer Bann wird <t:${Math.round(tempdata.banned.time / 1000)}:R> aufgehoben.`
+                if(tempdata.banned != -1) timestamp = `\n\nDer Bann wird <t:${Math.round(tempdata.banned.time / 1000)}:R> aufgehoben.`
                 while(!interaction.color) {await delay(50)}
                 return embeds.error(interaction, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
             }
-            if(tempdata.banned.time != -1 && tempdata.banned.time < Date.now()) {
+            if(tempdata.banned != -1 && tempdata.banned < Date.now()) {
                 delete tempdata.banned
                 interaction.user.data = tempdata
-                await update('userdata', interaction.user.id, { banned: null })
+                await update('user', interaction.user.id, { banned: null })
             }
         }
 

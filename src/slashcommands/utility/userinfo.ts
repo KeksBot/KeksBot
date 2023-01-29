@@ -18,7 +18,7 @@ const options: CommandOptions = {
         let targetMember: Discord.GuildMember = args.user == ita.user.id ? member : await guild.members.fetch(args.user).catch(() => null)
         if (!targetMember) return ita.error('Fehler', 'Der Nutzer konnte nicht gefunden werden.', true)
         targetMember.data = await targetMember.user.getData()
-        if (!targetMember.data) targetMember.data = { _id: targetMember.id }
+        if (!targetMember.data) targetMember.data = { id: targetMember.id }
 
         let embeds: { expand?: Discord.EmbedBuilder, collapse?: Discord.EmbedBuilder } = {}
 
@@ -28,15 +28,15 @@ const options: CommandOptions = {
             { name: 'Level', value: targetMember.data?.level?.toString() ||'1', inline: true }
         ]
         
-        let badges = []
-        if (targetMember.data.badges) {
-            if (targetMember.data.badges.mod) badges.push(emotes.mod)
-            if (targetMember.data.badges.dev) badges.push(emotes.dev)
-            if (targetMember.data.badges.team) badges.push(emotes.team)
-            if (targetMember.data.badges.verified) badges.push(emotes.verified)
-            if (targetMember.data.badges.partner) badges.push(emotes.partner)
-            if (targetMember.data.badges.beta) badges.push(emotes.firsthour)
-        }
+        let badges: String[] = []
+        // if (targetMember.data.badges) {
+        //     if (targetMember.data.badges.mod) badges.push(emotes.mod)
+        //     if (targetMember.data.badges.dev) badges.push(emotes.dev)
+        //     if (targetMember.data.badges.team) badges.push(emotes.team)
+        //     if (targetMember.data.badges.verified) badges.push(emotes.verified)
+        //     if (targetMember.data.badges.partner) badges.push(emotes.partner)
+        //     if (targetMember.data.badges.beta) badges.push(emotes.firsthour)
+        // }
 
         embeds.expand = new Discord.EmbedBuilder()
             .setColor(color.normal)

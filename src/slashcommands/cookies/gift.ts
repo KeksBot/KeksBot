@@ -40,7 +40,7 @@ const options: CommandOptions = {
         if (!member) return ita.error('Fehler', 'Der angegebene Nutzer konnte nicht gefunden werden.', true)
         if (args.count <= 0) return ita.error('Syntaxfehler', `Es wäre schön, wenn sich ${member.displayName} auch über dein Geschenk freuen könnte, also gib bitte eine positive Zahl an.`, true)
 
-        member.data = await member.user.getData() || { _id: member.id }
+        member.data = await member.user.getData()
         if (!user.data?.cookies) return ita.error('Fehler', 'Du hast keine Kekse, die du verschenken kannst.\nBenutz zuerst `/cookies`, um welche zu bekommen.', true)
         if (!member.data.cookies) member.data.cookies = 0
 

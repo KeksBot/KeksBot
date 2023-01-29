@@ -20,16 +20,14 @@ const options: CommandOptions = {
         if(args.count < 0) return embeds.error(ita, 'Syntaxfehler', 'Bitte gib eine Zahl > 0 an.', true)
         
         if(!client.thismin.get(user.id)) client.thismin.set(user.id, 0)
-        if(!user.data.badges) user.data.badges = {}
-        if(!user.data.cookies) user.data.cookies = 0
-        if(!guild.data.level) guild.data.level = 1
         if(!client.thismin.get(guild.id)) client.thismin.set(guild.id, 0)
 
         let maxuser = 
-            user.data.badges.team ? 512 :
-            user.data.badges.vip ? 512 :
-            user.data.badges.partner ? 256 : 128
-
+            user.data.badges & 0b1 ? 512 :      // Team
+            user.data.badges & 0b10 ? 512 :     // VIP
+            user.data.badges & 0b100 ? 256 :    // Verified (?)
+            user.data.badges & 0b1000 ? 256 :   // Partner
+            128
         var maxguild = 2 ** (guild.data.level + 8)
         if(guild.data.partner && guild.data.partner == 1 && maxguild < 65536) maxguild = 65536
         if(guild.data.verified && maxguild < 4194304) maxguild = 4194304

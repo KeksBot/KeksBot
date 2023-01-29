@@ -6,7 +6,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
     let { guild, color } = ita
     let informationtext = []
     let error = false
-    if (!guild.data.keksbox) guild.data.keksbox = {}
+    if (!guild.data.keksbox) guild.data.keksbox = { id: guild.id }
     if (args.delete_message) {
         if (args.delete_message == 'Nein') {
             guild.data.keksbox.keepmessage = true
@@ -68,7 +68,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
             if (ita.customId == 'settings.keksbox:change-channel-whitelist') {
                 await guild.channels.fetch()
                 let value: string = ''
-                if (!guild.data.keksbox) guild.data.keksbox = {}
+                if (!guild.data.keksbox) guild.data.keksbox = { id: guild.id }
                 if (!guild.data.keksbox.channels) guild.data.keksbox.channels = []
                 if (guild.data.keksbox.channels.length == 1 && guild.data.keksbox.channels[0] == '0') value = '0'
                 else {

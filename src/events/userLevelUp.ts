@@ -69,7 +69,7 @@ export default {
 
         skills.forEach((skill: any) => {
             skill.value += skill.added
-            if(skill.name == 'HP') user.data.battle.currentHP += skill.added
+            if(skill.name == 'HP') user.data.battle.hp += skill.added
             skill.added = 0
         })
 
@@ -141,7 +141,7 @@ export default {
 
     
             skills.forEach((skill: any) => {
-                if(skill.name == 'HP') user.data.battle.currentHP += skill.added
+                if(skill.name == 'HP') user.data.battle.hp += skill.added
                 delete skill.added
             })
         }

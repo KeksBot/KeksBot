@@ -18,10 +18,6 @@ const options: CommandOptions = {
         var { guild, user, color } = ita
         if(args.count <= 0) return embeds.error(ita, 'Syntaxfehler', 'Bitte gib eine positive Zahl an.')
 
-        if(!user.data.cookies) user.data.cookies = 0
-        if(!user.data.xp) user.data.xp = 0
-        if(!user.data.level) user.data.level = 1
-
         if(args.count > user.data.cookies) args.count = user.data.cookies
 
         if(!args.count && user.data.cookies) return embeds.success(ita, 'NomNom', 'Oder auch nicht.', true)

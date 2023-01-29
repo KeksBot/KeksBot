@@ -60,13 +60,13 @@ const options: CommandOptions = {
             }
             let embed
             if(output && (!output?.length || output?.[0])) {
-                if(item.aHeal) user.data.battle.currentHP += item.aHeal.value
-                if(item.rHeal) user.data.battle.currentHP += Math.round(user.data.battle.skills.find(s => s.name == 'HP').value * item.rHeal.value)
-                if(user.data.battle.currentHP > user.data.battle.skills.find(s => s.name == 'HP').value) user.data.battle.currentHP = user.data.battle.skills.find(s => s.name == 'HP').value
+                if(item.aHeal) user.data.battle.hp += item.aHeal.value
+                if(item.rHeal) user.data.battle.hp += Math.round(user.data.battle.skills.find((s: any) => s.name == 'HP').value * item.rHeal.value)
+                if(user.data.battle.hp > user.data.battle.skills.find((s: any) => s.name == 'HP').value) user.data.battle.hp = user.data.battle.skills.find((s: any) => s.name == 'HP').value
                 // TODO: Stat modifiers
                 item.count --
-                user.data.inventory[index].count --
-                if(user.data.inventory[index].count <= 0) user.data.inventory.splice(user.data.inventory.findIndex(i => i.id === index), 1)
+                user.data.inventory.items[index].count --
+                if(user.data.inventory.items[index].count <= 0) user.data.inventory.items.splice(user.data.inventory.items.findIndex(i => i.id === index), 1)
                 await user.save()
                 embed = new Discord.EmbedBuilder()
                     .setColor(color.normal)

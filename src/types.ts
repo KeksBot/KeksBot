@@ -71,28 +71,28 @@ declare global {
         keksbox?: {
                 id: string,
                 server?: GuildData,
-                spawnrate: number, //Durchschnittliche Anzahl zw. KeksBoxen
+                spawnrate?: number, //Durchschnittliche Anzahl zw. KeksBoxen
                 channels?: Array<Discord.Snowflake>, //Channel Whitelist
                 message?: Discord.MessageResolvable, //Nachricht vom Paket
                 multiplier?: number, //Für besondere KeksBoxen
-                keepmessage: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
+                keepmessage?: boolean, //Ob die Nachricht beim claimen gelöscht werden soll
                 channel?: Discord.Snowflake, //Channel für die Nachricht
         }
     }
 
     interface UserData {
         __modules?: DbSchemas
-        id: string,
-        xp: number,
-        level: number,
-        cookies: number,
-        badges: number,
+        id?: string,
+        xp?: number,
+        level?: number,
+        cookies?: number,
+        badges?: number,
         banned?: number,
         banreason?: string,
         inventory?: {
             id: string
             user?: UserData
-            items: DbInventoryItem[]
+            items: Array<DbInventoryItem>
         }
         battle?: {
             id: string
@@ -117,7 +117,7 @@ declare global {
         boundSysUser?: UserData
         boundId?: string
         loggedInAs?: UserData
-        loggedInUser: UserData
+        loggedInUser?: UserData
         loggedInId?: string
         sysUserPassword?: string
         sysUserPermissionLevel?: number
