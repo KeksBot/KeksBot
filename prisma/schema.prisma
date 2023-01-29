@@ -18,15 +18,15 @@ model user {
     banned                 BigInt?
     banReason              String?
     settings               usersettings?
-    badges                 Int            @default(0) //  PARTNER VERIFIED VIP TEAM
+    badges                 Int            @default(0) // PARTNER VERIFIED VIP TEAM
     inventory              userinventory?
     battle                 userbattle?
     sysUserName            String? //Systemuser
     boundTo                user?          @relation("systemuser_bound", fields: [boundId], references: [id]) //Systemuser
     boundSysUser           user?          @relation("systemuser_bound") //User
     boundId                String?        @unique
-    loggedInAs             user?          @relation("systemuser_loggedin", fields: [loggedInId], references: [id]) //User
-    loggedInUser           user?          @relation("systemuser_loggedin") //Systemuser
+    loggedInUser           user?          @relation("systemuser_loggedin", fields: [loggedInId], references: [id]) //User
+    loggedInAs             user?          @relation("systemuser_loggedin") //Systemuser
     loggedInId             String?        @unique
     sysUserPassword        String? //Systemuser
     sysUserPermissionLevel Int? //Systemuser
