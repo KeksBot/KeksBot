@@ -54,7 +54,7 @@ export default class BaseBattle {
         let battleActions: string[] = []
         for (const user of this.users.values()) {
             battleActions.push(...user.battle.attacks)
-            battleActions.push(...user.inventory.map(i => i.id))
+            battleActions.push(...user.inventory.items.map(i => i.id))
         }
         battleActions = [...new Set(battleActions)]
         this.usable = objectLoader(battleActions)
@@ -142,12 +142,12 @@ export default class BaseBattle {
         let status: any = {}
         this.#actions = []
         //@ts-ignore
-        let userarray = this.users.filter(u => u.battle.currentHP).map(u => {return { name: u.name, team: u.team, id: u.id }})
+        let userarray = this.users.filter(u => u.battle.hp).map(u => {return { name: u.name, team: u.team, id: u.id }})
         await Promise.all(this.users.map(async u => {
             let users = []
             users.push({
                 n: u.member.displayName,
-                h: u.battle.currentHP,
+                h: u.battle.hp,
                 m: u.skills.find(s => s.name == 'HP').value,
                 l: u.user.data.level,
                 t: u.team
@@ -156,7 +156,7 @@ export default class BaseBattle {
                 if (user.id != u.id) {
                     users.push({
                         n: user.member.displayName,
-                        h: user.battle.currentHP,
+                        h: user.battle.hp,
                         m: user.skills.find(s => s.name == 'HP').value,
                         l: user.user.data.level,
                         t: user.team
@@ -209,7 +209,7 @@ export default class BaseBattle {
                 let users = []
                 users.push({
                     n: u.member.displayName,
-                    h: u.battle.currentHP,
+                    h: u.battle.hp,
                     m: u.skills.find(s => s.name == 'HP').value,
                     l: u.user.data.level,
                     t: u.team
@@ -218,7 +218,7 @@ export default class BaseBattle {
                     if (user.id != u.id) {
                         users.push({
                             n: user.member.displayName,
-                            h: user.battle.currentHP,
+                            h: user.battle.hp,
                             m: user.skills.find(s => s.name == 'HP').value,
                             l: user.user.data.level,
                             t: user.team
@@ -226,7 +226,7 @@ export default class BaseBattle {
                     }
                 }
                 embed.setImage(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
-                embed.setColor(u.battle.currentHP <= 0.25 * u.getSkillValue('HP') ? this.color.red : this.color.normal)
+                embed.setColor(u.battle.hp <= 0.25 * u.getSkillValue('HP') ? this.color.red : this.color.normal)
                 await u.updateMessage({ embeds: [embed], components: [] })
                 await delay(updateDuration)
             }
@@ -241,10 +241,10 @@ export default class BaseBattle {
         while(true) {
             await this.round()
             if(!this.client.battles.has(this.id)) return
-            if(!this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
-            if(!this.users.filter(u => u.team != this.users.first().team).map(u => !!u.battle.currentHP).includes(true)) break
+            if(!this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.hp).includes(true)) break
+            if(!this.users.filter(u => u.team != this.users.first().team).map(u => !!u.battle.hp).includes(true)) break
         }
-        let winners = !this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.currentHP).includes(true) 
+        let winners = !this.users.filter(u => u.team == this.users.first().team).map(u => !!u.battle.hp).includes(true) 
             ? this.users.filter(u => u.team != this.users.first().team).map(u => u) 
             : this.users.filter(u => u.team == this.users.first().team).map(u => u)
         await Promise.all(this.users.map(async (u) => {
@@ -253,7 +253,7 @@ export default class BaseBattle {
                 .setColor(this.color.normal)
                 .setDescription(`${winners.map(u => u.name).join(', ').replaceLast(', ', ' und ')} ${winners.length == 1 ? 'hat' : 'haben'} gewonnen!`)
             let xp = 0
-            if(winners.find(w => w.id == u.id) && u.battle.currentHP > 0) {
+            if(winners.find(w => w.id == u.id) && u.battle.hp > 0) {
                 for (const user of this.users.filter(u => !winners.find(us => us.id == u.id)).values()) {
                     xp += Math.floor(((((user.user.data.level * 2.7 + 30) * user.user.data.level) / 4 * (((2 * user.user.data.level + 10) ** 2.2) / (u.user.data.level + user.user.data.level + 10) ** 2)) + 1) * 2.3)
                 }
@@ -273,7 +273,7 @@ export default class BaseBattle {
         for (const action of this.#actions) {
             let actionType = action.move.type.split('/')[0]
             const { user } = action
-            if(user.battle.currentHP <= 0) continue
+            if(user.battle.hp <= 0) continue
             switch(actionType) {
                 case 'atk': {
                     let text = `${user.name} setzt ${action.move.name} ein\n`
@@ -288,7 +288,7 @@ export default class BaseBattle {
                             continue
                         }
                         if(action.move.strength) {
-                            await target.setHP(target.battle.currentHP - 
+                            await target.setHP(target.battle.hp - 
                                 ((user.getSkillValue('Angriff') / target.getSkillValue('Verteidigung')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.data.level / 100)
                             )
                         }
@@ -300,9 +300,9 @@ export default class BaseBattle {
                             }
                         }
                         //@ts-ignore
-                        if(action.move.aHeal?.onTarget) await target.setHP(tagret.battle.currentHP + action.move.aHeal.value)
+                        if(action.move.aHeal?.onTarget) await target.setHP(tagret.battle.hp + action.move.aHeal.value)
                         //@ts-ignore
-                        if(action.move.rHeal?.onTarget) await user.setHP(target.battle.currentHP + Math.round(target.battle.currentHP / 100 * action.move.rHeal.value))
+                        if(action.move.rHeal?.onTarget) await user.setHP(target.battle.hp + Math.round(target.battle.hp / 100 * action.move.rHeal.value))
                     }
                     if(action.move.modifiedSkills) {
                         for (const skill of action.move.modifiedSkills?.filter(s => !s.onTarget)) {
@@ -316,16 +316,16 @@ export default class BaseBattle {
                         if(out) text += out
                     }
                     //@ts-ignore
-                    if(action.move.aHeal && !action.move.aHeal.onTarget) await user.setHP(user.battle.currentHP + (action.move.aHeal.value))
+                    if(action.move.aHeal && !action.move.aHeal.onTarget) await user.setHP(user.battle.hp + (action.move.aHeal.value))
                     //@ts-ignore
-                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.currentHP + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
+                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.hp + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
                     yield text
                     break
                 }
                 case 'item':
                     let text = `${action.move.usageMessage?.replaceAll('{user}', user.name) || `${user.name} benutzt ${action.move.name}.`}\n`
-                    if(action.move.aHeal) await user.setHP(user.battle.currentHP + action.move.aHeal.value)
-                    if(action.move.rHeal) await user.setHP(user.battle.currentHP + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
+                    if(action.move.aHeal) await user.setHP(user.battle.hp + action.move.aHeal.value)
+                    if(action.move.rHeal) await user.setHP(user.battle.hp + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
                     if(action.move.modifiedSkills) {
                         for (const skill of action.move.modifiedSkills) {
                             if(skill.probability && Math.random() * 100 >= skill.probability) continue

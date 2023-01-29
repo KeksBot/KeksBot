@@ -61,7 +61,7 @@ export default class BattleUser {
             }
         }
         for (const s of this.skills) {
-            s.getValue = () => Math.round(s.value * this.skillChanges.find(skill => skill.name == s.name).value)
+            s.getValue = () => Math.round(s.value * this.skillChanges.find((skill: any) => skill.name == s.name).value)
         }
     }
 
@@ -70,25 +70,25 @@ export default class BattleUser {
     }
 
     async heal() {
-        let { healTimestamp, skills, currentHP } = this.battle
-        let maxHP = skills.find(skill => skill.name == 'HP').value
-        if (currentHP < maxHP) {
-            let healBonus = skills.find(s => s.name == 'Regeneration').value || 1
+        let { healTimestamp, skills, hp } = this.battle
+        let maxHP = skills.find((skill: any) => skill.name == 'HP').value
+        if (hp < maxHP) {
+            let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
             let heal = maxHP / 100
-            currentHP = currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
-            if (currentHP >= maxHP) {
-                currentHP = maxHP
+            hp = hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+            if (hp >= maxHP) {
+                hp = maxHP
                 healTimestamp = 0
             } else healTimestamp = Date.now()
         }
-        this.battle.currentHP = currentHP
+        this.battle.hp = hp
         this.battle.healTimestamp = healTimestamp
         await this.user.save()
     }
 
     async setHP(hp: number) {
-        this.battle.currentHP = Math.round(hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp)
-        this.battle.healTimestamp = this.battle.currentHP < this.getSkillValue('HP') ? Date.now() : 0
+        this.battle.hp = Math.round(hp < 0 ? 0 : hp > this.skills.find(s => s.name == 'HP').value ? this.skills.find(s => s.name == 'HP').value : hp)
+        this.battle.healTimestamp = this.battle.hp < this.getSkillValue('HP') ? Date.now() : 0
         await this.user.save()
     }
 
@@ -127,7 +127,7 @@ export default class BattleUser {
     }
 
     modifySkills(skill: string, value: number) {
-        let index = this.skillChanges.findIndex(s => s.name == skill)
+        let index = this.skillChanges.findIndex((s: any) => s.name == skill)
         let oldValue = this.skillChanges[index].value
         for (let i = 0; i < Math.abs(value); i++) {
             if (value > 0 && oldValue < 3) this.skillChanges[index].value /= 0.8
@@ -168,14 +168,14 @@ export default class BattleUser {
 
     async chooseAction(imageUrl: string, users: { name: string, team: any, id: string }[]) {
         let imageEmbed = new Discord.EmbedBuilder()
-            .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+            .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
             .setImage(imageUrl)
             .setFooter(null)
         let loops = 0
         loop: do {
             if (!loops || this.interaction.customId == 'battle:user.home') {
                 let embed = new Discord.EmbedBuilder()
-                    .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                    .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                     .setTitle('Hauptmenü')
                     .setDescription('Bitte wähle eine Aktion aus')
                     .addFields([
@@ -216,7 +216,7 @@ export default class BattleUser {
                 case 'attack': {
                     delete this.move
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle('Kampfmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
@@ -295,7 +295,7 @@ export default class BattleUser {
                         break loop
                     } 
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle('Zielauswahl')
                         .setDescription('Bitte wähle das Ziel für deinen Angriff aus')
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>().addComponents(
@@ -323,7 +323,7 @@ export default class BattleUser {
                 }
                 case 'inventory': {
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle('Hauptmenü')
                         .setDescription('Bitte wähle eine Aktion aus')
                         .addFields([
@@ -394,7 +394,7 @@ export default class BattleUser {
                     let items = this.inventory.filter(i => this.usable.get(i.id).type == type).map(i => { return { id: i.id, count: i.count, name: this.usable.get(i.id).name, description: this.usable.get(i.id).description, u: this.usable.get(i.id).fightUsable } })
                     let page = parseInt(this.interaction.customId.split('.')[3]) || 1
                     let embed = new Discord.EmbedBuilder()
-                        .setColor(this.battle.currentHP <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
+                        .setColor(this.battle.hp <= 0.25 * this.getSkillValue('HP') ? this.color.red : this.color.normal)
                         .setTitle(
                             type == 'item/med' ? 'Medizinbeutel' :
                             type == 'item/atk' ? 'Kampfbeutel' :
@@ -470,7 +470,7 @@ export default class BattleUser {
             let item = this.battle.inventory.find(i => i.id == this.interaction.values[0])
             if(!item) return false
             item.count--
-            if(!item.count) this.inventory.splice(this.inventory.indexOf(item), 1)
+            if(!item.count) this.inventory.items.splice(this.inventory.items.indexOf(item), 1)
             this.move = {
                 action: item.id,
                 targets: [this.id],
