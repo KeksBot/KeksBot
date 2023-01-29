@@ -5,7 +5,6 @@ import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
 import autocompletehandler from './autocomplete'
 import uptimemonitoring from './uptimemonitoring'
-import { connect } from './db'
 
 import './db/getData'
 import './db/update'
@@ -77,9 +76,7 @@ client.once('ready', async () => { //Status
     uptimemonitoring(config.uptimeurl, client)
     console.log(`[${client.user.username}]: System wird gestartet.`)
     client.setMaxListeners(0)
-    let mongoose = await connect()
     console.log(`[${client.user.username}]: Verbindung zur Datenbank hergestellt.`)
-    mongoose.connection.close()
     await commandhandler(client)
     await eventhandler(client)
     await autocompletehandler(client)
