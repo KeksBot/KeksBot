@@ -70,8 +70,8 @@ export default {
                         .setStyle(Discord.ButtonStyle.Primary)
                         .setLabel('Einsammeln')
                         .setCustomId('keksbox:claim')
-                )
-            let message = await msg.channel.send({ embeds: [embed], components: [button] })
+                )//@ts-ignore
+            let message = await msg.channel.send({ embeds: [embed], components: [button] }) as Discord.Message
             keksbox.message = message.id
             keksbox.channel = message.channel.id
             await msg.guild.setData({ keksbox })

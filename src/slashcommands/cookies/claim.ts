@@ -24,7 +24,7 @@ const options: CommandOptions = {
             return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)
         }
         try {
-            var message
+            var message //@ts-ignore
             try {message = await channel.messages.fetch(guild.storage.data.keksbox.message)} catch {
                 let { keksbox } = guild.storage.data
                 keksbox.message = null

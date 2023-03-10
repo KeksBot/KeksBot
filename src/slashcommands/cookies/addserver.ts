@@ -42,7 +42,7 @@ const options: CommandOptions = {
             let embed = new Discord.EmbedBuilder()
                 .setColor(color.normal)
                 .setTitle('Level Up')
-                .setDescription(`Dieser Server ist nun **Level ${guild.storage.data.level}**.\nDas entspricht einem Limit von **${2 ** (guild.storage.data.level + 8)} Keksen**, die hier pro Minute gegessen werden können.\nHerzlichen Glückwunsch!`)
+                .setDescription(`Dieser Server ist nun **Level ${guild.storage.data.level}**.\nDas entspricht einem Limit von **${2 ** (guild.storage.data.level + 8)} Keksen**, die hier pro Minute gegessen werden können.\nHerzlichen Glückwunsch!`) //@ts-ignore
             ita.channel.send({ embeds: [embed] })
         }
 
