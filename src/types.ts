@@ -238,5 +238,5 @@ declare global {
         }
     }
 
-    type DbSchemas = ['usersettings'?, 'userinventory'?, 'userbattle'?, 'serverkeksbox'?]
+    type DbSchemas = ('usersettings' | 'userinventory' | 'userbattle' | 'serverkeksbox')[]
 }

@@ -4,9 +4,9 @@ const client: Discord.Client = new Discord.Client(
         intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers',, 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'] ,
         sweepers: {
             users: {
-                interval: 1800,
+                interval: 30,
                 lifetime: 7200, //@ts-ignore
-                filter: (id: string, u: Discord.User) => id != client.user.id
+                filter: user => user.bot && user.id !== client.user.id
             }
         }
     }

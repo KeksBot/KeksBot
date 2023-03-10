@@ -1,4 +1,4 @@
-import { DataManager } from ".";
+import DataManager from "./DataManager";
 
 export default class UserDataManager extends DataManager {
     public data: UserData = {}

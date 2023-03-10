@@ -1,4 +1,4 @@
-import { DataManager } from ".";
+import DataManager from "./DataManager";
 
 export default class GuildDataManager extends DataManager { //@ts-ignore
     public data: GuildData = {}

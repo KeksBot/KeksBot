@@ -25,22 +25,23 @@ async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): 
             include[m.split('/')[0].replaceAll(/user|server/g, '')].include[m.split('/')[1].replaceAll(/user|server/g, '')] = true
         } else !include[m.replaceAll(/user|server/g, '')] ? include[m.replaceAll(/user|server/g, '')] = true : null
     })
-    if(schema == 'user') include.loggedInAs = modules?.length ? { include } : true
+    // if(schema == 'user') include.loggedInAs = modules?.length ? { include } : true
     const options: any = {
         where: {
             id
         },
         include: Object.keys(include).length ? include : undefined
-    } //@ts-ignore
+    }
+    console.log(options)
+    //@ts-ignore
     let data = await prisma[schema].findUnique(options)
     // TODO: handle
-    data ? data.__modules = modules : { id }
     return data
 }
 
 export default get
 
-Guild.prototype.getData = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
+Guild.prototype.getData = async function(modules: DbSchemas = ['serverkeksbox']) {
     this.storage.fetch(modules)
     return this.storage.data
 }
