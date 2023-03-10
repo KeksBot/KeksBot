@@ -6,17 +6,17 @@ const options: CommandOptions = {
     battlelock: true,
     async execute(interaction, args, client) {
         var { guild, user } = interaction
-        if(!guild.data.keksbox?.message) return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)
+        if(!guild.storage.data.keksbox?.message) return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)
         var content = Math.random() * 10
-        if(guild.data.keksbox.spawnrate) content *= guild.data.keksbox.spawnrate
+        if(guild.storage.data.keksbox.spawnrate) content *= guild.storage.data.keksbox.spawnrate
         else {
             content *= 100
-            guild.data.keksbox.spawnrate = 100
+            guild.storage.data.keksbox.spawnrate = 100
         }
-        content = Math.round(content * guild.data.keksbox.multiplier)
-        let channel = await guild.channels.fetch(guild.data.keksbox.channel)
-        if(!guild.data.keksbox.channel || !channel?.isTextBased()) {
-            let { keksbox } = guild.data
+        content = Math.round(content * guild.storage.data.keksbox.multiplier)
+        let channel = await guild.channels.fetch(guild.storage.data.keksbox.channel)
+        if(!guild.storage.data.keksbox.channel || !channel?.isTextBased()) {
+            let { keksbox } = guild.storage.data
             keksbox.message = null
             keksbox.multiplier = null
             keksbox.channel = null
@@ -25,8 +25,8 @@ const options: CommandOptions = {
         }
         try {
             var message
-            try {message = await channel.messages.fetch(guild.data.keksbox.message)} catch {
-                let { keksbox } = guild.data
+            try {message = await channel.messages.fetch(guild.storage.data.keksbox.message)} catch {
+                let { keksbox } = guild.storage.data
                 keksbox.message = null
                 keksbox.multiplier = null
                 keksbox.channel = null
@@ -34,11 +34,11 @@ const options: CommandOptions = {
                 return embeds.error(interaction, 'Fehler', 'Es gibt gerade kein Paket, das abgeholt werden kann.', true)
             }
             if(message && (message.deletable || message.editable)) {
-                embeds.successMessage(message, 'Paket eingesammelt', `<@!${user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, guild.data.keksbox.keepmessage)
+                embeds.successMessage(message, 'Paket eingesammelt', `<@!${user.id}> hat das Paket eingesammelt und ${content} Kekse erhalten.`, true, guild.storage.data.keksbox.keepmessage)
                 embeds.success(interaction, 'Paket eingesammelt', `Du hast das Paket eingesammelt und ${content} Kekse erhalten.`, true)
-                if(!user.data.cookies) user.data.cookies = 0
-                user.data.cookies += content
-                let { keksbox } = guild.data
+                if(!user.storage.data.cookies) user.storage.data.cookies = 0
+                user.storage.data.cookies += content
+                let { keksbox } = guild.storage.data
                 keksbox.message = null
                 keksbox.multiplier = null
                 keksbox.channel = null
@@ -46,7 +46,7 @@ const options: CommandOptions = {
                 await user.save()
                 return
             }
-            let { keksbox } = guild.data
+            let { keksbox } = guild.storage.data
             keksbox.message = null
             keksbox.multiplier = null
             keksbox.channel = null
@@ -55,7 +55,7 @@ const options: CommandOptions = {
         } catch (error) {
             console.error(error)
         }
-        let { keksbox } = guild.data
+        let { keksbox } = guild.storage.data
         keksbox.message = null
         keksbox.multiplier = null
         keksbox.channel = null

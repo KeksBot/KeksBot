@@ -30,11 +30,11 @@ export default class BattleUser {
         //@ts-ignore
         this.member = interaction?.member
         this.interaction = interaction
-        this.battle = this.user?.data?.battle
+        this.battle = this.user?.storage?.data?.battle
         this.id = this.user.id
         this.team = team
         this.name = this.member.displayName
-        this.inventory = this.user.data.inventory
+        this.inventory = this.user.storage.data.inventory
     }
 
     setup(color: Color, usable: Map<string, BattleAction>) {
@@ -93,7 +93,7 @@ export default class BattleUser {
     }
 
     async addXP(xp: number) {
-        this.user.data.xp += xp
+        this.user.storage.data.xp += xp
 
         let { user } = this
         let levelup = false
@@ -101,16 +101,16 @@ export default class BattleUser {
         let levelcount = 0
 
         while (scanning) {
-            if (user.data.level <= 15 && (user.data.level + 1) ** 3 * ((24 + Math.floor((user.data.level + 2) / 3)) / 3) <= user.data.xp) {
-                user.data.level++
+            if (user.storage.data.level <= 15 && (user.storage.data.level + 1) ** 3 * ((24 + Math.floor((user.storage.data.level + 2) / 3)) / 3) <= user.storage.data.xp) {
+                user.storage.data.level++
                 levelup = true
                 levelcount++
-            } else if (user.data.level <= 36 && user.data.level > 15 && (user.data.level + 1) ** 3 * ((15 + user.data.level) / 3) <= user.data.xp) {
-                user.data.level++
+            } else if (user.storage.data.level <= 36 && user.storage.data.level > 15 && (user.storage.data.level + 1) ** 3 * ((15 + user.storage.data.level) / 3) <= user.storage.data.xp) {
+                user.storage.data.level++
                 levelup = true
                 levelcount++
-            } else if (user.data.level < 100 && user.data.level > 37 && (user.data.level + 1) ** 3 * ((32 + Math.floor((user.data.level + 1) / 2)) / 3)) {
-                user.data.level++
+            } else if (user.storage.data.level < 100 && user.storage.data.level > 37 && (user.storage.data.level + 1) ** 3 * ((32 + Math.floor((user.storage.data.level + 1) / 2)) / 3)) {
+                user.storage.data.level++
                 levelup = true
                 levelcount++
             } else scanning = false

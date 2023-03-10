@@ -149,7 +149,7 @@ export default class BaseBattle {
                 n: u.member.displayName,
                 h: u.battle.hp,
                 m: u.skills.find(s => s.name == 'HP').value,
-                l: u.user.data.level,
+                l: u.user.storage.data.level,
                 t: u.team
             })
             for (const user of this.users.values()) {
@@ -158,7 +158,7 @@ export default class BaseBattle {
                         n: user.member.displayName,
                         h: user.battle.hp,
                         m: user.skills.find(s => s.name == 'HP').value,
-                        l: user.user.data.level,
+                        l: user.user.storage.data.level,
                         t: user.team
                     })
                 }
@@ -211,7 +211,7 @@ export default class BaseBattle {
                     n: u.member.displayName,
                     h: u.battle.hp,
                     m: u.skills.find(s => s.name == 'HP').value,
-                    l: u.user.data.level,
+                    l: u.user.storage.data.level,
                     t: u.team
                 })
                 for (const user of this.users.values()) {
@@ -220,7 +220,7 @@ export default class BaseBattle {
                             n: user.member.displayName,
                             h: user.battle.hp,
                             m: user.skills.find(s => s.name == 'HP').value,
-                            l: user.user.data.level,
+                            l: user.user.storage.data.level,
                             t: user.team
                         })
                     }
@@ -255,7 +255,7 @@ export default class BaseBattle {
             let xp = 0
             if(winners.find(w => w.id == u.id) && u.battle.hp > 0) {
                 for (const user of this.users.filter(u => !winners.find(us => us.id == u.id)).values()) {
-                    xp += Math.floor(((((user.user.data.level * 2.7 + 30) * user.user.data.level) / 4 * (((2 * user.user.data.level + 10) ** 2.2) / (u.user.data.level + user.user.data.level + 10) ** 2)) + 1) * 2.3)
+                    xp += Math.floor(((((user.user.storage.data.level * 2.7 + 30) * user.user.storage.data.level) / 4 * (((2 * user.user.storage.data.level + 10) ** 2.2) / (u.user.storage.data.level + user.user.storage.data.level + 10) ** 2)) + 1) * 2.3)
                 }
                 embed.setDescription(embed.data.description + `\nDu erhältst ${xp} Erfahrungspunkte`)
             }
@@ -289,7 +289,7 @@ export default class BaseBattle {
                         }
                         if(action.move.strength) {
                             await target.setHP(target.battle.hp - 
-                                ((user.getSkillValue('Angriff') / target.getSkillValue('Verteidigung')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.data.level / 100)
+                                ((user.getSkillValue('Angriff') / target.getSkillValue('Verteidigung')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.storage.data.level / 100)
                             )
                         }
                         if(action.move.modifiedSkills) {

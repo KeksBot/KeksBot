@@ -16,9 +16,9 @@ export default {
                 name: 'Level Up',
                 iconURL: client.user.displayAvatarURL({ extension: 'png', forceStatic: false })
             })
-            .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.data.level} erreicht!`)
-        if(user.data.battle.ready) {
-            var { skills } = user.data.battle
+            .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.storage.data.level} erreicht!`)
+        if(user.storage.data.battle.ready) {
+            var { skills } = user.storage.data.battle
             embed
                 //@ts-ignore
                 .addFields([{name: 'Statuswerte', value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
@@ -32,10 +32,10 @@ export default {
             reply = await ita.editReply({ embeds: [embed], components: [] })
             replied = true
         }
-        if(!user.data.battle.ready) return
+        if(!user.storage.data.battle.ready) return
         await delay(2000)
 
-        skills = user.data.battle.skills
+        skills = user.storage.data.battle.skills
 
         for (let l = levelCount || 0; l > 0; l--) {
             //@ts-ignore
@@ -43,8 +43,8 @@ export default {
                 //@ts-ignore
                 let added = (skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2
                 added *= 
-                    user.data.battle.priority === skill.name ? 1.5 : 
-                    user.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
+                    user.storage.data.battle.priority === skill.name ? 1.5 : 
+                    user.storage.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
                 added = Math.round(added)
                 // @ts-ignore
                 skill.added = added
@@ -69,7 +69,7 @@ export default {
 
         skills.forEach((skill: any) => {
             skill.value += skill.added
-            if(skill.name == 'HP') user.data.battle.hp += skill.added
+            if(skill.name == 'HP') user.storage.data.battle.hp += skill.added
             skill.added = 0
         })
 
@@ -105,8 +105,8 @@ export default {
                 //@ts-ignore
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                 added *= 
-                    user.data.battle.priority === skill.name ? 1.5 : 
-                    user.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
+                    user.storage.data.battle.priority === skill.name ? 1.5 : 
+                    user.storage.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
                 added = Math.round(added / 2)
                 skill.added = added
                 skill.value += skill.added
@@ -131,7 +131,7 @@ export default {
                 if(!interaction.replied) await interaction.safeUpdate({ embeds: [embed], components: [buttons] })
                 else await interaction.editReply({ embeds: [embed], components: [buttons] })
             } else {
-                embed.setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.data.level} erreicht!`)
+                embed.setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.storage.data.level} erreicht!`)
                 //@ts-ignore
                 if(!interaction.replied) await interaction.safeUpdate({ embeds: [embed], components: [] })
                 else await interaction.editReply({ embeds: [embed], components: [] })
@@ -141,7 +141,7 @@ export default {
 
     
             skills.forEach((skill: any) => {
-                if(skill.name == 'HP') user.data.battle.hp += skill.added
+                if(skill.name == 'HP') user.storage.data.battle.hp += skill.added
                 delete skill.added
             })
         }

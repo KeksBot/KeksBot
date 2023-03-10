@@ -8,6 +8,7 @@ import getcolors from './subcommands/getcolor'
 import getData from './db/getData'
 import update from './db/update'
 import handleError from './subcommands/handleError'
+import { UserDataManager, GuildDataManager } from './db'
 
 export default async (client: Discord.Client) => {
     client.commands = new Discord.Collection()
@@ -57,26 +58,27 @@ export default async (client: Discord.Client) => {
 
         if(!interaction.guild.available) return
 
+        if(!interaction.user.storage) interaction.user.storage = new UserDataManager(interaction.user.id)
+        if(!interaction.guild.storage) interaction.guild.storage = new GuildDataManager(interaction.guild.id)
+
         //let newUser = false
-        let tempdata: any = await getData('server', interaction.guild.id)
-        if(!tempdata) tempdata = await update('server', interaction.guild.id, {})
-        interaction.guild.data = {...tempdata}
+        await interaction.guild.getData()
+        if(!interaction.guild.storage.data) interaction.guild.create()
         interaction.color = await getcolors(interaction.guild)
-        tempdata = await getData('user', interaction.user.id)
-        if(!tempdata) tempdata = await update('user', interaction.user.id, {})
-        interaction.user.data = tempdata
-        if(tempdata.banned) {
-            if(tempdata.banned > Date.now()) {
+        await interaction.user.getData()
+        if(!interaction.user.storage.data) await interaction.user.create()
+        if(interaction.user.storage.data.banned) {
+            if(interaction.user.storage.data.banned > Date.now()) {
                 let reason = '_Es liegt keine Begründung vor._'
-                if(tempdata.banReason) reason = `Begründung: _${tempdata.banReason}_`
+                if(interaction.user.storage.data.banreason) reason = `Begründung: _${interaction.user.storage.data.banreason}_`
                 let timestamp = ''
-                if(tempdata.banned != -1) timestamp = `\n\nDer Bann wird <t:${Math.round(tempdata.banned.time / 1000)}:R> aufgehoben.`
+                if(interaction.user.storage.data.banned != -1) timestamp = `\n\nDer Bann wird <t:${Math.round(interaction.user.storage.data.banned / 1000)}:R> aufgehoben.`
                 while(!interaction.color) {await delay(50)}
                 return embeds.error(interaction, 'Nutzung verboten', `Du wurdest von der KeksBot Nutzung gebannt.\n${reason}\n\nSolltest du Fragen zu diesem Fall haben, wende dich bitte an das [KeksBot Team](discord.gg/g8AkYzWRCK).${timestamp}`, true)
             }
-            if(tempdata.banned != -1 && tempdata.banned < Date.now()) {
-                delete tempdata.banned
-                interaction.user.data = tempdata
+            if(interaction.user.storage.data.banned != -1 && interaction.user.storage.data.banned < Date.now()) {
+                delete interaction.user.storage.data.banned
+                interaction.user.storage.data = interaction.user.storage.data
                 await update('user', interaction.user.id, { banned: null })
             }
         }

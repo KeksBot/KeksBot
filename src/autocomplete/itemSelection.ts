@@ -7,9 +7,9 @@ const options: AutocompleteOptions = {
     async execute(interaction) {
         const { user } = interaction
 
-        if(!user.data) user.data = await user.getData()
-        if(!user.data?.inventory) return interaction.respond([])
-        const inventory = user.data.inventory
+        if(!user.storage.data) user.storage.data = await user.getData()
+        if(!user.storage.data?.inventory) return interaction.respond([])
+        const inventory = user.storage.data.inventory
 
         let input = interaction.options.getFocused().toLowerCase()
         if(input.length < 3) return interaction.respond([])

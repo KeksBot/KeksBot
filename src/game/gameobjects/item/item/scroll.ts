@@ -15,7 +15,7 @@ const obj: BattleActionBuilder = {
         if(!item.metadata?.skill) return false
         const skill: BattleActionBuilder = objectLoader([item.metadata.skill]).get(item.metadata.skill) 
         if(!skill) return false
-        if(user.data.battle.attacks.includes(skill.id)) return [false, 'Du hast diese Attacke bereits gelernt'] 
+        if(user.storage.data.battle.attacks.includes(skill.id)) return [false, 'Du hast diese Attacke bereits gelernt'] 
         let embed = new EmbedBuilder()
             .setDescription('Möchtest du den Skill **' + skill.name + '** lernen?')
             .addFields([
@@ -54,8 +54,8 @@ const obj: BattleActionBuilder = {
 
         if(interaction.customId != 'scroll:learn') return null
 
-        let skills = objectLoader(user.data.battle.attacks)
-        if(user.data.battle.attacks.length > maxSkillAmount) {
+        let skills = objectLoader(user.storage.data.battle.attacks)
+        if(user.storage.data.battle.attacks.length > maxSkillAmount) {
             let embed = new EmbedBuilder()
                 .setColor(color.yellow)
                 .setTitle('Zu viele Skills')
@@ -66,7 +66,7 @@ const obj: BattleActionBuilder = {
                         value: `${skill.description || 'Keine Beschreibung verfügbar'}\n**Stärke**: ${skill.strength || '-'}\n**Genauigkeit**: ${skill.accuracy.toString().replace('Infinity', '-')}`
                     }
                 ])
-            user.data.battle.attacks.forEach((s) => {
+            user.storage.data.battle.attacks.forEach((s) => {
                 let skill = skills.get(s)
                 embed.addFields([{ name: skill.name, value: `${skill.description}\n**Stärke**: ${skill.strength || '-'}\n**Genauigkeit**: ${skill.accuracy.toString().replace('Infinity', '-')}`, inline: true }])
             })
@@ -75,7 +75,7 @@ const obj: BattleActionBuilder = {
                     new SelectMenuBuilder()
                         .setCustomId('scroll:select')
                         .setPlaceholder('Wähle den Skill aus, den du vergessen mächtest')
-                        .addOptions(user.data.battle.attacks.map((s) => {
+                        .addOptions(user.storage.data.battle.attacks.map((s) => {
                             let skill = skills.get(s)
                             return {
                                 label: skill.name,
@@ -113,8 +113,8 @@ const obj: BattleActionBuilder = {
             reply = await interaction.editReply({ embeds: [embed], components: [buttons] })
             interaction = await reply.awaitMessageComponent({ time: 300000, componentType: ComponentType.Button }).catch(() => null) || interaction
             if(interaction?.customId != 'scroll:forget') return null
-            user.data.battle.attacks.splice(user.data.battle.attacks.indexOf(selected.id), 1, skill.id)
-        } else user.data.battle.attacks.push(skill.id)
+            user.storage.data.battle.attacks.splice(user.storage.data.battle.attacks.indexOf(selected.id), 1, skill.id)
+        } else user.storage.data.battle.attacks.push(skill.id)
         await user.save()
         interaction.deferUpdate()
         return 'Du hast den Skill ' + skill.name + ' erlernt'

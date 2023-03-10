@@ -15,7 +15,7 @@ export default {
             if (serverdata.keksbox.channels?.length && !serverdata.keksbox.channels.includes(msg.channel.id)) return
         }
         if (!Math.floor(Math.random() * spawnrate)) {
-            if (!serverdata) serverdata = await msg.guild.setData({})
+            if (!serverdata) serverdata = await msg.guild.create()
             const color = await getcolor(msg.guild)
             let keksbox = serverdata.keksbox
             if (keksbox.message) return

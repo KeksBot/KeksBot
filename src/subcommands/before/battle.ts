@@ -3,7 +3,7 @@ import delay from 'delay'
 
 export default async (ita: Discord.CommandInteraction, args: any, client: Discord.Client) => {
     const { user, guild, color } = ita
-    if(!user.data.battle?.ready) {
+    if(!user.storage.data.battle?.ready) {
 
         //Willkommen
         let embed = new Discord.EmbedBuilder()
@@ -84,7 +84,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 })
             }
         }
-        if((user.data.level || 0) > 1) {
+        if((user.storage.data.level || 0) > 1) {
 
             //Autoskill
             embed
@@ -93,7 +93,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .addFields([{name: 'Statuswerte', value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 4/6'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
-            for (let l = user.data.level || 0; l > 1; l--) {
+            for (let l = user.storage.data.level || 0; l > 1; l--) {
                 skills.forEach((skill) => {
                     let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
                     added *= 
@@ -149,7 +149,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         .setStyle(Discord.ButtonStyle.Secondary)
                 )
             embed.setFooter({text: 'Schritt 5/6'})
-            for (let l = user.data.level || 0; l > 1; l--) {
+            for (let l = user.storage.data.level || 0; l > 1; l--) {
                 embed  
                     .setTitle('Verteilung der Statuswerte')
                     .setDescription(`>>> Pro Level kannst du eine zusätzliche Erhöhung eines beliebigen Skills durchführen. (${(l - 1)} verbleibend)`)

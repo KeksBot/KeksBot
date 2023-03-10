@@ -1,5 +1,16 @@
 import Discord from 'discord.js'
-const client: Discord.Client = new Discord.Client({ intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers',, 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'] })
+const client: Discord.Client = new Discord.Client(
+    { 
+        intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers',, 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'] ,
+        sweepers: {
+            users: {
+                interval: 1800,
+                lifetime: 7200, //@ts-ignore
+                filter: (id: string, u: Discord.User) => id != client.user.id
+            }
+        }
+    }
+)
 import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
@@ -10,7 +21,7 @@ import './db/getData'
 import './db/update'
 import './embeds'
 
-process.on('beforeExit', async (code) => {
+process.on('exit', async (code) => {
     let channel = await client.channels.fetch(config.logChannel)
     console.log(`[${client?.user.username}]: System wird heruntergefahren.`)
     let embed = new Discord.EmbedBuilder()

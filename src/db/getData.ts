@@ -1,5 +1,6 @@
 import { User, Guild } from 'discord.js'
 import { PrismaClient } from '@prisma/client'
+import UserDataManager from './UserDataManager'
 const prisma = new PrismaClient()
 
 // async function handle(data: any, name: string) {
@@ -39,18 +40,21 @@ async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): 
 
 export default get
 
-Guild.prototype.getData = async function(modules?: DbSchemas) {
-    this.data.__modules.forEach(m => {
-        if(!modules.includes(m)) modules.push(m)
-    })
-    this.data = await Object.assign(await get('server', this.id, modules) || {}, this.data)
-    return this.data
+Guild.prototype.getData = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
+    this.storage.fetch(modules)
+    return this.storage.data
 }
 
-User.prototype.getData = async function(modules?: DbSchemas) {
-    this.data.__modules.forEach(m => {
-        if(!modules.includes(m)) modules.push(m)
-    })
-    this.data = await Object.assign(await get('server', this.id, modules), this.data)
-    return this.data
+User.prototype.getData = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
+    this.storage.fetch(modules)
+    return this.storage.data
+}
+
+User.prototype.load = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
+    if(!this.storage) this.storage = new UserDataManager(this.id)
+    await this.storage.fetch(modules)
+    if(!this.storage.data) {
+        await this.create()
+    }
+    return this.storage.data
 }

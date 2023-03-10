@@ -1,4 +1,5 @@
 import Discord = require('discord.js')
+import { UserDataManager, GuildDataManager } from './db'
 
 declare module 'discord.js' {
     interface Collection<K, V> {
@@ -31,17 +32,20 @@ declare module 'discord.js' {
     }
 
     interface User {
-        data: UserData
+        storage: UserDataManager
         setData(data: any): Promise<UserData>
         getData(): Promise<UserData>
         save(): Promise<UserData>
+        create(): Promise<UserData>
+        load(): Promise<UserData>
     }
 
     interface Guild {
-        data: GuildData
+        storage: GuildDataManager
         setData(data: any): Promise<GuildData>
         getData(): Promise<GuildData>
         save(): Promise<GuildData>
+        create(): Promise<GuildData>
     }
 
     interface GuildMember {
