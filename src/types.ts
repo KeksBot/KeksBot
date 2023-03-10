@@ -51,6 +51,10 @@ declare module 'discord.js' {
     interface GuildMember {
         data?: UserData
     }
+
+    // interface StageChannel {
+    //     send(arg0: any): Promise<Message>
+    // }
 }
 
 declare global {

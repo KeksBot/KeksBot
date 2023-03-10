@@ -1,7 +1,7 @@
 import Discord from 'discord.js'
 const client: Discord.Client = new Discord.Client(
     { 
-        intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers',, 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'] ,
+        intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers', 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'],
         sweepers: {
             users: {
                 interval: 30,

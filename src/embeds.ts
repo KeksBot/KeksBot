@@ -67,7 +67,7 @@ const exp = {
             .setTitle(`${emotes.denied} ${title}`)
             .setDescription(text)
         let message
-        if(!edit) {
+        if(!edit) {//@ts-ignore
             message = await msg.channel.send({embeds: [embed], components: []})
         }
         else message = await msg.edit({embeds: [embed], components: []}).catch()
@@ -114,7 +114,7 @@ const exp = {
             .setTitle(`${emotes.denied} Fehlende Berechtigung`)
             .setDescription(`Um diesen Befehl auszuführen, benötigst du \`${permission}\`.`)
         let message
-        if(!edit) {
+        if(!edit) {//@ts-ignore
             message = await msg.channel.send({embeds: [embed]})
         }
         else message = await msg.edit({embeds: [embed], components: []}).catch()
@@ -161,7 +161,7 @@ const exp = {
             .setTitle(`${emotes.accept} ${title}`)
             .setDescription(text)
         let message
-        if(!edit) {
+        if(!edit) {//@ts-ignore
             message = await msg.channel.send({embeds: [embed], components: []})
         }
         else message = await msg.edit({embeds: [embed], components: []}).catch()
