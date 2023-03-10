@@ -8,7 +8,7 @@ const options: CommandOptions = {
     battlelock: true,
     execute: async function (ita, args, client) {
         let { user, color, guild } = ita
-        let inventory = user.data?.inventory?.items
+        let inventory = user.storage.data?.inventory?.items
         if (!inventory || !inventory.length) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
         //@ts-ignore
         let objects = objectLoader(inventory.map(i => i.id))
@@ -50,7 +50,7 @@ const options: CommandOptions = {
             .addFields([
                 {
                     name: 'Kekse',
-                    value: user.data.cookies.toString() || '0',
+                    value: user.storage.data.cookies.toString() || '0',
                     inline: true
                 },
                 {
@@ -88,7 +88,7 @@ const options: CommandOptions = {
                                 .addFields([
                                     {
                                         name: 'Kekse',
-                                        value: user.data.cookies.toString() || '0',
+                                        value: user.storage.data.cookies.toString() || '0',
                                         inline: true
                                     },
                                     {
@@ -239,13 +239,13 @@ const options: CommandOptions = {
                         .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
 
                     if(output && (!output?.length || output?.[0])) {
-                        if(item.aHeal) user.data.battle.hp += item.aHeal.value
-                        if(item.rHeal) user.data.battle.hp += Math.round(user.data.battle.skills.find((s: any) => s.name == 'HP').value * item.rHeal.value)
-                        if(user.data.battle.hp > user.data.battle.skills.find((s: any) => s.name == 'HP').value) user.data.battle.hp = user.data.battle.skills.find((s: any) => s.name == 'HP').value
+                        if(item.aHeal) user.storage.data.battle.hp += item.aHeal.value
+                        if(item.rHeal) user.storage.data.battle.hp += Math.round(user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value * item.rHeal.value)
+                        if(user.storage.data.battle.hp > user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value) user.storage.data.battle.hp = user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value
                         // TODO: Stat modifiers
                         item.count --
-                        user.data.inventory.items[index].count --
-                        if(user.data.inventory.items[index].count <= 0) user.data.inventory.items.splice(index, 1)
+                        user.storage.data.inventory.items[index].count --
+                        if(user.storage.data.inventory.items[index].count <= 0) user.storage.data.inventory.items.splice(index, 1)
                         await user.save()
                         embed.setFooter({ text: typeof output === 'string' ? output : 'Das Item wurde erfolgreich angewandt' })
                     } else {

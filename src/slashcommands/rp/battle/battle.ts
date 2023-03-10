@@ -28,8 +28,8 @@ const options: CommandOptions = {
             return await ita.error('Fehler', 'Der Nutzer ist nicht auf dem Server.', true)
         })
 
-        if(user.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, hp } = user.data.battle
+        if(user.storage.data.battle?.healTimestamp) {
+            let { healTimestamp, skills, hp } = user.storage.data.battle
             let maxHP = skills.find((skill: any) => skill.name == 'HP').value
             if(hp != maxHP) {
                 let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
@@ -39,19 +39,19 @@ const options: CommandOptions = {
                     hp = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
-                user.data.battle.healTimestamp = healTimestamp
-                user.data.battle.hp = hp
+                user.storage.data.battle.healTimestamp = healTimestamp
+                user.storage.data.battle.hp = hp
                 await user.save()
             }
         }
 
-        if(user.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
+        if(user.storage.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
 
-        await target.user?.getData()
-        if(!target.user?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
+        await target.user?.load()
+        if(!target.user?.storage?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
 
-        if(target.user.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, currentHP } = target.user.data.battle
+        if(target.user.storage.data.battle?.healTimestamp) {
+            let { healTimestamp, skills, currentHP } = target.user.storage.data.battle
             let maxHP = skills.find((skill: any) => skill.name == 'HP').value
             if(currentHP != maxHP) {
                 let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
@@ -61,13 +61,13 @@ const options: CommandOptions = {
                     currentHP = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
-                target.user.data.battle.healTimestamp = healTimestamp
-                target.user.data.battle.currentHP = currentHP
+                target.user.storage.data.battle.healTimestamp = healTimestamp
+                target.user.storage.data.battle.currentHP = currentHP
                 await target.user.save()
             }
         }
 
-        if(target.user.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
+        if(target.user.storage.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 
         //Herausforderung
         let embed = new Discord.EmbedBuilder()

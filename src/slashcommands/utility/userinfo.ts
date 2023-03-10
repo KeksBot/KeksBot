@@ -104,6 +104,12 @@ const options: CommandOptions = {
             //@ts-ignore
             await ita.update({ embeds: [embeds[type]], components: [buttons[type]] })
         })
+        
+        collector.once('end', async () => {
+            if (message.editable) await message.edit({ embeds: [message.embeds[0]], components: [] })
+            delete targetMember.data
+            collector.removeAllListeners()
+        })
     }
 }
 

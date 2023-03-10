@@ -197,7 +197,7 @@ const obj: CommandOptions = {
                         .addFields([
                             {
                                 name: 'Aktuelles Guthaben',
-                                value: `${user.data.cookies} Kekse`,
+                                value: `${user.storage.data.cookies} Kekse`,
                                 inline: true
                             },
                             {
@@ -207,11 +207,11 @@ const obj: CommandOptions = {
                             },
                             {
                                 name: 'Verbleibendes Guthaben',
-                                value: `${user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0)} Kekse`,
+                                value: `${user.storage.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0)} Kekse`,
                                 inline: true
                             }
                         ])
-                    if(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) embed.setFooter({ text: 'Du hast nicht genügend Kekse, um diesen Kauf abzuschließen.' })
+                    if(user.storage.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) embed.setFooter({ text: 'Du hast nicht genügend Kekse, um diesen Kauf abzuschließen.' })
                     let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                         .addComponents(
                             new Discord.ButtonBuilder()
@@ -222,13 +222,13 @@ const obj: CommandOptions = {
                                 .setCustomId('store.payment')
                                 .setEmoji(emotes.store)
                                 .setStyle(Discord.ButtonStyle.Success)
-                                .setDisabled(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0)
+                                .setDisabled(user.storage.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0)
                         )
                     await interaction.safeUpdate({ embeds: [embed], components: [buttons] })
                     break
                 }
                 case 3: {
-                    if(user.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) {
+                    if(user.storage.data.cookies - cartContent.reduce((a, b) => a + b.count * b.price, 0) < 0) {
                         let embed = new Discord.EmbedBuilder()
                             .setTitle(`${emotes.denied} Zahlung verweigert`)
                             .setColor(color.red)
@@ -236,11 +236,11 @@ const obj: CommandOptions = {
                         return interaction.safeUpdate({ embeds: [embed], components: [] })
                     }
                     for (const item of cartContent) {
-                        let index = user.data.inventory.items.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
+                        let index = user.storage.data.inventory.items.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
                         if(index == -1) {
-                            user.data.inventory.items.push({ id: item.id, count: item.count, metadata: item.metadata })
-                        } else user.data.inventory.items[index].count += item.count
-                        user.data.cookies -= item.count * item.price
+                            user.storage.data.inventory.items.push({ id: item.id, count: item.count, metadata: item.metadata })
+                        } else user.storage.data.inventory.items[index].count += item.count
+                        user.storage.data.cookies -= item.count * item.price
                     }
                     await user.save()
                     let embed = new Discord.EmbedBuilder()
@@ -434,14 +434,14 @@ const obj: CommandOptions = {
                             .setDescription(`${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}**${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis variiert zwischen unterschiedlichen Ausführungen'}`)
                             .setColor(color.normal)
                             .setFooter({ 
-                                text: `${user.data.inventory.items.find(i => i.id == item.id) ? 
-                                    `Du hast dieses Item ${user.data.inventory.items.find(i => i.id == item.id).count}x im Inventar\n` :
+                                text: `${user.storage.data.inventory.items.find(i => i.id == item.id) ? 
+                                    `Du hast dieses Item ${user.storage.data.inventory.items.find(i => i.id == item.id).count}x im Inventar\n` :
                                     ''
                                 }${
                                     cartContent.find(i => i.id == item.id) ?
                                     `Dieses Item befindet sich bereits ${cartContent.find(i => i.id == item.id).count}x im Warenkorb\n` :
                                     ''
-                                }Du hast aktuell ${user.data.cookies} Kekse`
+                                }Du hast aktuell ${user.storage.data.cookies} Kekse`
                             })
                         let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
                             .addComponents(
@@ -499,14 +499,14 @@ const obj: CommandOptions = {
                         .setDescription(`**${item.emote ? `${emotes.items[item.emote]} ` : '[ ] '}${item.name}**\n${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis unbekannt'}`)
                         .setColor(color.normal)
                         .setFooter({
-                            text: `${user.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
-                                `Du hast dieses Item ${user.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)).count}x im Inventar\n` :
+                            text: `${user.storage.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
+                                `Du hast dieses Item ${user.storage.data.inventory.items.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)).count}x im Inventar\n` :
                                 ''
                             }${
                                 cartContent.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)) ?
                                 `Dieses Item befindet sich bereits ${cartContent.find(i => i.id == item.id && equals(i.metadata, currentItem.metadata)).count}x im Warenkorb\n` :
                                 ''
-                            }Du hast aktuell ${user.data.cookies} Kekse`
+                            }Du hast aktuell ${user.storage.data.cookies} Kekse`
                         })
                     let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
                         .addComponents(

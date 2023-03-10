@@ -39,11 +39,11 @@ export default async function(ita: Discord.CommandInteraction, args: any, client
             if(i.customId.includes('yes')) {
                 color.normal = args.color.toUpperCase()
                 //@ts-ignore
-                if(!guild.data.theme) guild.data.theme = {}
+                if(!guild.storage.data.theme) guild.storage.data.theme = {}
                 //@ts-ignore
-                if(args.color.toLowerCase() == 'role') guild.data.theme.normal = 'role'
-                else guild.data.theme.normal = args.color.toUpperCase()
-                guild.setData({ theme: guild.data.theme })
+                if(args.color.toLowerCase() == 'role') guild.storage.data.theme.normal = 'role'
+                else guild.storage.data.theme.normal = args.color.toUpperCase()
+                guild.setData({ theme: guild.storage.data.theme })
                 embed = new Discord.EmbedBuilder()
                     .setColor(color.lime)
                     .setTitle('Änderungen übernommen')
@@ -64,23 +64,23 @@ export default async function(ita: Discord.CommandInteraction, args: any, client
         let themetext
         switch(args.theme) {
             case 'default':
-                Object.assign(guild.data.theme || {}, { red: '0xE62535', yellow: '0xF2E03F', lime: '0x25D971' })
+                Object.assign(guild.storage.data.theme || {}, { red: '0xE62535', yellow: '0xF2E03F', lime: '0x25D971' })
                 themetext = 'Du hast das KeksBot Standard Theme ausgewählt.\nEs erwartet dich höchste Qualität mit viel Kontrast'
                 break
             case 'dark': 
-                Object.assign(guild.data.theme || {}, { red: '0x661017', yellow: '0x736A1E', lime: '0x0F592E' })
+                Object.assign(guild.storage.data.theme || {}, { red: '0x661017', yellow: '0x736A1E', lime: '0x0F592E' })
                 themetext = 'Du hast das KeksBot Dark Theme ausgewählt.\nDie richtige Auswahl für die 3 Leute, die Discord als Taschenlampe hernehmen und mehr Kontrast zwischen Hintergrund und Embed wollen'
                 break
             case 'old':
-                Object.assign(guild.data.theme || {}, { red: '0xFF0000', yellow: '0xF1C40F', lime: '0x2ECC71' })
+                Object.assign(guild.storage.data.theme || {}, { red: '0xFF0000', yellow: '0xF1C40F', lime: '0x2ECC71' })
                 themetext = 'Du hast das KeksBot Origins Theme ausgewählt.\nDie richtigen Farben für OGs! Genieß die alten KeksBot Farben ganz ohne Staubschichten mit ihrem ursprünglichen Glanz'
                 break
             case 'discord':
-                Object.assign(guild.data.theme || {}, { red: '0xED4245', yellow: '0xFEE75C', lime: '0x57F287' })
+                Object.assign(guild.storage.data.theme || {}, { red: '0xED4245', yellow: '0xFEE75C', lime: '0x57F287' })
                 themetext = 'Du hast das Discord Theme ausgewählt.\nFreue dich auf die [Discord Farben](https://discord.com/branding) jetzt auch im KeksBot!\n__Protipp:__ Verwende `/settings theme color:blurple`, um das Design zu perfektionieren'
                 break
             case 'gray':
-                Object.assign(guild.data.theme || {}, { red: '0x303030', yellow: '0x6B6B6B', lime: '0xAFAFAF' })
+                Object.assign(guild.storage.data.theme || {}, { red: '0x303030', yellow: '0x6B6B6B', lime: '0xAFAFAF' })
                 themetext = 'Du hast Graustufen ausgewählt.\nEmbeds sind jetzt grau o.O'
                 break
         }
@@ -115,7 +115,7 @@ export default async function(ita: Discord.CommandInteraction, args: any, client
         let message = await ita.safeReply({ embeds: [embed], ephemeral: true, components: [buttons], fetchReply: true })
         //@ts-ignore
         const collector = message.createMessageComponentCollector({ componentType: Discord.ComponentType.Button, time: 600_000 })
-        let theme =  guild.data.theme
+        let theme =  guild.storage.data.theme
         collector.on('collect', async function(i: Discord.ButtonInteraction) {
             switch(i.customId.replace('settings:theme:', '')) {
                 case 'save':
@@ -173,9 +173,9 @@ und `/settings theme theme:<Auswahl>`, um die Farben für andere Embeds zu verä
             {
                 name: 'Theme',
                 value: (function() {
-                    if(guild.data.theme?.red) {
+                    if(guild.storage.data.theme?.red) {
                         let out = 'Bezeichnung: '
-                        switch (guild.data.theme.red) {
+                        switch (guild.storage.data.theme.red) {
                             case '0xE62535': out += 'KeksBot Standard'; break
                             case '0x661017': out += 'KeksBot Dark'; break
                             case '0xFF0000': out += 'KeksBot Origins'; break
@@ -183,9 +183,9 @@ und `/settings theme theme:<Auswahl>`, um die Farben für andere Embeds zu verä
                             case '0x303030': out += 'Graustufen'; break
                             default: 'Unbekannt'
                         }
-                        out += `\nRot: ${guild.data.theme.red}`
-                        out += `\nGelb: ${guild.data.theme.yellow}`
-                        out += `\nGrün: ${guild.data.theme.lime}`
+                        out += `\nRot: ${guild.storage.data.theme.red}`
+                        out += `\nGelb: ${guild.storage.data.theme.yellow}`
+                        out += `\nGrün: ${guild.storage.data.theme.lime}`
                         return out.replaceAll('0x', '#').replaceAll('undefined', 'Unbekannt').replaceAll('null', 'Unbekannt')
                     } else return 'Bezeichnung: KeksBot Standard\nRot: `#E62535`\nGelb: `#F2E03F`\nGrün: `#25D971`'
                 })(),

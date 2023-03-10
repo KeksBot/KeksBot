@@ -6,19 +6,19 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
     let { guild, color } = ita
     let informationtext = []
     let error = false
-    if (!guild.data.keksbox) guild.data.keksbox = { id: guild.id }
+    if (!guild.storage.data.keksbox) guild.storage.data.keksbox = { id: guild.id }
     if (args.delete_message) {
         if (args.delete_message == 'Nein') {
-            guild.data.keksbox.keepmessage = true
+            guild.storage.data.keksbox.keepmessage = true
             informationtext.push('KeksBox Nachrichten werden nicht mehr gelöscht.')
         } else {
-            guild.data.keksbox.keepmessage = false
+            guild.storage.data.keksbox.keepmessage = false
             informationtext.push('KeksBox Nachrichten werden nach dem Einsammeln gelöscht.')
         }
     }
     if (args.spawnrate) {
         if (20 <= args.spawnrate && args.spawnrate <= 10000) {
-            guild.data.keksbox.spawnrate = args.spawnrate
+            guild.storage.data.keksbox.spawnrate = args.spawnrate
             informationtext.push(`KeksBoxen spawnen nun durchschnittlich alle ${args.spawnrate} Nachrichten (${(Math.round(1 / args.spawnrate * 10000) / 100).toString().replace('.', ',')}%)`)
         } else {
             error = true
@@ -27,7 +27,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
     }
     if (informationtext.length) {
         if (error) return embeds.error(ita, 'Syntaxfehler', informationtext.join('\n'), true)
-        await guild.setData({ keksbox: guild.data.keksbox })
+        await guild.setData({ keksbox: guild.storage.data.keksbox })
         return embeds.success(ita, 'Änderungen übernommen', informationtext.join('\n'), true)
     }
     let embed = new Discord.EmbedBuilder()
@@ -51,8 +51,8 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                     'Beispiel: ```allgemein, #kekskanal\n775001585541185550```',
                 inline: true
             }])
-        .setDescription(`Aktuelle Einstellungen:\n Nachrichten löschen: ${guild.data.keksbox?.keepmessage?.toString().replace('true', 'Nein').replace('false', 'Ja') || 'Ja'}\n` +
-            ` Spawnrate: 1 pro ${guild.data.keksbox?.spawnrate || 100} Nachrichten`)
+        .setDescription(`Aktuelle Einstellungen:\n Nachrichten löschen: ${guild.storage.data.keksbox?.keepmessage?.toString().replace('true', 'Nein').replace('false', 'Ja') || 'Ja'}\n` +
+            ` Spawnrate: 1 pro ${guild.storage.data.keksbox?.spawnrate || 100} Nachrichten`)
     let components = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
         .addComponents(
             new Discord.ButtonBuilder()
@@ -68,11 +68,11 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
             if (ita.customId == 'settings.keksbox:change-channel-whitelist') {
                 await guild.channels.fetch()
                 let value: string = ''
-                if (!guild.data.keksbox) guild.data.keksbox = { id: guild.id }
-                if (!guild.data.keksbox.channels) guild.data.keksbox.channels = []
-                if (guild.data.keksbox.channels.length == 1 && guild.data.keksbox.channels[0] == '0') value = '0'
+                if (!guild.storage.data.keksbox) guild.storage.data.keksbox = { id: guild.id }
+                if (!guild.storage.data.keksbox.channels) guild.storage.data.keksbox.channels = []
+                if (guild.storage.data.keksbox.channels.length == 1 && guild.storage.data.keksbox.channels[0] == '0') value = '0'
                 else {
-                    value = guild.data.keksbox.channels.map(c => {
+                    value = guild.storage.data.keksbox.channels.map(c => {
                         return '#' + (guild.channels.cache.filter(c => c.isTextBased()).get(c)?.name || -1) + ' | ' + c
                     }).filter(t => !t.startsWith('#-1')).join('\n')
                 }
@@ -100,7 +100,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                 await guild.channels.fetch()
                 value = interaction.fields.getTextInputValue('settings.keksbox:set-channel-whitelist')
                 if (value.trim() == '0') {
-                    guild.data.keksbox.channels = ['0']
+                    guild.storage.data.keksbox.channels = ['0']
                     await guild.save()
                     embed.setFooter({ text: 'KeksBoxen deaktiviert' })
                     //@ts-ignore
@@ -119,7 +119,7 @@ export default async function (ita: Discord.CommandInteraction, args: any) {
                     })
                     .filter(v => v)
                 values = [...(new Set(values))]
-                guild.data.keksbox.channels = values
+                guild.storage.data.keksbox.channels = values
                 await guild.save()
                 //@ts-ignore
                 return interaction.update({ embeds: [embed.setFooter({ text: 'Änderungen übernommen' })] })

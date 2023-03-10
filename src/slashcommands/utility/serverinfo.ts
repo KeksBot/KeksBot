@@ -7,9 +7,9 @@ const options: CommandOptions = {
     async execute(ita, args, client) {
         var { guild, color, member } = ita
 
-        let cookielimit = 2 ** (guild.data.level || 1 + 8)
-        if (guild.data?.partner == 1 && cookielimit < 65536) cookielimit = 65536
-        if (guild.data?.verified && cookielimit < 4194304) cookielimit = 4194304
+        let cookielimit = 2 ** (guild.storage.data.level || 1 + 8)
+        if (guild.storage.data?.partner == 1 && cookielimit < 65536) cookielimit = 65536
+        if (guild.storage.data?.verified && cookielimit < 4194304) cookielimit = 4194304
 
 
         let embeds: { expand?: Discord.EmbedBuilder, collapse?: Discord.EmbedBuilder } = {
@@ -18,8 +18,8 @@ const options: CommandOptions = {
                 .setTitle(guild.name)
                 .setThumbnail(guild.iconURL({ forceStatic: false, size: 512, extension: 'png' }))
                 .addFields([
-                    { name: 'Erfahrungspunkte', value: guild.data?.xp?.toString() || '0', inline: true },
-                    { name: 'Level', value: guild.data?.level?.toString() || '1', inline: true },
+                    { name: 'Erfahrungspunkte', value: guild.storage.data?.xp?.toString() || '0', inline: true },
+                    { name: 'Level', value: guild.storage.data?.level?.toString() || '1', inline: true },
                     { name: 'Kekslimit', value: (cookielimit.toString() || '512') + ' Kekse pro Minute', inline: true }
                 ])
         }
@@ -97,6 +97,11 @@ const options: CommandOptions = {
             let type = ita.customId.split(':')[1]
             //@ts-ignore
             await ita.update({ embeds: [embeds[type]], components: [buttons[type]] })
+        })
+
+        collector.once('end', async () => {
+            if (message.editable) await message.edit({ embeds: [message.embeds[0]], components: [] })
+            collector.removeAllListeners()
         })
     }
 }
