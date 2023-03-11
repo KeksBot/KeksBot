@@ -4,9 +4,8 @@ const client: Discord.Client = new Discord.Client(
         intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers', 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'],
         sweepers: {
             users: {
-                interval: 30,
-                lifetime: 7200, //@ts-ignore
-                filter: user => user.bot && user.id !== client.user.id
+                interval: 30, //@ts-ignore
+                filter: () => (user: Discord.User, id: string) => !id && !client.user.id
             }
         }
     }
@@ -17,8 +16,7 @@ import eventhandler from './eventhandler'
 import autocompletehandler from './autocomplete'
 import uptimemonitoring from './uptimemonitoring'
 
-import './db/getData'
-import './db/update'
+import './db'
 import './embeds'
 
 process.on('exit', async (code) => {

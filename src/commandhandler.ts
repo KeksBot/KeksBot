@@ -58,15 +58,7 @@ export default async (client: Discord.Client) => {
 
         if(!interaction.guild.available) return
 
-        if(!interaction.user.storage) interaction.user.storage = new UserDataManager(interaction.user.id)
-        if(!interaction.guild.storage) interaction.guild.storage = new GuildDataManager(interaction.guild.id)
-
-        //let newUser = false
-        await interaction.guild.getData()
-        if(!interaction.guild.storage.data) interaction.guild.create()
-        interaction.color = await getcolors(interaction.guild)
-        await interaction.user.getData()
-        if(!interaction.user.storage.data) await interaction.user.create()
+        await Promise.all([interaction.guild.load(), interaction.user.load()])
         if(interaction.user.storage.data.banned) {
             if(interaction.user.storage.data.banned > Date.now()) {
                 let reason = '_Es liegt keine Begründung vor._'

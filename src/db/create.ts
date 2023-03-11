@@ -27,3 +27,5 @@ User.prototype.create = async function() {
 Guild.prototype.create = async function() {
     return await create('server', this.id)
 }
+
+export default create

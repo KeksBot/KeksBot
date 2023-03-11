@@ -50,13 +50,13 @@ model userinventory {
 model userbattle {
     id            String   @id @unique
     user          user     @relation(fields: [id], references: [id])
-    skills        Json
+    skills        Json?
     ready         Boolean  @default(false)
-    priority      String
-    hp            String
+    priority      String?
+    hp            String?
     healTimestamp DateTime @default(now())
-    class         String
-    attacks       String[]
+    class         String?
+    attacks       String[] @default([])
 }
 
 model server {

@@ -1,4 +1,5 @@
-import { getData, update } from "."
+import getData from "./getData"
+import update from "./update"
 
 export default class DataManager {
 
@@ -16,8 +17,7 @@ export default class DataManager {
 
     protected async _fetch(schema: 'server' | 'user', id: string, modules?: DbSchemas) {
         this.modules = this.modules.concat(modules) as DbSchemas
-        this.data = await getData(schema, id, this.modules) || {}
-        if(!Object.keys(this.data).length) return null
+        this.data = await getData(schema, id, this.modules) || null
         return this.data
     }
 

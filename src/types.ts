@@ -46,6 +46,7 @@ declare module 'discord.js' {
         getData(): Promise<GuildData>
         save(): Promise<GuildData>
         create(): Promise<GuildData>
+        load(): Promise<GuildData>
     }
 
     interface GuildMember {

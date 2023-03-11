@@ -1,6 +1,7 @@
 import { User, Guild } from 'discord.js'
 import { PrismaClient } from '@prisma/client'
 import UserDataManager from './UserDataManager'
+import GuildDataManager from './GuildDataManager'
 const prisma = new PrismaClient()
 
 // async function handle(data: any, name: string) {
@@ -32,7 +33,6 @@ async function get(schema: 'user' | 'server', id: string, modules?: DbSchemas): 
         },
         include: Object.keys(include).length ? include : undefined
     }
-    console.log(options)
     //@ts-ignore
     let data = await prisma[schema].findUnique(options)
     // TODO: handle
@@ -53,6 +53,16 @@ User.prototype.getData = async function(modules: DbSchemas = ['usersettings', 'u
 
 User.prototype.load = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
     if(!this.storage) this.storage = new UserDataManager(this.id)
+    await this.storage.fetch(modules)
+    console.log(this.storage.data)
+    if(!this.storage.data) {
+        await this.create()
+    }
+    return this.storage.data
+}
+
+Guild.prototype.load = async function(modules: DbSchemas = ['serverkeksbox']) {
+    if(!this.storage) this.storage = new GuildDataManager(this.id)
     await this.storage.fetch(modules)
     if(!this.storage.data) {
         await this.create()
