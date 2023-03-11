@@ -59,6 +59,7 @@ export default async (client: Discord.Client) => {
         if(!interaction.guild.available) return
 
         await Promise.all([interaction.guild.load(), interaction.user.load()])
+        interaction.color = await getcolors(interaction.guild)
         if(interaction.user.storage.data.banned) {
             if(interaction.user.storage.data.banned > Date.now()) {
                 let reason = '_Es liegt keine Begründung vor._'

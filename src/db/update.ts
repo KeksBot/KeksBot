@@ -6,28 +6,19 @@ const modules = ['loggedInAs', 'keksbox', 'settings', 'battle', 'inventory']
 
 async function set(schema: 'user' | 'server', id: string, data: any): Promise<any> {
 
-    //TODO: this
-
-    console.log(data)
     const _data = {...data}
     for (const d in _data) {
-        if(d.startsWith('__') || (modules.includes(d) && !_data[d])) delete _data[d]
         if(modules.includes(d) && _data[d]) {
             _data[d] = {
-                upsert: {
-                    create: Object.assign({ id }, _data[d]),
-                    update: _data[d]
-                }
+                update: Object.assign(_data[d], { id: undefined })
             }
         }
     }
-    console.log(JSON.stringify(_data, null, 2))
     const options: any = {
         where: { id },
-        create: Object.assign({ id }, _data),
-        update: _data
+        data: _data
     } //@ts-ignore
-    data = await prisma[schema].upsert(options)
+    data = await prisma[schema].update(options)
     return data
 }
 
