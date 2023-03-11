@@ -7,6 +7,7 @@ export default class DataManager {
 
     protected modules: DbSchemas
     public data
+    public expires: Date = new Date(Date.now() + 60000)
     protected id: string
 
     constructor(id: string, data?: any, modules: DbSchemas = []) {
@@ -18,11 +19,13 @@ export default class DataManager {
     protected async _fetch(schema: 'server' | 'user', id: string, modules?: DbSchemas) {
         this.modules = this.modules.concat(modules) as DbSchemas
         this.data = await getData(schema, id, this.modules) || null
+        this.expires = new Date(Date.now() + 60000)
         return this.data
     }
 
     protected async _save(schema: 'server' | 'user', id: string) {
         this.data = await update(schema, id, this.data)
+        this.expires = new Date(Date.now() + 60000)
         return this.data
     }
 }

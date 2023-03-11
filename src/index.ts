@@ -4,8 +4,8 @@ const client: Discord.Client = new Discord.Client(
         intents: ['Guilds', 'GuildMembers', 'GuildEmojisAndStickers', 'GuildMessages', 'DirectMessages', 'DirectMessageReactions'],
         sweepers: {
             users: {
-                interval: 30, //@ts-ignore
-                filter: () => (user: Discord.User, id: string) => !id && !client.user.id
+                interval: 180000, //@ts-ignore
+                filter: () => (user: Discord.User, id: string) => user.storage?.expires > Date.now() || id == client.user.id
             }
         }
     }
