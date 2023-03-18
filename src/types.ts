@@ -106,7 +106,14 @@ declare global {
         battle?: {
             id: string
             user?: UserData
-            skills: any
+            stats: Record<Stats, {
+                base: number,
+                priority: number,
+                increment: number,
+                relModifier: number,
+                absModifier: number,
+                randomness: number, 
+            }>
             ready: boolean,
             priority: string,
             hp: number,
@@ -139,7 +146,7 @@ declare global {
         battle: UserData['battle']
         id: string
         team: number
-        skills: {
+        stats: {
             name: string
             value: number
             getValue?: () => number
@@ -152,7 +159,7 @@ declare global {
             action: string,
             user: BattleUser
         }
-        skillChanges?: UserData['battle']['skills']
+        statChanges?: UserData['battle']['stats']
     }
 
     interface BaseBattle {
@@ -244,4 +251,6 @@ declare global {
     }
 
     type DbSchemas = ('usersettings' | 'userinventory' | 'userbattle' | 'serverkeksbox')[]
+
+    type Stats = 'hp' | 'attack' | 'defense' | 'speed' | 'accuracy' | 'critrate' | 'critdamage' | 'regeneration'
 }

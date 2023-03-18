@@ -6,9 +6,11 @@ export default class DataManager {
     //TODO: ID ändern bei systemusern
 
     protected modules: DbSchemas
+    protected id: string
+    protected auto_cache: any
     public data
     public expires: Date = new Date(Date.now() + 60000)
-    protected id: string
+    public auto: any
 
     constructor(id: string, data?: any, modules: DbSchemas = []) {
         this.data = data
