@@ -6,10 +6,7 @@ export default class UserDataManager extends DataManager {
     public data: UserData = {}
     public auto: {
         stats: {
-            [key in Stats]?: {
-                value: number,
-                expires: number
-            }
+            [key in Stats]?: number
         }
     } = {
         stats: {}
@@ -17,7 +14,8 @@ export default class UserDataManager extends DataManager {
     protected auto_cache: any = {}
 
     constructor(id: string, data?: UserData, modules: DbSchemas = []) {
-        super(id, data, modules)
+        super(id, data, modules)        
+        // init stats
         for (const stat of stats) {
             Object.defineProperty(this.auto.stats, stat, {
                 get: function () { //@ts-expect-error
@@ -39,5 +37,9 @@ export default class UserDataManager extends DataManager {
 
     public async save(): Promise<UserData> {
         return await this._save('user', this.id)
+    }
+
+    public reloadStats() {
+        this.auto_cache.stats = {}
     }
 }
