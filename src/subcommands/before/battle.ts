@@ -61,7 +61,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
 
-        let playerClass = classes.find(c => c.id == user.storage.data.battle.class)
+        let playerClass = classes.find(c => c.id == interaction.customId.split('.')[1])
 
         //Stat Priorität
         embed
@@ -112,7 +112,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         //Stats initialisieren
         let priority = interaction.customId.split('.')[1]
         let stats: Partial<Record<Stats, UserData['battle']['stats']['accuracy'] & { added?: number}>> = {}
-        for (const s in statnames) {
+        for (const s of statnames) {
             stats[s as Stats] = {
                 base: playerClass.baseStats[s as Stats],
                 priority: priority == s ? 1.2 : priority == 'all' ? 1.1 : undefined,
@@ -123,6 +123,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 added: 0
             }
         }
+
+        console.log(stats)
 
         if((user.storage.data.level || 0) > 1) {
 
@@ -135,7 +137,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
                 (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).forEach(([name, stat]) => {
-                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2)
+                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
                     stats[name].increment += added
                     added *= 
                         priority === name ? 1.2 : 
@@ -156,7 +158,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
                     new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step4')
+                        .setCustomId('battlesetup:step5')
                         .setLabel('Fortfahren')
                         .setStyle(Discord.ButtonStyle.Primary)
                 )
@@ -170,37 +172,37 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>(), new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
             buttons[0].addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.hp')
+                    .setCustomId('battlesetup:step6.hp')
                     .setLabel('HP')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.attack')
+                    .setCustomId('battlesetup:step6.attack')
                     .setLabel('Angriff')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.defense')
+                    .setCustomId('battlesetup:step6.defense')
                     .setLabel('Verteidigung')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.speed')
+                    .setCustomId('battlesetup:step6.speed')
                     .setLabel('Geschwindigkeit')
                     .setStyle(Discord.ButtonStyle.Secondary)
             )
             buttons[1].addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.mana')
+                    .setCustomId('battlesetup:step6.mana')
                     .setLabel('Mana')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.mAttack')
+                    .setCustomId('battlesetup:step6.mAttack')
                     .setLabel('Magischer Angriff')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.mDefense')
+                    .setCustomId('battlesetup:step6.mDefense')
                     .setLabel('Magische Verteidigung')
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step4.all')
+                    .setCustomId('battlesetup:step6.all')
                     .setLabel('Ausgeglichen')
                     .setStyle(Discord.ButtonStyle.Secondary)
             )
@@ -226,7 +228,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]] //@ts-ignore - Lieber Leser. Als ich versucht hab, das hier sinnvoll zu lösen, hat VS Code angefangen, zu weinen. Deshalb hab ich es so gemacht. Ich bitte um Nachsicht.
                 Object.entries(stats).forEach(function ([name, stat]: [Stats, any]): any {
                     if(name != sk) return stat.added = 0
-                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2)
+                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
                     stats[name].increment += added
                     added *= 
                         priority === name ? 1.2 : 
@@ -264,12 +266,12 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed = new Discord.EmbedBuilder()
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`>>> Du hast bisher noch kein Level erreicht.\nVerwende \`/cookies\` und \`/eat\`, um dein Level zu erhöhen und deine Statuswerte zu verbessern.`)
-                .setFooter({text: 'Schritt 4+5/7'})
+                .setFooter({text: 'Schritt 5+6/7'})
                 .setColor(color.red)
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
                     new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step45')
+                        .setCustomId('battlesetup:step56')
                         .setLabel('Fortfahren')
                         .setStyle(Discord.ButtonStyle.Primary)
                 )
