@@ -1,5 +1,8 @@
 import Discord from 'discord.js'
 import delay from 'delay'
+import classes from '../../battle/classes'
+import statnames from '../../battle/stats.json'
+import calculateStatValue from '../../util/calculateStatValue'
 
 export default async (ita: Discord.CommandInteraction, args: any, client: Discord.Client) => {
     const { user, guild, color } = ita
@@ -9,9 +12,9 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         let embed = new Discord.EmbedBuilder()
             .setColor(color.normal)
             .setTitle('Willkommen')
-            .setDescription('>>> Herzlich Willkommen zum KeksBot Kampfsystem. (Wir suchen btw noch einen kuhlen Namen <:MenheraEhehe:998997848215523460>)\nBevor du anfangen kannst, Leute zu bonken, musst du aber noch ein paar Sachen machen.')
-            .setFooter({text: 'Schritt 1/6'})
-        let buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+            .setDescription('>>> Herzlich Willkommen beim KeksBot Kampfsystem. (Ich such btw noch einen kuhlen Namen c:)\nBevor du anfangen kannst, Leute zu bonken, musst du aber noch ein paar Sachen machen.')
+            .setFooter({text: 'Schritt 1/7'})
+        let buttons: any = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
                 new Discord.ButtonBuilder()
                     .setCustomId('battlesetup:step1')
@@ -25,8 +28,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         //Allgemein
         embed
             .setTitle('Allgemeine Informationen')
-            .setDescription('>>> Beim KeksBot Kampfsystem (Wir suchen im Übrigen immer noch einen Namen) handelt es sich um ein skillbasiertes PvP "Roleplay".\nDurch Level-Ups erhöhen sich Statuswerte und man wird stärker. Relativ simpel :)\n**Wichtiger Hinweis**: Das ganze ist ein Proof of Concept und dient ausschließlich Entwicklungszwecken. Eine später verwendete Version kann stark vom aktuellen Entwicklungsstatus abweichen.')
-            .setFooter({text: 'Schritt 2/6'})
+            .setDescription('>>> Beim KeksBot Kampfsystem handelt es sich um ein skillbasiertes PvP "Roleplay".\nDurch Level-Ups und Items erhöhen sich Statuswerte und man wird stärker. Relativ simpel :)\n**Wichtiger Hinweis**: Das ganze ist aktuell ein Proof of Concept und dient ausschließlich Entwicklungszwecken. Eine später verwendete Version kann stark vom aktuellen Entwicklungsstatus abweichen. Daher kann es während der Entwicklung regelmäßig zum Zurücksetzen der Spielstände kommen.')
+            .setFooter({text: 'Schritt 2/7'})
         buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
                 new Discord.ButtonBuilder()
@@ -38,77 +41,114 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
         if(!interaction) return
 
-        //Skill Priorität
+        //Klasse
+
         embed
-            .setTitle('Skill Priorität')
-            .setDescription('>>> Wähle einen priorisierten Skill.\nDieser steigt bei Level Ups schneller an, als andere.\n__Achtung__: Die hier getroffene Auswahl kann nur durch einen Reset geändert werden. Dabei geht der gesamte Fortschritt verloren.')
-            .setFooter({text: 'Schritt 3/6'})
-        buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-            .addComponents(
+            .setTitle('Klasse')
+            .setDescription('>>> Wähle eine Klasse aus.\nDiese bestimmt, welche Skills du erlernen kannst und welche Statuswerte zu Beginn wie hoch ausfallen.')
+            .setFooter({text: 'Schritt 3/7'})
+        buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
+        classes.forEach(c => {
+            if(buttons[buttons.length - 1].components.length >= 5) buttons.push(new Discord.ActionRowBuilder<Discord.ButtonBuilder>())
+            buttons[buttons.length - 1].addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step3.hp')
-                    .setLabel('HP')
-                    .setStyle(Discord.ButtonStyle.Secondary),
-                new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step3.atk')
-                    .setLabel('Angriff')
-                    .setStyle(Discord.ButtonStyle.Secondary),
-                new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step3.def')
-                    .setLabel('Verteidigung')
-                    .setStyle(Discord.ButtonStyle.Secondary),
-                new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step3.spd')
-                    .setLabel('Geschwindigkeit')
-                    .setStyle(Discord.ButtonStyle.Secondary),
-                new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step3.all')
-                    .setLabel('Ausgeglichen')
-                    .setStyle(Discord.ButtonStyle.Secondary),
+                    .setCustomId(`battlesetup:step3.${c.id}`)
+                    .setLabel(c.translations.de)
+                    .setStyle(Discord.ButtonStyle.Secondary)
             )
-        await interaction.update({ embeds: [embed], components: [buttons], fetchReply: true })
+        })
+        await interaction.update({ embeds: [embed], components: buttons, fetchReply: true })
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
 
-        //Skills initialisieren
-        let priority = require('../../battle/skillids.json')[interaction.customId.split('.')[1]] || 'Ausgeglichen'
-        let skillinformation = require('../../battle/skills.json')
-        let skills = []
-        for (const s in skillinformation) {
-            if (Object.hasOwnProperty.call(skillinformation, s)) {
-                const skill = skillinformation[s];
-                skills.push({
-                    name: s,
-                    value: skill.baseValue,
-                    added: 0
-                })
+        let playerClass = classes.find(c => c.id == user.storage.data.battle.class)
+
+        //Stat Priorität
+        embed
+            .setTitle('Statpriorität')
+            .setDescription('>>> Wähle einen priorisierten Statuswert.\nDieser steigt bei Level Ups schneller an, als andere.')
+            .setFooter({text: 'Schritt 4/7'})
+        buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>(), new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
+        buttons[0].addComponents(
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.hp')
+                .setLabel('HP')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.attack')
+                .setLabel('Angriff')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.defense')
+                .setLabel('Verteidigung')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.speed')
+                .setLabel('Geschwindigkeit')
+                .setStyle(Discord.ButtonStyle.Secondary)
+        )
+        buttons[1].addComponents(
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.mana')
+                .setLabel('Mana')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.mAttack')
+                .setLabel('Magischer Angriff')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.mDefense')
+                .setLabel('Magische Verteidigung')
+                .setStyle(Discord.ButtonStyle.Secondary),
+            new Discord.ButtonBuilder()
+                .setCustomId('battlesetup:step4.all')
+                .setLabel('Ausgeglichen')
+                .setStyle(Discord.ButtonStyle.Secondary)
+        )
+        await interaction.update({ embeds: [embed], components: buttons, fetchReply: true })
+        interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
+        if(!interaction) return
+
+        //Stats initialisieren
+        let priority = interaction.customId.split('.')[1]
+        let stats: Partial<Record<Stats, UserData['battle']['stats']['accuracy'] & { added?: number}>> = {}
+        for (const s in statnames) {
+            stats[s as Stats] = {
+                base: playerClass.baseStats[s as Stats],
+                priority: priority == s ? 1.2 : priority == 'all' ? 1.1 : undefined,
+                increment: 0,
+                randomness: Math.random() * 0.1 + 0.95,
+                absModifier: 0,
+                relModifier: 1,
+                added: 0
             }
         }
+
         if((user.storage.data.level || 0) > 1) {
 
-            //Autoskill
+            //Autostats
             embed
                 .setTitle('Verteilung der Statuswerte')
-                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Skillpoints.`)
-                .addFields([{name: 'Statuswerte', value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
-                .setFooter({text: 'Schritt 4/6'})
+                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`)
+                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'), inline: true}])
+                .setFooter({text: 'Schritt 5/7'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
-                skills.forEach((skill) => {
-                    let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
+                (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).forEach(([name, stat]) => {
+                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2)
+                    stats[name].increment += added
                     added *= 
-                        priority === skill.name ? 1.5 : 
-                        priority === 'Ausgeglichen' ? 1.125 : 1
-                    added = Math.round(added)
-                    skill.added += added
+                        priority === name ? 1.2 : 
+                        priority === 'all' ? 1.1 : 1
+                    stats[name].added += Math.round(added)
                 })
             }
             await delay(2000)
-            embed.addFields([{name: '​', value: skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
+            embed.addFields([{name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
             embed.setFields([
                 {
                     name: 'Statuswerte',
-                    value: skills.map(skill => `**${skill.name}**: ${skill.value + skill.added}`).join('\n'),
+                    value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
                     inline: true
                 },
                 embed.data.fields[1]
@@ -120,65 +160,78 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         .setLabel('Fortfahren')
                         .setStyle(Discord.ButtonStyle.Primary)
                 )
-            skills.forEach(skill => {
-                skill.value += skill.added
-                skill.added = 0
-            })
+            Object.values(stats).forEach(stat => {stat.added = 0})
+
             await interaction.editReply({ embeds: [embed], components: [buttons] })
             interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
             if(!interaction) return
 
             //Skillpunkte setzen
-            buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-                .addComponents(
-                    new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step5.hp')
-                        .setLabel('HP')
-                        .setStyle(Discord.ButtonStyle.Secondary),
-                    new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step5.atk')
-                        .setLabel('Angriff')
-                        .setStyle(Discord.ButtonStyle.Secondary),
-                    new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step5.def')
-                        .setLabel('Verteidigung')
-                        .setStyle(Discord.ButtonStyle.Secondary),
-                    new Discord.ButtonBuilder()
-                        .setCustomId('battlesetup:step5.spd')
-                        .setLabel('Geschwindigkeit')
-                        .setStyle(Discord.ButtonStyle.Secondary)
-                )
-            embed.setFooter({text: 'Schritt 5/6'})
+            buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>(), new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
+            buttons[0].addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.hp')
+                    .setLabel('HP')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.attack')
+                    .setLabel('Angriff')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.defense')
+                    .setLabel('Verteidigung')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.speed')
+                    .setLabel('Geschwindigkeit')
+                    .setStyle(Discord.ButtonStyle.Secondary)
+            )
+            buttons[1].addComponents(
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.mana')
+                    .setLabel('Mana')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.mAttack')
+                    .setLabel('Magischer Angriff')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.mDefense')
+                    .setLabel('Magische Verteidigung')
+                    .setStyle(Discord.ButtonStyle.Secondary),
+                new Discord.ButtonBuilder()
+                    .setCustomId('battlesetup:step4.all')
+                    .setLabel('Ausgeglichen')
+                    .setStyle(Discord.ButtonStyle.Secondary)
+            )
+            embed.setFooter({text: 'Schritt 6/7'})
             for (let l = user.storage.data.level || 0; l > 1; l--) {
                 embed  
                     .setTitle('Verteilung der Statuswerte')
                     .setDescription(`>>> Pro Level kannst du eine zusätzliche Erhöhung eines beliebigen Skills durchführen. (${(l - 1)} verbleibend)`)
-                    .setFields([
+                    embed.setFields([
                         {
                             name: 'Statuswerte',
-                            value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'),
+                            value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
                             inline: true
                         },
                         {
-                            name: '​', 
-                            value: skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
-                            inline: true
+                            name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true
                         }
                     ])
-                await interaction.update({ embeds: [embed], components: [buttons] })
+                await interaction.update({ embeds: [embed], components: buttons })    
                 interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
                 if(!interaction) return
 
-                let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]]
-                skills.forEach((skill) => {
-                    if(skill.name != sk) return skill.added = 0
-                    let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
+                let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]] //@ts-ignore - Lieber Leser. Als ich versucht hab, das hier sinnvoll zu lösen, hat VS Code angefangen, zu weinen. Deshalb hab ich es so gemacht. Ich bitte um Nachsicht.
+                Object.entries(stats).forEach(function ([name, stat]: [Stats, any]): any {
+                    if(name != sk) return stat.added = 0
+                    let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2)
+                    stats[name].increment += added
                     added *= 
-                        priority === skill.name ? 1.5 : 
-                        priority === 'Ausgeglichen' ? 1.125 : 1
-                    added = Math.round(added / 2)
-                    skill.added = added
-                    skill.value += skill.added
+                        priority === name ? 1.2 : 
+                        priority === 'all' ? 1.1 : 1
+                    stats[name].added += Math.round(added)
                 })
             }
 
@@ -188,18 +241,14 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setFields([
                     {
                         name: 'Statuswerte',
-                        value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'),
+                        value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
                         inline: true
                     },
                     {
-                        name: '​', 
-                        value: skills.map(s => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
-                        inline: true
+                        name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true
                     }
                 ])
-            skills.forEach(skill => {
-                skill.added = 0
-            })
+            Object.values(stats).forEach(skill => { delete skill.added })
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
                     new Discord.ButtonBuilder()
@@ -215,7 +264,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed = new Discord.EmbedBuilder()
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`>>> Du hast bisher noch kein Level erreicht.\nVerwende \`/cookies\` und \`/eat\`, um dein Level zu erhöhen und deine Statuswerte zu verbessern.`)
-                .setFooter({text: 'Schritt 4+5/6'})
+                .setFooter({text: 'Schritt 4+5/7'})
                 .setColor(color.red)
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
@@ -236,10 +285,10 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             .setFields(
                 [
                     { name: 'Skill Priorität', value: priority, inline: true },
-                    { name: 'Statuswerte', value: skills.map(skill => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true },
+                    { name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'), inline: true },
                 ]
             )
-            .setFooter({text: 'Schritt 6/6'})
+            .setFooter({text: 'Schritt 7/7'})
         buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
                 new Discord.ButtonBuilder()
@@ -259,15 +308,20 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
         if(interaction.customId.split(':')[1].startsWith('save')) {
-            let battle = {
+            let battle: UserData['battle'] = {
+                id: user.id,
                 priority,
-                skills,
+                stats: stats as UserData['battle']['stats'],
                 ready: true,
-                currentHP: skills.find(skill => skill.name == 'HP').value,
                 attacks: ['angriff'],
-                healTimestamp: Date.now()
+                hp: calculateStatValue(stats.hp),
+                healTimestamp: Date.now(),
+                class: playerClass.id
             }
-            await user.setData({ battle, inventory: [{ id: 'potion_t1', count: 5 }] })
+            user.storage.data.battle = battle
+            await user.save()
+            // TODO: Add 5 potion_t1 to inventory as seen below
+            // await user.setData({ battle, inventory: [{ id: 'potion_t1', count: 5 }] })
         }
         switch(interaction.customId.split(':')[1]) {
             case 'saveandexit':
