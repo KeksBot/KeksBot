@@ -3,6 +3,7 @@ import delay from 'delay'
 import classes from '../../battle/classes'
 import statnames from '../../battle/stats.json'
 import calculateStatValue from '../../util/calculateStatValue'
+import stattranslations from '../../battle/stattranslations.json'
 
 export default async (ita: Discord.CommandInteraction, args: any, client: Discord.Client) => {
     const { user, guild, color } = ita
@@ -72,33 +73,33 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         buttons[0].addComponents(
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.hp')
-                .setLabel('HP')
+                .setLabel(stattranslations.hp.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.attack')
-                .setLabel('Angriff')
+                .setLabel(stattranslations.attack.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.defense')
-                .setLabel('Verteidigung')
+                .setLabel(stattranslations.defense.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.speed')
-                .setLabel('Geschwindigkeit')
+                .setLabel(stattranslations.speed.de)
                 .setStyle(Discord.ButtonStyle.Secondary)
         )
         buttons[1].addComponents(
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.mana')
-                .setLabel('Mana')
+                .setLabel(stattranslations.mana.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.mAttack')
-                .setLabel('Magischer Angriff')
+                .setLabel(stattranslations.mAttack.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.mDefense')
-                .setLabel('Magische Verteidigung')
+                .setLabel(stattranslations.mDefense.de)
                 .setStyle(Discord.ButtonStyle.Secondary),
             new Discord.ButtonBuilder()
                 .setCustomId('battlesetup:step4.all')
@@ -110,7 +111,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         if(!interaction) return
 
         //Stats initialisieren
-        let priority = interaction.customId.split('.')[1]
+        let priority = interaction.customId.split('.')[1] 
         let stats: Partial<Record<Stats, UserData['battle']['stats']['accuracy'] & { added?: number}>> = {}
         for (const s of statnames) {
             stats[s as Stats] = {
@@ -124,15 +125,13 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             }
         }
 
-        console.log(stats)
-
         if((user.storage.data.level || 0) > 1) {
 
             //Autostats
             embed
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`)
-                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'), inline: true}])
+                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.floor(calculateStatValue(stat))}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 5/7'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
@@ -150,7 +149,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed.setFields([
                 {
                     name: 'Statuswerte',
-                    value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
+                    value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
                     inline: true
                 },
                 embed.data.fields[1]
@@ -172,39 +171,35 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             buttons = [new Discord.ActionRowBuilder<Discord.ButtonBuilder>(), new Discord.ActionRowBuilder<Discord.ButtonBuilder>()]
             buttons[0].addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.hp')
-                    .setLabel('HP')
+                    .setCustomId('battlesetup:step4.hp')
+                    .setLabel(stattranslations.hp.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.attack')
-                    .setLabel('Angriff')
+                    .setCustomId('battlesetup:step4.attack')
+                    .setLabel(stattranslations.attack.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.defense')
-                    .setLabel('Verteidigung')
+                    .setCustomId('battlesetup:step4.defense')
+                    .setLabel(stattranslations.defense.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.speed')
-                    .setLabel('Geschwindigkeit')
+                    .setCustomId('battlesetup:step4.speed')
+                    .setLabel(stattranslations.speed.de)
                     .setStyle(Discord.ButtonStyle.Secondary)
             )
             buttons[1].addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.mana')
-                    .setLabel('Mana')
+                    .setCustomId('battlesetup:step4.mana')
+                    .setLabel(stattranslations.mana.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.mAttack')
-                    .setLabel('Magischer Angriff')
+                    .setCustomId('battlesetup:step4.mAttack')
+                    .setLabel(stattranslations.mAttack.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
                 new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.mDefense')
-                    .setLabel('Magische Verteidigung')
+                    .setCustomId('battlesetup:step4.mDefense')
+                    .setLabel(stattranslations.mDefense.de)
                     .setStyle(Discord.ButtonStyle.Secondary),
-                new Discord.ButtonBuilder()
-                    .setCustomId('battlesetup:step6.all')
-                    .setLabel('Ausgeglichen')
-                    .setStyle(Discord.ButtonStyle.Secondary)
             )
             embed.setFooter({text: 'Schritt 6/7'})
             for (let l = user.storage.data.level || 0; l > 1; l--) {
@@ -214,7 +209,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     embed.setFields([
                         {
                             name: 'Statuswerte',
-                            value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
+                            value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
                             inline: true
                         },
                         {
@@ -225,7 +220,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
                 if(!interaction) return
 
-                let sk = require('../../battle/skillids.json')[interaction.customId.split('.')[1]] //@ts-ignore - Lieber Leser. Als ich versucht hab, das hier sinnvoll zu lösen, hat VS Code angefangen, zu weinen. Deshalb hab ich es so gemacht. Ich bitte um Nachsicht.
+                let sk = interaction.customId.split('.')[1] //@ts-ignore - Lieber Leser. Als ich versucht hab, das hier sinnvoll zu lösen, hat VS Code angefangen, zu weinen. Deshalb hab ich es so gemacht. Ich bitte um Nachsicht.
                 Object.entries(stats).forEach(function ([name, stat]: [Stats, any]): any {
                     if(name != sk) return stat.added = 0
                     let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
@@ -243,7 +238,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setFields([
                     {
                         name: 'Statuswerte',
-                        value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'),
+                        value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
                         inline: true
                     },
                     {
@@ -285,9 +280,10 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             .setTitle('Registrierung abschließen')
             .setDescription('Bitte überprüfe die Werte und schließe die Vorbereitung ab.')
             .setFields(
-                [
-                    { name: 'Skill Priorität', value: priority, inline: true },
-                    { name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${calculateStatValue(stat)}`).join('\n'), inline: true },
+                [ 
+                    { name: 'Klasse', value: playerClass.translations.de, inline: true }, //@ts-ignore
+                    { name: 'Priorität', value: stattranslations[priority]?.de || 'Ausgeglichen', inline: true },
+                    { name: 'Statuswerte', value: (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).map(([name, stat]) => `**${stattranslations[name].de}**: ${Math.floor(calculateStatValue(stat))}`).join('\n') },
                 ]
             )
             .setFooter({text: 'Schritt 7/7'})
@@ -310,7 +306,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
         interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
         if(!interaction) return
         if(interaction.customId.split(':')[1].startsWith('save')) {
-            let battle: UserData['battle'] = {
+            user.storage.data.battle = {
                 id: user.id,
                 priority,
                 stats: stats as UserData['battle']['stats'],
@@ -320,7 +316,6 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 healTimestamp: Date.now(),
                 class: playerClass.id
             }
-            user.storage.data.battle = battle
             await user.save()
             // TODO: Add 5 potion_t1 to inventory as seen below
             // await user.setData({ battle, inventory: [{ id: 'potion_t1', count: 5 }] })
