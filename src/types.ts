@@ -59,6 +59,10 @@ declare module 'discord.js' {
 }
 
 declare global {
+    type languages = 'de'
+
+    type Stats = 'hp' | 'attack' | 'defense' | 'speed' | 'accuracy' | 'critRate' | 'critDamage' | 'regeneration' | 'mana' | 'mAttack' | 'mDefense'
+
     interface String {
         replaceLast(searchValue: string, replaceValue: string): string
         title(): string
@@ -252,5 +256,13 @@ declare global {
 
     type DbSchemas = ('usersettings' | 'userinventory' | 'userbattle' | 'serverkeksbox')[]
 
-    type Stats = 'hp' | 'attack' | 'defense' | 'speed' | 'accuracy' | 'critrate' | 'critdamage' | 'regeneration'
+    type PlayerClass = {
+        id: string,
+        translations: Record<languages, string>
+        description: Record<languages, string>
+        fullDescription: Record<languages, string>
+        baseStats: Record<Stats, number>
+        statIncrement: Partial<Record<Stats, number>>
+        statIncrementDelta: Partial<Record<Stats, number>>
+    }
 }

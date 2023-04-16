@@ -1,0 +1,35 @@
+{
+    "attack": {
+        "de": "Angriff"
+    },
+    "defense": {
+        "de": "Verteidigung"
+    },
+    "hp": {
+        "de": "HP"
+    },
+    "speed": {
+        "de": "Geschwindigkeit"
+    },
+    "regeneration": {
+        "de": "Regeneration"
+    },
+    "accuracy": {
+        "de": "Genauigkeit"
+    },
+    "mana": {
+        "de": "Mana"
+    },
+    "critRate": {
+        "de": "Kritische Trefferrate"
+    },
+    "critDamage": {
+        "de": "Kritischer Schaden"
+    },
+    "mAttack": {
+        "de": "Magischer Angriff"
+    },
+    "mDefense": {
+        "de": "Magische Verteidigung"
+    }
+}
