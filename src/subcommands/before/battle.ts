@@ -2,6 +2,7 @@ import Discord from 'discord.js'
 import delay from 'delay'
 import classes from '../../battle/classes'
 import statnames from '../../battle/stats.json'
+import calculateVisualStatValue from '../../util/calculateVisualStatValue'
 import calculateStatValue from '../../util/calculateStatValue'
 import stattranslations from '../../battle/stattranslations.json'
 
@@ -130,8 +131,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             //Autostats
             embed
                 .setTitle('Verteilung der Statuswerte')
-                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`)
-                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.floor(calculateStatValue(stat))}`).join('\n'), inline: true}])
+                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`) //@ts-ignore
+                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 5/7'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
@@ -148,8 +149,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed.addFields([{name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
             embed.setFields([
                 {
-                    name: 'Statuswerte',
-                    value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
+                    name: 'Statuswerte', //@ts-ignore
+                    value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
                     inline: true
                 },
                 embed.data.fields[1]
@@ -208,8 +209,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setDescription(`>>> Pro Level kannst du eine zusätzliche Erhöhung eines beliebigen Skills durchführen. (${(l - 1)} verbleibend)`)
                     embed.setFields([
                         {
-                            name: 'Statuswerte',
-                            value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
+                            name: 'Statuswerte', //@ts-ignore
+                            value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
                             inline: true
                         },
                         {
@@ -228,7 +229,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     added *= 
                         priority === name ? 1.2 : 
                         priority === 'all' ? 1.1 : 1
-                    stats[name].added += Math.round(added)
+                    stats[name].added = Math.round(added)
                 })
             }
 
@@ -237,8 +238,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setDescription(`>>> Alle verfügbaren Erhöhungen wurden verwendet.`)
                 .setFields([
                     {
-                        name: 'Statuswerte',
-                        value: Object.entries(stats).map(([name, stat]) => `**${name}**: ${Math.round(calculateStatValue(stat))}`).join('\n'),
+                        name: 'Statuswerte', //@ts-ignore
+                        value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
                         inline: true
                     },
                     {
@@ -282,8 +283,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             .setFields(
                 [ 
                     { name: 'Klasse', value: playerClass.translations.de, inline: true }, //@ts-ignore
-                    { name: 'Priorität', value: stattranslations[priority]?.de || 'Ausgeglichen', inline: true },
-                    { name: 'Statuswerte', value: (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).map(([name, stat]) => `**${stattranslations[name].de}**: ${Math.floor(calculateStatValue(stat))}`).join('\n') },
+                    { name: 'Priorität', value: stattranslations[priority]?.de || 'Ausgeglichen', inline: true }, //@ts-ignore
+                    { name: 'Statuswerte', value: (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n') },
                 ]
             )
             .setFooter({text: 'Schritt 7/7'})
@@ -328,7 +329,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setFooter(null)
                     .setFields([])
                     .setColor(color.lime)
-                await interaction.update({ embeds: [embed], components: [] })
+                await interaction.update({ embeds: [embed], components:     [] })
                 return false
             case 'save':
                 embed
