@@ -146,14 +146,12 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 })
             }
             await delay(2000)
-            embed.addFields([{name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true}])
             embed.setFields([
                 {
                     name: 'Statuswerte', //@ts-ignore
-                    value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
+                    value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                     inline: true
-                },
-                embed.data.fields[1]
+                }
             ])
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
@@ -207,14 +205,11 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 embed  
                     .setTitle('Verteilung der Statuswerte')
                     .setDescription(`>>> Pro Level kannst du eine zusätzliche Erhöhung eines beliebigen Skills durchführen. (${(l - 1)} verbleibend)`)
-                    embed.setFields([
+                    .setFields([
                         {
                             name: 'Statuswerte', //@ts-ignore
-                            value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
+                            value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                             inline: true
-                        },
-                        {
-                            name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true
                         }
                     ])
                 await interaction.update({ embeds: [embed], components: buttons })    
@@ -239,11 +234,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setFields([
                     {
                         name: 'Statuswerte', //@ts-ignore
-                        value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'),
+                        value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                         inline: true
-                    },
-                    {
-                        name: '​', value: Object.entries(stats).map(([name, stat]) => `+ ${stat.added}`.replaceAll(/\+ 0$/g, '')).join('\n'), inline: true
                     }
                 ])
             Object.values(stats).forEach(skill => { delete skill.added })
