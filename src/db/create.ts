@@ -6,7 +6,7 @@ const usermodules = ['settings', 'battle', 'inventory']
 const servermodules = ['keksbox']
 
 async function create(schema: 'user' | 'server', id: string): Promise<any> {
-    const data: any = {}
+    let data: any = {}
     if(schema == 'user') {
         usermodules.forEach(m => data[m] = { create: {}})
     } else if(schema == 'server') {

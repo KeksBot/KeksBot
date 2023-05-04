@@ -1,6 +1,5 @@
 import Discord from 'discord.js'
-import skillid from '../battle/skillids.json'
-import skillinformation from '../battle/skills.json'
+import stattranslations from '../battle/stattranslations.json'
 import getcolor from '../subcommands/getcolor'
 import delay from 'delay'
 
@@ -17,12 +16,11 @@ export default {
                 iconURL: client.user.displayAvatarURL({ extension: 'png', forceStatic: false })
             })
             .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.storage.data.level} erreicht!`)
-        if(user.storage.data.battle.ready) {
-            var { skills } = user.storage.data.battle
+        if(user.storage.data.battle?.ready) {
+            var { stats } = user.storage.data.battle
             embed
                 //@ts-ignore
-                .addFields([{name: 'Statuswerte', value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
-                .setDescription(embed.data.description)
+                .addFields([{name: 'Statuswerte', value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
         }
         let reply
         let replied = !ita.replied
@@ -32,14 +30,14 @@ export default {
             reply = await ita.editReply({ embeds: [embed], components: [] })
             replied = true
         }
-        if(!user.storage.data.battle.ready) return
+        if(!user.storage.data.battle?.ready) return
         await delay(2000)
 
-        skills = user.storage.data.battle.skills
+        stats = user.storage.data.battle.stats
 
         for (let l = levelCount || 0; l > 0; l--) {
             //@ts-ignore
-            skills.forEach((skill: any) => {
+            stats.forEach((skill: any) => {
                 //@ts-ignore
                 let added = (skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2
                 added *= 
@@ -56,18 +54,20 @@ export default {
             {
                 name: 'Statuswerte',
                 //@ts-ignore
-                value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
+                value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
                 inline: true
             },
             {
                 name: '​',
                 //@ts-ignore
-                value: skills.filter(s => !skillinformation[s.name].hidden).map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                value: stats.filter(s => !skillinformation[s.name].hidden).map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
                 inline: true
             }
         ])
 
-        skills.forEach((skill: any) => {
+        //TODO: Autp heal
+
+        stats.forEach((skill: any) => {
             skill.value += skill.added
             if(skill.name == 'HP') user.storage.data.battle.hp += skill.added
             skill.added = 0
@@ -100,7 +100,7 @@ export default {
             //@ts-ignore
             const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
     
-            skills.forEach((skill: any) => {
+            stats.forEach((skill: any) => {
                 if(skill.name != sk) return skill.added = 0
                 //@ts-ignore
                 let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
@@ -116,13 +116,13 @@ export default {
                 {
                     name: 'Statuswerte',
                     //@ts-ignore
-                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'),
+                    value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'),
                     inline: true
                 },
                 {
                     name: '​',
                     //@ts-ignore
-                    value: skills.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                    value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `+ ${skill.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
                     inline: true
                 }
             ])
@@ -140,7 +140,7 @@ export default {
             }
 
     
-            skills.forEach((skill: any) => {
+            stats.forEach((skill: any) => {
                 if(skill.name == 'HP') user.storage.data.battle.hp += skill.added
                 delete skill.added
             })
