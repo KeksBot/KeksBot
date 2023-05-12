@@ -63,6 +63,15 @@ declare global {
 
     type Stats = 'hp' | 'attack' | 'defense' | 'speed' | 'accuracy' | 'critRate' | 'critDamage' | 'regeneration' | 'mana' | 'mAttack' | 'mDefense'
 
+    type StatOptions = {
+        base: number,
+        priority: number,
+        increment: number,
+        relModifier: number,
+        absModifier: number,
+        randomness: number,
+    }
+
     interface String {
         replaceLast(searchValue: string, replaceValue: string): string
         title(): string
@@ -110,14 +119,7 @@ declare global {
         battle?: {
             id: string
             user?: UserData
-            stats: Map<Stats, {
-                base: number,
-                priority: number,
-                increment: number,
-                relModifier: number,
-                absModifier: number,
-                randomness: number,
-            }>
+            stats: Discord.Collection<Stats, StatOptions>
             ready: boolean,
             priority: string,
             hp: number,

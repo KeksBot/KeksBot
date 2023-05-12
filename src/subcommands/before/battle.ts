@@ -113,17 +113,17 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
 
         //Stats initialisieren
         let priority = interaction.customId.split('.')[1] 
-        let stats: Partial<Record<Stats, UserData['battle']['stats']['accuracy'] & { added?: number}>> = {}
-        for (const s of statnames) {
-            stats[s as Stats] = {
-                base: playerClass.baseStats[s as Stats],
+        let stats: Discord.Collection<Stats, StatOptions & { added?: number }> = new Discord.Collection()
+        for (const s of statnames as Stats[]) {
+            stats.set(s, {
+                base: playerClass.baseStats[s],
                 priority: priority == s ? 1.2 : priority == 'all' ? 1.1 : undefined,
                 increment: 0,
                 randomness: Math.random() * 0.1 + 0.95,
                 absModifier: 0,
                 relModifier: 1,
                 added: 0
-            }
+            })
         }
 
         if((user.storage.data.level || 0) > 1) {
@@ -131,25 +131,25 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             //Autostats
             embed
                 .setTitle('Verteilung der Statuswerte')
-                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`) //@ts-ignore
-                .addFields([{name: 'Statuswerte', value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'), inline: true}])
+                .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`)
+                .addFields([{name: 'Statuswerte', value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 5/7'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
-                (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).forEach(([name, stat]) => {
+                stats.forEach(function (stat, name) {
                     let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
-                    stats[name].increment += added
+                    stat.increment += added
                     added *= 
                         priority === name ? 1.2 : 
                         priority === 'all' ? 1.1 : 1
-                    stats[name].added += Math.round(added)
+                    stat.added += Math.round(added)
                 })
             }
             await delay(2000)
             embed.setFields([
                 {
-                    name: 'Statuswerte', //@ts-ignore
-                    value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                    name: 'Statuswerte',
+                    value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                     inline: true
                 }
             ])
@@ -159,8 +159,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                         .setCustomId('battlesetup:step5')
                         .setLabel('Fortfahren')
                         .setStyle(Discord.ButtonStyle.Primary)
-                )
-            Object.values(stats).forEach(stat => {stat.added = 0})
+                );
+            [...stats.values()].forEach(stat => {stat.added = 0})
 
             await interaction.editReply({ embeds: [embed], components: [buttons] })
             interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction
@@ -207,8 +207,8 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setDescription(`>>> Pro Level kannst du eine zusätzliche Erhöhung eines beliebigen Skills durchführen. (${(l - 1)} verbleibend)`)
                     .setFields([
                         {
-                            name: 'Statuswerte', //@ts-ignore
-                            value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                            name: 'Statuswerte',
+                            value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                             inline: true
                         }
                     ])
@@ -216,15 +216,15 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 interaction = await message.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction 
                 if(!interaction) return
 
-                let sk = interaction.customId.split('.')[1] //@ts-ignore - Lieber Leser. Als ich versucht hab, das hier sinnvoll zu lösen, hat VS Code angefangen, zu weinen. Deshalb hab ich es so gemacht. Ich bitte um Nachsicht.
-                Object.entries(stats).forEach(function ([name, stat]: [Stats, any]): any {
+                let sk = interaction.customId.split('.')[1]
+                stats.forEach((stat, name) => {
                     if(name != sk) return stat.added = 0
                     let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
-                    stats[name].increment += added
+                    stat.increment += added
                     added *= 
                         priority === name ? 1.2 : 
                         priority === 'all' ? 1.1 : 1
-                    stats[name].added = Math.round(added)
+                    stat.added = Math.round(added)
                 })
             }
 
@@ -233,12 +233,12 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setDescription(`>>> Alle verfügbaren Erhöhungen wurden verwendet.`)
                 .setFields([
                     {
-                        name: 'Statuswerte', //@ts-ignore
-                        value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                        name: 'Statuswerte',
+                        value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                         inline: true
                     }
                 ])
-            Object.values(stats).forEach(skill => { delete skill.added })
+            stats.forEach(skill => { delete skill.added })
             buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
                 .addComponents(
                     new Discord.ButtonBuilder()
@@ -274,9 +274,9 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             .setDescription('Bitte überprüfe die Werte und schließe die Vorbereitung ab.')
             .setFields(
                 [ 
-                    { name: 'Klasse', value: playerClass.translations.de, inline: true }, //@ts-ignore
-                    { name: 'Priorität', value: stattranslations[priority]?.de || 'Ausgeglichen', inline: true }, //@ts-ignore
-                    { name: 'Statuswerte', value: (Object.entries(stats) as [Stats, UserData['battle']['stats']['accuracy']][]).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n') },
+                    { name: 'Klasse', value: playerClass.translations.de, inline: true },
+                    { name: 'Priorität', value: stattranslations[priority as Stats]?.de || 'Ausgeglichen', inline: true },
+                    { name: 'Statuswerte', value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n') },
                 ]
             )
             .setFooter({text: 'Schritt 7/7'})
@@ -305,7 +305,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 stats: stats as UserData['battle']['stats'],
                 ready: true,
                 attacks: ['angriff'],
-                hp: calculateStatValue(stats.hp),
+                hp: calculateStatValue(stats.get('hp')),
                 healTimestamp: Date.now(),
                 class: playerClass.id
             }
