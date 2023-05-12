@@ -25,8 +25,8 @@ export default class DataManager {
         return this.data
     }
 
-    protected async _save(schema: 'server' | 'user', id: string) {
-        this.data = await update(schema, id, this.data)
+    protected async _save(schema: 'server' | 'user', id: string, data: any) {
+        await update(schema, id, data)
         this.expires = new Date(Date.now() + 60000)
         return this.data
     }

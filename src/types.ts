@@ -110,13 +110,13 @@ declare global {
         battle?: {
             id: string
             user?: UserData
-            stats: Record<Stats, {
+            stats: Map<Stats, {
                 base: number,
                 priority: number,
                 increment: number,
                 relModifier: number,
                 absModifier: number,
-                randomness: number, 
+                randomness: number,
             }>
             ready: boolean,
             priority: string,

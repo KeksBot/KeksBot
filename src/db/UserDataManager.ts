@@ -1,6 +1,6 @@
 import DataManager from "./DataManager";
 
-const stats = ['hp', 'attack', 'defense', 'speed', 'accuracy', 'critrate', 'critdamage', 'regeneration'] as const
+import stats from '../battle/stats.json'
 
 export default class UserDataManager extends DataManager {
     public data: UserData = {}
@@ -22,7 +22,7 @@ export default class UserDataManager extends DataManager {
                     if (this.auto_cache["stat/" + stat]?.expires > Date.now()) return this.auto_cache["stat/" + stat].value; //@ts-expect-error
                     this.auto_cache["stat/" + stat] = { //@ts-expect-error
                         value: (this.data.battle.stats[stat].base + this.data.battle.stats[stat].increment + this.data.battle.stats[stat].absModifier) * //@ts-expect-error
-                            this.data.battle.stats[stat].randomness * this.data.battle.stats[stat].priority * this.data.battle.stats[stat].relModifier,
+                            this.data.battle.stats[stat].randomness * (this.data.battle.stats[stat].priority || 1) * this.data.battle.stats[stat].relModifier,
                         expires: Date.now() + 600000
                     }; //@ts-expect-error
                     return this.auto_cache["stat/" + stat].value;
@@ -32,11 +32,16 @@ export default class UserDataManager extends DataManager {
     }
 
     public async fetch(modules?: DbSchemas): Promise<UserData> {
-        return await this._fetch('user', this.id, modules)
+        await this._fetch('user', this.id, modules)
+        if(this.data.battle?.stats) this.data.battle.stats = new Map(this.data.battle.stats)
+        return this.data
     }
 
     public async save(): Promise<UserData> {
-        return await this._save('user', this.id)
+        let data: any = {...this.data}
+        if(data.battle?.stats) data.battle.stats = Array.from(data.battle.stats)
+        await this._save('user', this.id, data)
+        return this.data
     }
 
     public reloadStats() {
