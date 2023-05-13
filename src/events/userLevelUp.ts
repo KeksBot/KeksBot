@@ -1,7 +1,10 @@
 import Discord from 'discord.js'
 import stattranslations from '../battle/stattranslations.json'
+import classes from '../battle/classes'
 import getcolor from '../subcommands/getcolor'
 import delay from 'delay'
+import statnames from '../battle/stats'
+import { hidden } from '../battle/stats'
 
 export default {
     name: 'Level Up Message',
@@ -17,10 +20,9 @@ export default {
             })
             .setDescription(`Herzlichen Glückwunsch!\nDu hast Level ${user.storage.data.level} erreicht!`)
         if(user.storage.data.battle?.ready) {
-            var { stats } = user.storage.data.battle
+            var stats: Discord.Collection<Stats, StatOptions & { added?: number }> = user.storage.data.battle.stats
             embed
-                //@ts-ignore
-                .addFields([{name: 'Statuswerte', value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
+                .addFields([{name: 'Statuswerte', value: stats.filter((stat, name)=> !hidden[name]).map((skill: any) => `**${skill.name}**: ${skill.value}`).join('\n'), inline: true}])
         }
         let reply
         let replied = !ita.replied
@@ -33,44 +35,34 @@ export default {
         if(!user.storage.data.battle?.ready) return
         await delay(2000)
 
-        stats = user.storage.data.battle.stats
+        //@ts-ignore
+        let playerClass: PlayerClass = classes[user.storage.data.battle.class]
+        let priority = user.storage.data.battle.priority
 
-        for (let l = levelCount || 0; l > 0; l--) {
-            //@ts-ignore
-            stats.forEach((skill: any) => {
-                //@ts-ignore
-                let added = (skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2
+        for (let l = levelCount || 0; l > 1; l--) {
+            stats.forEach(function (stat, name) {
+                let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
+                stat.increment += added
                 added *= 
-                    user.storage.data.battle.priority === skill.name ? 1.5 : 
-                    user.storage.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
-                added = Math.round(added)
-                // @ts-ignore
-                skill.added = added
+                    priority === name ? 1.2 : 
+                    priority === 'all' ? 1.1 : 1
+                stat.added += Math.round(added)
             })
         }
 
         embed.setDescription(embed.data.description + '\nBitte wähle einen Skill aus, den du erhöhen möchtest.\nNach 2 Minuten wird automatisch ein zufälliger Skill erhöht.')
         embed.setFields([
             {
-                name: 'Statuswerte',
-                //@ts-ignore
-                value: stats.filter(s => !skillinformation[s.name].hidden).map((skill: any) => `**${skill.name}**: ${skill.value + skill.added}`).join('\n') + '​',
-                inline: true
-            },
-            {
-                name: '​',
-                //@ts-ignore
-                value: stats.filter(s => !skillinformation[s.name].hidden).map((s: any) => `+ ${s.added}`.replaceAll(/\+ 0$/g, '​')).join('\n') + '​',
+                name: 'Statuswerte', //@ts-ignore
+                value: Object.entries(stats).map(([name, stat]) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                 inline: true
             }
-        ])
+        ]);
 
         //TODO: Autp heal
-
-        stats.forEach((skill: any) => {
-            skill.value += skill.added
-            if(skill.name == 'HP') user.storage.data.battle.hp += skill.added
-            skill.added = 0
+        (Object.entries(stats) as [Stats, any]).forEach(([name, stat]) => {
+            if(name == 'hp') user.storage.data.battle.hp += stat.added
+            stat.added = 0
         })
 
         buttons.addComponents(
@@ -96,20 +88,17 @@ export default {
         else reply = await ita.editReply({ embeds: [embed], components: [buttons] }) 
 
         for(let l = levelCount; l > 0; l--) {
-            const interaction = await (reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita) as Discord.ButtonInteraction | Discord.SelectMenuInteraction | Discord.CommandInteraction
-            //@ts-ignore
-            const sk = skillid[interaction?.customId?.split('.')[1]] || Object.values(skillid)[Math.floor(Math.random() * Object.values(skillid).length)]
-    
-            stats.forEach((skill: any) => {
-                if(skill.name != sk) return skill.added = 0
-                //@ts-ignore
-                let added = ((skillinformation[skill.name].avgChange - skillinformation[skill.name].diffChange) + Math.random() * skillinformation[skill.name].diffChange * 2)
+            const interaction = await (reply.awaitMessageComponent({ time: 120000 }).catch(() => {}) || ita) as Discord.ButtonInteraction
+            
+            let sk = interaction.customId.split('.')[1] || statnames[Math.floor(Math.random() * statnames.length)] as Stats
+            stats.forEach((stat, name) => {
+                if(name != sk) return stat.added = 0
+                let added = ((playerClass.statIncrement[name] - playerClass.statIncrementDelta[name]) + Math.random() * playerClass.statIncrementDelta[name] * 2) || 0
+                stat.increment += added
                 added *= 
-                    user.storage.data.battle.priority === skill.name ? 1.5 : 
-                    user.storage.data.battle.priority === 'Ausgeglichen' ? 1.125 : 1
-                added = Math.round(added / 2)
-                skill.added = added
-                skill.value += skill.added
+                    priority === name ? 1.2 : 
+                    priority === 'all' ? 1.1 : 1
+                stat.added = Math.round(added)
             })
     
             embed.setFields([

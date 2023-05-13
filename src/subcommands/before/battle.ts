@@ -1,7 +1,8 @@
 import Discord from 'discord.js'
 import delay from 'delay'
 import classes from '../../battle/classes'
-import statnames from '../../battle/stats.json'
+import statnames from '../../battle/stats'
+import { hidden } from '../../battle/stats'
 import calculateVisualStatValue from '../../util/calculateVisualStatValue'
 import calculateStatValue from '../../util/calculateStatValue'
 import stattranslations from '../../battle/stattranslations.json'
@@ -132,7 +133,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed
                 .setTitle('Verteilung der Statuswerte')
                 .setDescription(`> Du erhältst nun automatisch anhand deines Levels Statuswerte.`)
-                .addFields([{name: 'Statuswerte', value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'), inline: true}])
+                .addFields([{name: 'Statuswerte', value: stats.filter((stat, name)=> !hidden[name]).map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n'), inline: true}])
                 .setFooter({text: 'Schritt 5/7'})
             await interaction.update({ embeds: [embed], components: [], fetchReply: true })
             for (let l = user.storage.data.level || 0; l > 1; l--) {
@@ -149,7 +150,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
             embed.setFields([
                 {
                     name: 'Statuswerte',
-                    value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                    value: stats.filter((stat, name)=> !hidden[name]).map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                     inline: true
                 }
             ])
@@ -208,7 +209,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                     .setFields([
                         {
                             name: 'Statuswerte',
-                            value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                            value: stats.filter((stat, name)=> !hidden[name]).map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                             inline: true
                         }
                     ])
@@ -234,7 +235,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 .setFields([
                     {
                         name: 'Statuswerte',
-                        value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
+                        value: stats.filter((stat, name)=> !hidden[name]).map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)} ${stat.added ? `+ ${stat.added}` : ''}`).join('\n'),
                         inline: true
                     }
                 ])
@@ -276,7 +277,7 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 [ 
                     { name: 'Klasse', value: playerClass.translations.de, inline: true },
                     { name: 'Priorität', value: stattranslations[priority as Stats]?.de || 'Ausgeglichen', inline: true },
-                    { name: 'Statuswerte', value: stats.map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n') },
+                    { name: 'Statuswerte', value: stats.filter((stat, name)=> !hidden[name]).map((stat, name) => `**${stattranslations[name].de}**: ${calculateVisualStatValue(name, stat)}`).join('\n') },
                 ]
             )
             .setFooter({text: 'Schritt 7/7'})
