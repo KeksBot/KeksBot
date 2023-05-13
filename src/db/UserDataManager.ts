@@ -1,7 +1,7 @@
 import DataManager from "./DataManager";
 import { Collection } from "@discordjs/collection";
 
-import stats from '../battle/stats.json'
+import stats from '../battle/stats'
 
 export default class UserDataManager extends DataManager {
     public data: UserData = {}
