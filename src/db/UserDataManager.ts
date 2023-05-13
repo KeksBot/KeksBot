@@ -34,7 +34,7 @@ export default class UserDataManager extends DataManager {
 
     public async fetch(modules?: DbSchemas): Promise<UserData> {
         await this._fetch('user', this.id, modules)
-        if(this.data.battle?.stats) this.data.battle.stats = new Collection(this.data.battle.stats)
+        if(this.data?.battle?.stats) this.data.battle.stats = new Collection(this.data.battle.stats)
         return this.data
     }
 
