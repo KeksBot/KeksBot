@@ -12,6 +12,6 @@ export default class GuildDataManager extends DataManager { //@ts-ignore
     }
 
     public async save(): Promise<GuildData> {
-        return await this._save('server', this.id)
+        return await this._save('server', this.id, this.data)
     }
 }
