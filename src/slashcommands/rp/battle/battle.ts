@@ -19,20 +19,22 @@ const options: CommandOptions = {
     before,
     execute: async function(ita, args, client) {
         let { user, color, guild } = ita
-        let { user: target } = args
+        let target: Discord.GuildMember = args.user
 
+        //@ts-ignore
         if(target == user.id) return ita.error('Fehler', 'Du kannst dich nicht selbst herausfordern.', true)
 
-        //Angegebenen Nutzer überprüfen
+        //@ts-ignore Angegebenen Nutzer überprüfen
         target = await guild.members.fetch(target).catch(async () => {
             return await ita.error('Fehler', 'Der Nutzer ist nicht auf dem Server.', true)
         })
+        if(!target.user.username) return
 
         if(user.storage.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, hp } = user.storage.data.battle
-            let maxHP = skills.find((skill: any) => skill.name == 'HP').value
+            let { healTimestamp, hp } = user.storage.data.battle
+            let maxHP = user.storage.auto.stats.hp
             if(hp != maxHP) {
-                let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
+                let healBonus = user.storage.auto.stats.regeneration || 1
                 let heal = maxHP / 100
                 hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(hp >= maxHP) {
@@ -51,23 +53,23 @@ const options: CommandOptions = {
         if(!target.user?.storage?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
 
         if(target.user.storage.data.battle?.healTimestamp) {
-            let { healTimestamp, skills, currentHP } = target.user.storage.data.battle
-            let maxHP = skills.find((skill: any) => skill.name == 'HP').value
-            if(currentHP != maxHP) {
-                let healBonus = skills.find((s: any) => s.name == 'Regeneration').value || 1
+            let { healTimestamp, hp } = target.user.storage.data.battle
+            let maxHP = user.storage.auto.stats.hp
+            if(hp != maxHP) {
+                let healBonus = user.storage.auto.stats.regeneration || 1
                 let heal = maxHP / 100
-                currentHP += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
-                if(currentHP >= maxHP) {
-                    currentHP = maxHP
+                hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
+                if(hp >= maxHP) {
+                    hp = maxHP
                     healTimestamp = 0
                 } else healTimestamp = Date.now()
                 target.user.storage.data.battle.healTimestamp = healTimestamp
-                target.user.storage.data.battle.currentHP = currentHP
+                target.user.storage.data.battle.hp = hp
                 await target.user.save()
             }
         }
 
-        if(target.user.storage.data.battle.currentHP <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
+        if(target.user.storage.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 
         //Herausforderung
         let embed = new Discord.EmbedBuilder()

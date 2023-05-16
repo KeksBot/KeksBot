@@ -68,7 +68,7 @@ export default class BattleUser {
     }
 
     async heal() {
-        let { healTimestamp, stats, hp } = this.battle
+        let { healTimestamp, hp } = this.battle
         let maxHP = this.stats.get('hp').value
         if (hp < maxHP) {
             let healBonus = this.stats.get('regeneration').value || 1
