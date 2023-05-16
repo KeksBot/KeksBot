@@ -8,9 +8,9 @@ const obj: BattleActionBuilder = {
     accuracy: 100,
     targets: 0,
     priority: 0,
-    modifiedSkills: [
+    modifiedStats: [
         {
-            name: 'Genauigkeit',
+            name: 'accuracy',
             value: -1,
             probability: 0.1
         }

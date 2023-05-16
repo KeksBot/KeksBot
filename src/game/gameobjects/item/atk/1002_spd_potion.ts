@@ -9,7 +9,7 @@ const obj: BattleActionBuilder = {
     emote: 'potion',
     modifiedStats: [
         {
-            name: 'Geschwindigkeit',
+            name: 'speed',
             value: 1
         }
     ],

@@ -224,8 +224,8 @@ declare global {
             onTarget?: boolean // Anwender oder Ziel 
             value: number
         }
-        modifiedSkills?: {
-            name: string
+        modifiedStats?: {
+            name: Stats
             value: number
             onTarget?: boolean // Anwender oder Ziel 
             probability?: number
