@@ -148,7 +148,7 @@ export default class BaseBattle {
             users.push({
                 n: u.member.displayName,
                 h: u.battle.hp,
-                m: u.skills.find(s => s.name == 'HP').value,
+                m: u.stats.get('hp').value,
                 l: u.user.storage.data.level,
                 t: u.team
             })
@@ -157,7 +157,7 @@ export default class BaseBattle {
                     users.push({
                         n: user.member.displayName,
                         h: user.battle.hp,
-                        m: user.skills.find(s => s.name == 'HP').value,
+                        m: user.stats.get('hp').value,
                         l: user.user.storage.data.level,
                         t: user.team
                     })
@@ -192,8 +192,8 @@ export default class BaseBattle {
             if(a.move.priority > b.move.priority) return -1
             if(a.move.priority < b.move.priority) return 1
 
-            if(a.user.skills.find(s => s.name == 'Geschwindigkeit') > b.user.skills.find(s => s.name == 'Geschwindigkeit')) return -1
-            if(a.user.skills.find(s => s.name == 'Geschwindigkeit') < b.user.skills.find(s => s.name == 'Geschwindigkeit')) return 1
+            if(a.user.stats.get('speed') > b.user.stats.get('speed')) return -1
+            if(a.user.stats.get('speed') < b.user.stats.get('speed')) return 1
         })
         let calc = this.calculations()
         let done = false
@@ -210,7 +210,7 @@ export default class BaseBattle {
                 users.push({
                     n: u.member.displayName,
                     h: u.battle.hp,
-                    m: u.skills.find(s => s.name == 'HP').value,
+                    m: u.stats.get('hp').value,
                     l: u.user.storage.data.level,
                     t: u.team
                 })
@@ -219,14 +219,14 @@ export default class BaseBattle {
                         users.push({
                             n: user.member.displayName,
                             h: user.battle.hp,
-                            m: user.skills.find(s => s.name == 'HP').value,
+                            m: user.stats.get('hp').value,
                             l: user.user.storage.data.level,
                             t: user.team
                         })
                     }
                 }
                 embed.setImage(`${imageRendererAPI}/b?users=${JSON.stringify(users)}`)
-                embed.setColor(u.battle.hp <= 0.25 * u.getSkillValue('HP') ? this.color.red : this.color.normal)
+                embed.setColor(u.battle.hp <= 0.25 * u.getSkillValue('hp') ? this.color.red : this.color.normal)
                 await u.updateMessage({ embeds: [embed], components: [] })
                 await delay(updateDuration)
             }
@@ -280,7 +280,7 @@ export default class BaseBattle {
                     for (const t of action.targets) {
                         const target = this.users.get(t)
                         let hit = Math.random() * 100
-                        let acu = user.getSkillValue('Genauigkeit') * action.move.accuracy
+                        let acu = user.getSkillValue('accuracy') * action.move.accuracy
                         acu = acu > 100 ? 100 : acu
                         if(hit >= acu) {
                             if(action.targets.length == 1) yield 'Daneben!'
@@ -289,14 +289,14 @@ export default class BaseBattle {
                         }
                         if(action.move.strength) {
                             await target.setHP(target.battle.hp - 
-                                ((user.getSkillValue('Angriff') / target.getSkillValue('Verteidigung')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.storage.data.level / 100)
+                                ((user.getSkillValue('attack') / target.getSkillValue('defense')) * 0.4 + 0.5) * action.move.strength * 1.6 * (1 + user.user.storage.data.level / 100)
                             )
                         }
-                        if(action.move.modifiedSkills) {
-                            for (const skill of action.move.modifiedSkills?.filter(s => s.onTarget)) {
-                                if(skill.probability && Math.random() * 100 >= skill.probability) continue
-                                target.modifySkills(skill.name, skill.value)
-                                text += `${skill.name} von ${target.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                        if(action.move.modifiedStats) {
+                            for (const stat of action.move.modifiedStats?.filter(s => s.onTarget)) {
+                                if(stat.probability && Math.random() * 100 >= stat.probability) continue
+                                target.modifySkills(stat.name, stat.value)
+                                text += `${stat.name} von ${target.name} ${stat.value > 0 ? 'steigt' : 'sinkt'}.`
                             }
                         }
                         //@ts-ignore
@@ -304,11 +304,11 @@ export default class BaseBattle {
                         //@ts-ignore
                         if(action.move.rHeal?.onTarget) await user.setHP(target.battle.hp + Math.round(target.battle.hp / 100 * action.move.rHeal.value))
                     }
-                    if(action.move.modifiedSkills) {
-                        for (const skill of action.move.modifiedSkills?.filter(s => !s.onTarget)) {
-                            if(skill.probability && Math.random() * 100 >= skill.probability) continue
-                            user.modifySkills(skill.name, skill.value)
-                            text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                    if(action.move.modifiedStats) {
+                        for (const stat of action.move.modifiedStats?.filter(s => !s.onTarget)) {
+                            if(stat.probability && Math.random() * 100 >= stat.probability) continue
+                            user.modifySkills(stat.name, stat.value)
+                            text += `${stat.name} von ${user.name} ${stat.value > 0 ? 'steigt' : 'sinkt'}.`
                         }
                     }
                     if(action.move.onUse) {
@@ -317,20 +317,19 @@ export default class BaseBattle {
                     }
                     //@ts-ignore
                     if(action.move.aHeal && !action.move.aHeal.onTarget) await user.setHP(user.battle.hp + (action.move.aHeal.value))
-                    //@ts-ignore
-                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.heal(user.battle.hp + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
+                    if(action.move.rHeal && !action.move.rHeal.onTarget) await user.setHP(user.battle.hp + Math.round(user.getSkillValue('hp') / 100 * action.move.rHeal.value))
                     yield text
                     break
                 }
                 case 'item':
                     let text = `${action.move.usageMessage?.replaceAll('{user}', user.name) || `${user.name} benutzt ${action.move.name}.`}\n`
                     if(action.move.aHeal) await user.setHP(user.battle.hp + action.move.aHeal.value)
-                    if(action.move.rHeal) await user.setHP(user.battle.hp + Math.round(user.getSkillValue('HP') / 100 * action.move.rHeal.value))
-                    if(action.move.modifiedSkills) {
-                        for (const skill of action.move.modifiedSkills) {
-                            if(skill.probability && Math.random() * 100 >= skill.probability) continue
-                            user.modifySkills(skill.name, skill.value)
-                            text += `${skill.name} von ${user.name} ${skill.value > 0 ? 'steigt' : 'sinkt'}.`
+                    if(action.move.rHeal) await user.setHP(user.battle.hp + Math.round(user.getSkillValue('hp') / 100 * action.move.rHeal.value))
+                    if(action.move.modifiedStats) {
+                        for (const stat of action.move.modifiedStats) {
+                            if(stat.probability && Math.random() * 100 >= stat.probability) continue
+                            user.modifySkills(stat.name, stat.value)
+                            text += `${stat.name} von ${user.name} ${stat.value > 0 ? 'steigt' : 'sinkt'}.`
                         }
                     }
                     if(action.move.onUse) {

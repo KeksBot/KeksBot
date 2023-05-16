@@ -152,11 +152,10 @@ declare global {
         battle: UserData['battle']
         id: string
         team: number
-        stats: {
-            name: string
+        stats: Map<Stats, ({
             value: number
             getValue?: () => number
-        }[]
+        } & StatOptions)>
         attacks: { id: string, uses: number }[]
         color: Color
         name: string
@@ -165,7 +164,7 @@ declare global {
             action: string,
             user: BattleUser
         }
-        statChanges?: UserData['battle']['stats']
+        statChanges?: Map<Stats, number>
     }
 
     interface BaseBattle {
@@ -176,6 +175,7 @@ declare global {
         color: Color
         client: Discord.Client
         started: boolean
+        usable: Map<string, BattleAction>
     }
 
     interface Color {
