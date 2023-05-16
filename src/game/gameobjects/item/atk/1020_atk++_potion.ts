@@ -7,7 +7,7 @@ const obj: BattleActionBuilder = {
     fightUsable: true,
     usageMessage: '{user} verwendet eine Offensivessenz',
     emote: 'potion',
-    modifiedSkills: [
+    modifiedStats: [
         {
             name: 'Angriff',
             value: 3

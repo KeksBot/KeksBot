@@ -7,7 +7,7 @@ const obj: BattleActionBuilder = {
     fightUsable: true,
     usageMessage: '{user} verwendet einen Offensivtrank',
     emote: 'potion',
-    modifiedSkills: [
+    modifiedStats: [
         {
             name: 'Angriff',
             value: 1

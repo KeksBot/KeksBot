@@ -7,7 +7,7 @@ const obj: BattleActionBuilder = {
     fightUsable: true,
     usageMessage: '{user} verwendet einen Tempotrank',
     emote: 'potion',
-    modifiedSkills: [
+    modifiedStats: [
         {
             name: 'Geschwindigkeit',
             value: 1

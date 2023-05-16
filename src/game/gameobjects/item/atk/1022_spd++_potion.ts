@@ -7,7 +7,7 @@ const obj: BattleActionBuilder = {
     fightUsable: true,
     usageMessage: '{user} verwendet eine Tempoessenz',
     emote: 'potion',
-    modifiedSkills: [
+    modifiedStats: [
         {
             name: 'Geschwindigkeit',
             value: 3

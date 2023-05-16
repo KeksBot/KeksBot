@@ -7,7 +7,7 @@ const obj: BattleActionBuilder = {
     fightUsable: true,
     usageMessage: '{user} verwendet eine Präzisionsessenz',
     emote: 'potion',
-    modifiedSkills: [
+    modifiedStats: [
         {
             name: 'Genauigkeit',
             value: 3
