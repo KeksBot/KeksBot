@@ -30,44 +30,45 @@ const options: CommandOptions = {
         })
         if(!target.user.username) return
 
-        if(user.storage.data.battle?.healTimestamp) {
+        await (async () => {
             let { healTimestamp, hp } = user.storage.data.battle
-            let maxHP = user.storage.auto.stats.hp
+            console.log(user.storage.auto.stats.hp)
+            let maxHP = Math.round(user.storage.auto.stats.hp)
             if(hp != maxHP) {
                 let healBonus = user.storage.auto.stats.regeneration || 1
                 let heal = maxHP / 100
                 hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(hp >= maxHP) {
                     hp = maxHP
-                    healTimestamp = 0
-                } else healTimestamp = Date.now()
+                }
+                healTimestamp = Date.now()
                 user.storage.data.battle.healTimestamp = healTimestamp
                 user.storage.data.battle.hp = hp
                 await user.save()
             }
-        }
+        })();
 
         if(user.storage.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'In deinem aktuellen Zustand bist du kampfunfähig. Bitte ruhe dich noch etwas aus, bevor du jemanden herausforderst.', true)
 
         await target.user?.load()
-        if(!target.user?.storage?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true)
+        if(!target.user?.storage?.data?.battle?.ready) return await ita.error('Fehler', 'Der Nutzer ist nicht bereit für einen Kampf.', true);
 
-        if(target.user.storage.data.battle?.healTimestamp) {
+        await (async () => {
             let { healTimestamp, hp } = target.user.storage.data.battle
-            let maxHP = user.storage.auto.stats.hp
+            let maxHP = Math.round(target.user.storage.auto.stats.hp)
             if(hp != maxHP) {
                 let healBonus = user.storage.auto.stats.regeneration || 1
                 let heal = maxHP / 100
                 hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
                 if(hp >= maxHP) {
                     hp = maxHP
-                    healTimestamp = 0
-                } else healTimestamp = Date.now()
+                }
+                healTimestamp = Date.now()
                 target.user.storage.data.battle.healTimestamp = healTimestamp
                 target.user.storage.data.battle.hp = hp
                 await target.user.save()
             }
-        }
+        })();
 
         if(target.user.storage.data.battle.hp <= 0) return await ita.error('Kampf unmöglich', 'Dein Gegner ist aktuell kampfunfähig. Bitte warte einen Moment und probiere es nachher erneut.', true)
 

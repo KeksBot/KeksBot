@@ -34,13 +34,15 @@ export default class UserDataManager extends DataManager {
 
     public async fetch(modules?: DbSchemas): Promise<UserData> {
         await this._fetch('user', this.id, modules)
-        if(this.data?.battle?.stats) this.data.battle.stats = new Collection(this.data.battle.stats)
+        if(this.data?.battle?.stats) this.data.battle.stats = new Collection(this.data.battle.stats) //@ts-ignore
+        if(this.data?.battle?.healTimestamp) this.data.battle.healTimestamp = this.data.battle.healTimestamp.getTime()
         return this.data
     }
 
     public async save(): Promise<UserData> {
         let data: any = {...this.data}
         if(data.battle?.stats) data.battle.stats = Array.from(data.battle.stats)
+        if(data.battle?.healTimestamp) data.battle.healTimestamp = new Date(data.battle.healTimestamp)
         await this._save('user', this.id, data)
         return this.data
     }

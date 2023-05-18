@@ -54,7 +54,7 @@ model userbattle {
     ready         Boolean  @default(false)
     priority      String?
     hp            Float?
-    healTimestamp BigInt?
+    healTimestamp DateTime?
     class         String?
     attacks       String[] @default([])
 }
