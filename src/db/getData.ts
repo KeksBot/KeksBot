@@ -56,7 +56,7 @@ User.prototype.load = async function(modules: DbSchemas = ['usersettings', 'user
     await this.storage.fetch(modules)
     console.log(this.storage.data)
     if(!this.storage.data) {
-        await this.create()
+        this.storage.data = await this.create()
     }
     return this.storage.data
 }
@@ -65,7 +65,7 @@ Guild.prototype.load = async function(modules: DbSchemas = ['serverkeksbox']) {
     if(!this.storage) this.storage = new GuildDataManager(this.id)
     await this.storage.fetch(modules)
     if(!this.storage.data) {
-        await this.create()
+        this.storage.data = await this.create()
     }
     return this.storage.data
 }
