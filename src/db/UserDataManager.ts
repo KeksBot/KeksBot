@@ -19,15 +19,15 @@ export default class UserDataManager extends DataManager {
         // init stats
         for (const stat of stats) {
             Object.defineProperty(this.auto.stats, stat, {
-                get: function () { //@ts-expect-error
-                    if (this.auto_cache["stat/" + stat]?.expires > Date.now()) return this.auto_cache["stat/" + stat].value; //@ts-expect-error
+                get: () => { 
+                    if (this.auto_cache["stat/" + stat]?.expires > Date.now()) return this.auto_cache["stat/" + stat].value; 
                     this.auto_cache["stat/" + stat] = { //@ts-expect-error
                         value: (this.data.battle.stats.get(stat).base + this.data.battle.stats.get(stat).increment + this.data.battle.stats.get(stat).absModifier) * //@ts-expect-error
                             this.data.battle.stats.get(stat).randomness * (this.data.battle.stats.get(stat).priority || 1) * this.data.battle.stats.get(stat).relModifier,
                         expires: Date.now() + 600000
-                    }; //@ts-expect-error
+                    };
                     return this.auto_cache["stat/" + stat].value;
-                }.bind(this as UserDataManager)
+                }
             })
         }
     }
