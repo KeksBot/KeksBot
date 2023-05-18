@@ -8,7 +8,7 @@ export default {
     event: 'messageCreate',
     async on(msg: Discord.Message, client: Discord.Client) {
         if (!msg.guild || msg.author.bot || msg.author.system) return
-        var serverdata = await msg.guild.getData()
+        var serverdata = await msg.guild.load()
         var spawnrate = 100
         if (serverdata?.keksbox) {
             spawnrate = serverdata.keksbox.spawnrate || 100
