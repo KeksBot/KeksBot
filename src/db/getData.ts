@@ -54,7 +54,6 @@ User.prototype.getData = async function(modules: DbSchemas = ['usersettings', 'u
 User.prototype.load = async function(modules: DbSchemas = ['usersettings', 'userinventory', 'userbattle']) {
     if(!this.storage) this.storage = new UserDataManager(this.id)
     await this.storage.fetch(modules)
-    console.log(this.storage.data)
     if(!this.storage.data) {
         this.storage.data = await this.create()
     }
