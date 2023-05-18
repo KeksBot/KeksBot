@@ -53,8 +53,8 @@ model userbattle {
     stats         Json[]   @default([])
     ready         Boolean  @default(false)
     priority      String?
-    hp            String?
-    healTimestamp DateTime @default(now())
+    hp            Float?
+    healTimestamp BigInt?
     class         String?
     attacks       String[] @default([])
 }
