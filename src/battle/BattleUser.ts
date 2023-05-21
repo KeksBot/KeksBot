@@ -42,7 +42,8 @@ export default class BattleUser {
     }
 
     init() {
-        //TODO: Ausrüstung auf Werte anwenden
+        //@ts-ignore TODO: Ausrüstung auf Werte anwenden
+        console.log(this.battle.stats.constructor.name)
         this.stats = this.battle.stats.mapValues((stat, name) => {
             return {
                 ...stat,
@@ -69,15 +70,15 @@ export default class BattleUser {
 
     async heal() {
         let { healTimestamp, hp } = this.battle
-        let maxHP = this.stats.get('hp').value
+        let maxHP = Math.round(this.stats.get('hp').value)
         if (hp < maxHP) {
             let healBonus = this.stats.get('regeneration').value || 1
             let heal = maxHP / 100
             hp += Math.ceil(Math.floor((Date.now() - healTimestamp) / 60000) * heal * healBonus)
             if (hp >= maxHP) {
                 hp = maxHP
-                healTimestamp = 0
-            } else healTimestamp = Date.now()
+            }
+            healTimestamp = Date.now()
         }
         this.battle.hp = hp
         this.battle.healTimestamp = healTimestamp
@@ -86,7 +87,7 @@ export default class BattleUser {
 
     async setHP(hp: number) {
         this.battle.hp = Math.round(hp < 0 ? 0 : hp > this.stats.get('hp').value ? this.stats.get('hp').value : hp)
-        this.battle.healTimestamp = this.battle.hp < this.getSkillValue('hp') ? Date.now() : 0
+        this.battle.healTimestamp = Date.now()
         await this.user.save()
     }
 
@@ -157,7 +158,7 @@ export default class BattleUser {
         //@ts-ignore
         else this.interaction.message = await this.interaction.editReply({ embeds: [embed], components: [button] }).catch(error => console.error(error))
         let interaction = await this.interaction.message.awaitMessageComponent({ filter: (i: any) => i.customId == 'battle:user.ready', componentType: Discord.ComponentType.Button, time: 120000 })
-            .catch((e) => { console.log(e); return null })
+            .catch((e) => { return null })
         if (!interaction) return false
         this.interaction = interaction
         return true
@@ -356,9 +357,9 @@ export default class BattleUser {
                                 .setStyle(Discord.ButtonStyle.Secondary)
                                 .setDisabled(true)
                         )
-                    let selectMenu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let selectMenu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('battle:user.selectInvCategory')
                                 .setPlaceholder('Kategorie auswählen')
                                 .addOptions([
@@ -409,7 +410,7 @@ export default class BattleUser {
                         embed.setFooter({ text: `Seite ${page} von ${Math.ceil(items.length / 25)}` })
                     }
                     if(!items.length) embed.setDescription('Hier ist nichts')
-                    let selectMenu = items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let selectMenu = items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).length ? new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
                             new Discord.SelectMenuBuilder()
                                 .setCustomId('battle:user.exit.selectItem')
@@ -450,7 +451,7 @@ export default class BattleUser {
                 }
             }
             //@ts-ignore
-            let interaction = await this.interaction.message.awaitMessageComponent({ time: 120000 }).catch((e) => { console.log(e); return false })
+            let interaction = await this.interaction.message.awaitMessageComponent({ time: 120000 }).catch((e) => { return false })
             if (!interaction) return false
             //@ts-ignore
             this.interaction = interaction

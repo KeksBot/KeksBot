@@ -148,7 +148,7 @@ export default class BaseBattle {
             users.push({
                 n: u.member.displayName,
                 h: u.battle.hp,
-                m: u.stats.get('hp').value,
+                m: Math.round(u.stats.get('hp').value),
                 l: u.user.storage.data.level,
                 t: u.team
             })
@@ -157,7 +157,7 @@ export default class BaseBattle {
                     users.push({
                         n: user.member.displayName,
                         h: user.battle.hp,
-                        m: user.stats.get('hp').value,
+                        m: Math.round(user.stats.get('hp').value),
                         l: user.user.storage.data.level,
                         t: user.team
                     })
@@ -210,7 +210,7 @@ export default class BaseBattle {
                 users.push({
                     n: u.member.displayName,
                     h: u.battle.hp,
-                    m: u.stats.get('hp').value,
+                    m: Math.round(u.stats.get('hp').value),
                     l: u.user.storage.data.level,
                     t: u.team
                 })
@@ -219,7 +219,7 @@ export default class BaseBattle {
                         users.push({
                             n: user.member.displayName,
                             h: user.battle.hp,
-                            m: user.stats.get('hp').value,
+                            m: Math.round(user.stats.get('hp').value),
                             l: user.user.storage.data.level,
                             t: user.team
                         })
