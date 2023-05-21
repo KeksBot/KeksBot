@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node build/index",
     "build": "tsc && cpy 'src/*.json' 'build' && node build/build.js",
-    "dev": "tsc && cpy 'src/*.json' 'build' && node build/index"
+    "dev": "tsc && cpy 'src/*.json' 'build' && node --trace-deprecation build/index"
   },
   "author": "Clyde",
   "license": "MIT",
@@ -22,7 +22,8 @@
     "axios": ">=0.21.1",
     "delay": "^5.0.0",
     "discord.js": "^14.9.0",
-    "fs": ">=0.0.1-security"
+    "fs": ">=0.0.1-security",
+    "lodash.clonedeep": "^4.5.0"
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",

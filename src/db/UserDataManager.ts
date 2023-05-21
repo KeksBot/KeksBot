@@ -1,5 +1,6 @@
 import DataManager from "./DataManager";
-import { Collection } from "@discordjs/collection";
+import { Collection } from "@discordjs/collection"; //@ts-ignore
+import cloneDeep from "lodash.clonedeep";
 
 import stats from '../battle/stats'
 
@@ -40,7 +41,7 @@ export default class UserDataManager extends DataManager {
     }
 
     public async save(): Promise<UserData> {
-        let data: any = {...this.data}
+        let data: any = cloneDeep(this.data)
         if(data.battle?.stats) data.battle.stats = Array.from(data.battle.stats)
         if(data.battle?.healTimestamp) data.battle.healTimestamp = new Date(data.battle.healTimestamp)
         await this._save('user', this.id, data)
