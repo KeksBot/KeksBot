@@ -245,6 +245,7 @@ declare global {
 
     interface DbInventoryItem {
         id: string
+        uniqueId: string
         count: number
         metadata?: {
             name?: string
