@@ -1,7 +1,7 @@
 const obj: BattleActionBuilder = {
-    id: 'sternenstaub',
+    id: 'stardust',
     name: 'Sternenstaub',
-    type: 'item/item',
+    type: 'item/special',
     description: 'Ein kleiner Haufen kosmischen Staubs. Eröffnet neue Wege'
 }
 
