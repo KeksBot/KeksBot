@@ -170,7 +170,7 @@ const options: CommandOptions = {
                 case 'inventory.item': {
                     //@ts-ignore
                     let index = parseInt(interaction.values?.[0]) ?? parseInt(interaction.customId?.split(':')?.[1])
-                    if(!index != undefined) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden\n(Herzlichen Glückwunsch, das hier hätte eigentlich nicht passieren können sollen)')
+                    if(index == undefined) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden\n(Herzlichen Glückwunsch, das hier hätte eigentlich nicht passieren können sollen)')
                     let item: BattleAction = items[index]
                     let group = items.filter(i => i.type == item.type)
                     let groupname = item.type.split('/')[1] || 'none'
