@@ -1,6 +1,9 @@
+//TODO: Use unique item ids
+
 import Discord from 'discord.js'
 import objectLoader from '../../game/objectLoader'
 import emotes from '../../emotes.json'
+import generateUniqueItemId from '../../util/generateUniqueItemId'
 
 const equals = function (x: any, y: any) {
     if (x === y) return true
@@ -62,9 +65,9 @@ const obj: CommandOptions = {
                     value: 'Hier gibt es eine ganze Menge hilfreicher Dinge zu kaufen'
                 }
             ])
-        let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+        let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
             .addComponents(
-                new Discord.SelectMenuBuilder()
+                new Discord.StringSelectMenuBuilder()
                     .setCustomId('store.category')
                     .setPlaceholder('Wähle eine Kategorie')
                     .addOptions([
@@ -152,9 +155,9 @@ const obj: CommandOptions = {
                                 value: `${item.description || 'Es ist keine Beschreibung verfügbar'}\n${item.count}x ${item.price} Kekse`
                             }
                         }))
-                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('store.cart.item')
                                 .setPlaceholder('Artikel ändern')
                                 .addOptions(cartContent.slice(cartPage * 10, cartPage * 10 + 10).map((item, index) => {
@@ -236,10 +239,8 @@ const obj: CommandOptions = {
                         return interaction.safeUpdate({ embeds: [embed], components: [] })
                     }
                     for (const item of cartContent) {
+                        user.storage.inventory.addItem(Object.assign({uniqueId: generateUniqueItemId(item)}, item))
                         let index = user.storage.data.inventory.items.findIndex(i => i.id == item.id && equals(i.metadata, item.metadata))
-                        if(index == -1) {
-                            user.storage.data.inventory.items.push({ id: item.id, count: item.count, metadata: item.metadata })
-                        } else user.storage.data.inventory.items[index].count += item.count
                         user.storage.data.cookies -= item.count * item.price
                     }
                     await user.save()
@@ -274,9 +275,9 @@ const obj: CommandOptions = {
                                 value: 'Hier gibt es eine ganze Menge hilfreicher Dinge zu kaufen'
                             }
                         ])
-                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('store.category')
                                 .setPlaceholder('Wähle eine Kategorie')
                                 .addOptions([
@@ -322,9 +323,9 @@ const obj: CommandOptions = {
                                 value: `${item.description ? item.description : 'Keine Beschreibung verfügbar'}\n${(item.price && item.price != 0) ? `Preis: **${item.price}** Kekse` : 'Preis variiert zwischen unterschiedlichen Ausführungen'}`
                             }
                         }))
-                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('store.category.item')
                                 .setPlaceholder('Wähle ein Item')
                                 .addOptions(items.slice(categoryPage * 10, categoryPage * 10 + 10).map(item => {
@@ -384,9 +385,9 @@ const obj: CommandOptions = {
                                     value: `${item.description}\n${(item.value && item.value != 0) ? `Preis: **${item.value}** Kekse` : 'Preis unbekannt'}`
                                 }
                             }))
-                        let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                        let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                             .addComponents(
-                                new Discord.SelectMenuBuilder()
+                                new Discord.StringSelectMenuBuilder()
                                     .setCustomId('store.meta.select')
                                     .setPlaceholder('Wähle eine Ausführung')
                                     .addOptions(items.slice(metaPage * 10, metaPage * 10 + 1).map(item => {
@@ -443,9 +444,9 @@ const obj: CommandOptions = {
                                     ''
                                 }Du hast aktuell ${user.storage.data.cookies} Kekse`
                             })
-                        let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                        let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                             .addComponents(
-                                new Discord.SelectMenuBuilder()
+                                new Discord.StringSelectMenuBuilder()
                                     .setCustomId('store.item.addToCart')
                                     .setPlaceholder('Anzahl auswählen')
                                     .setOptions([
@@ -508,9 +509,9 @@ const obj: CommandOptions = {
                                 ''
                             }Du hast aktuell ${user.storage.data.cookies} Kekse`
                         })
-                    let menu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                    let menu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('store.item.addToCart')
                                 .setPlaceholder('Anzahl auswählen')
                                 .setOptions([
@@ -557,7 +558,6 @@ const obj: CommandOptions = {
             }
             if(!path.startsWith('cart')) oldPath = path
             interaction = await reply.awaitMessageComponent({ time: 300000 }).catch(() => null) as Discord.ButtonInteraction | Discord.SelectMenuInteraction
-            console.log(oldPath)
             if(!interaction) break
         }
     }
