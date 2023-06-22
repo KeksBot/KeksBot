@@ -17,10 +17,10 @@ const options: CommandOptions = {
     ],
     execute: async function (interaction: Discord.CommandInteraction | Discord.ButtonInteraction, args, client) {
         const { user, color } = interaction
-        const index = args.item
+        const uniqueId = args.item
 
         //@ts-ignore
-        let item: BattleAction = {...user.storage.data.inventory[index]._doc}
+        let item: BattleAction = {...user.storage.inventory.get(uniqueId)}
         item = Object.assign(item, objectLoader([item.id]).get(item.id))
         item.onLoad && item.onLoad()
 
@@ -40,7 +40,7 @@ const options: CommandOptions = {
         let button = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
             .addComponents(
                 new Discord.ButtonBuilder()
-                    .setCustomId('item_use:' + index)
+                    .setCustomId('item_use:' + uniqueId)
                     .setLabel('Einsetzen')
                     .setStyle(Discord.ButtonStyle.Primary)
                     .setDisabled(!item.inventoryUsable)
@@ -61,12 +61,11 @@ const options: CommandOptions = {
             let embed
             if(output && (!output?.length || output?.[0])) {
                 if(item.aHeal) user.storage.data.battle.hp += item.aHeal.value
-                if(item.rHeal) user.storage.data.battle.hp += Math.round(user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value * item.rHeal.value)
-                if(user.storage.data.battle.hp > user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value) user.storage.data.battle.hp = user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value
+                if(item.rHeal) user.storage.data.battle.hp += Math.round(user.storage.auto.stats.hp * item.rHeal.value)
+                if(user.storage.data.battle.hp > user.storage.auto.stats.hp) user.storage.data.battle.hp = user.storage.auto.stats.hp
                 // TODO: Stat modifiers
-                item.count --
-                user.storage.data.inventory.items[index].count --
-                if(user.storage.data.inventory.items[index].count <= 0) user.storage.data.inventory.items.splice(user.storage.data.inventory.items.findIndex(i => i.id === index), 1)
+                user.storage.inventory.removeItemById(item.id, 1)
+                item.count--
                 await user.save()
                 embed = new Discord.EmbedBuilder()
                     .setColor(color.normal)
@@ -74,7 +73,6 @@ const options: CommandOptions = {
                     .setTitle(item.emote ? `${emotes.items[item.emote] || '[ ]'} ${item.name.title()}` : `[ ] ${item.name.title()}`)
                     .setDescription(`Anzahl: **${item.count}**\nTyp: **${type}**\n${item.description}` || `Anzahl: **${item.count}**\nTyp: **${type}**\nKeine Beschreibung verfügbar`)
                     .setFooter({ text: typeof output === 'string' ? output : 'Das Item wurde erfolgreich angewandt.' })
-                button.components[0].setDisabled(!item.count)
             } else embed = new Discord.EmbedBuilder()
                 .setColor(color.normal)
                 //@ts-ignore
@@ -82,7 +80,8 @@ const options: CommandOptions = {
                 .setDescription(`Anzahl: **${item.count}**\nTyp: **${type}**\n${item.description}` || `Anzahl: **${item.count}**\nTyp: **${type}**\nKeine Beschreibung verfügbar`)
                 .setFooter({ text: output == null ? 'Der Vorgang wurde abgebrochen' : output?.length && !output[0] ? output[1] : 'Das Item konnte nicht benutzt werden' })
 
-            //@ts-ignore
+            button.components[0].setDisabled(!item.count)
+            // @ts-ignore
             await interaction.update({ embeds: [embed], components: [button] })
             interaction = await res.awaitMessageComponent({ componentType: Discord.ComponentType.Button, time: 120000 }).catch(() => null)
         }
