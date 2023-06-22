@@ -310,6 +310,11 @@ export default async (ita: Discord.CommandInteraction, args: any, client: Discor
                 healTimestamp: Date.now(),
                 class: playerClass.id
             }
+            user.storage.inventory.addItem({
+                id: 'potion_t1',
+                uniqueId: 'potion_t1',
+                count: 5,
+            })
             await user.save()
             // TODO: Add 5 potion_t1 to inventory as seen below
             // await user.setData({ battle, inventory: [{ id: 'potion_t1', count: 5 }] })
