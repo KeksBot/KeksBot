@@ -8,14 +8,12 @@ const options: CommandOptions = {
     battlelock: true,
     execute: async function (ita, args, client) {
         let { user, color, guild } = ita
-        let inventory = user.storage.data?.inventory?.items
-        if (!inventory || !inventory.length) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
-        //@ts-ignore
+        let inventory = user.storage.inventory
+        if (!inventory || !inventory.size) return ita.error('Inventar leer', 'Du hast nichts im Inventar.', true)
         let objects = objectLoader(inventory.map(i => i.id))
         let items: BattleAction[]
         items = inventory.map(i => {
-            //@ts-ignore
-            let item: BattleAction = Object.assign({...objects.get(i.id)}, i._doc)
+            let item: BattleAction = Object.assign({...objects.get(i.id)}, i)
             if(item.onLoad) item.onLoad()
             return item
         })
@@ -37,9 +35,9 @@ const options: CommandOptions = {
                 value: 'base'
             }
         ]
-        let selectMenu = new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+        let selectMenu = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
             .addComponents(
-                new Discord.SelectMenuBuilder()
+                new Discord.StringSelectMenuBuilder()
                     .setCustomId('inventory')
                     .setPlaceholder('Kategorie auswählen')
                     .addOptions(itemtypes)
@@ -55,24 +53,18 @@ const options: CommandOptions = {
                 },
                 {
                     name: 'Sternenstaub',
-                    value: items.find(i => i.id == 'sternenstaub')?.count.toString() || '0',
-                    inline: true
-                },
-                {
-                    name: 'Kometenstücke',
-                    value: items.find(i => i.id == 'kometenstück')?.count.toString() || '0',
+                    value: items.find(i => i.id == 'stardust')?.count.toString() || '0',
                     inline: true
                 }
             ])
         let response = await ita.reply({ embeds: [embed], components: [selectMenu], ephemeral: true })
-        let interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null }) as Discord.ButtonInteraction | Discord.SelectMenuInteraction
+        let interaction = await response.awaitMessageComponent({ time: 300000 }).catch((e) => { console.log(e); return null }) as Discord.ButtonInteraction | Discord.StringSelectMenuInteraction
         if(!interaction) return
         while(true) {
             let objects = objectLoader(inventory.map(i => i.id))
             let items: BattleAction[]
             items = inventory.map(i => {
-                //@ts-ignore
-                let item: BattleAction = Object.assign({...objects.get(i.id)}, i._doc)
+                let item: BattleAction = Object.assign({...objects.get(i.id)}, i)
                 if(item.onLoad) item.onLoad()
                 return item
             })
@@ -93,12 +85,7 @@ const options: CommandOptions = {
                                     },
                                     {
                                         name: 'Sternenstaub',
-                                        value: items.find(i => i.id == 'sternenstaub')?.count.toString() || '0',
-                                        inline: true
-                                    },
-                                    {
-                                        name: 'Kometenstücke',
-                                        value: items.find(i => i.id == 'kometenstück')?.count.toString() || '0',
+                                        value: items.find(i => i.id == 'stardust')?.count.toString() || '0',
                                         inline: true
                                     }
                                 ])
@@ -130,9 +117,9 @@ const options: CommandOptions = {
                                 })
                             )
                             if(filter.length > 10) embed.setFooter({ text: `Seite ${page + 1} von ${Math.ceil(filter.length / 10)}` })
-                            let itemSelector = filter.length ? new Discord.ActionRowBuilder<Discord.SelectMenuBuilder>()
+                            let itemSelector = filter.length ? new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                                 .addComponents(
-                                    new Discord.SelectMenuBuilder()
+                                    new Discord.StringSelectMenuBuilder()
                                         .setCustomId(`inventory.item::${page}`)
                                         .setPlaceholder('Item auswählen')
                                         .addOptions(filter.slice(page * 10, page * 10 + 10).map(i => {
@@ -182,8 +169,8 @@ const options: CommandOptions = {
                 }
                 case 'inventory.item': {
                     //@ts-ignore
-                    let index = parseInt(interaction.values?.[0]) || parseInt(interaction.customId?.split(':')?.[1])
-                    if(!index) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden')
+                    let index = parseInt(interaction.values?.[0]) ?? parseInt(interaction.customId?.split(':')?.[1])
+                    if(!index != undefined) return interaction.error('Fehler', 'Das Item konnte nicht gefunden werden\n(Herzlichen Glückwunsch, das hier hätte eigentlich nicht passieren können sollen)')
                     let item: BattleAction = items[index]
                     let group = items.filter(i => i.type == item.type)
                     let groupname = item.type.split('/')[1] || 'none'
@@ -240,12 +227,11 @@ const options: CommandOptions = {
 
                     if(output && (!output?.length || output?.[0])) {
                         if(item.aHeal) user.storage.data.battle.hp += item.aHeal.value
-                        if(item.rHeal) user.storage.data.battle.hp += Math.round(user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value * item.rHeal.value)
-                        if(user.storage.data.battle.hp > user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value) user.storage.data.battle.hp = user.storage.data.battle.skills.find((s: any) => s.name == 'HP').value
+                        if(item.rHeal) user.storage.data.battle.hp += Math.round(user.storage.auto.stats.hp * item.rHeal.value)
+                        if(user.storage.data.battle.hp > user.storage.auto.stats.hp) user.storage.data.battle.hp = user.storage.auto.stats.hp
                         // TODO: Stat modifiers
-                        item.count --
-                        user.storage.data.inventory.items[index].count --
-                        if(user.storage.data.inventory.items[index].count <= 0) user.storage.data.inventory.items.splice(index, 1)
+                        user.storage.inventory.removeItemById(item.id, 1)
+                        item.count--
                         await user.save()
                         embed.setFooter({ text: typeof output === 'string' ? output : 'Das Item wurde erfolgreich angewandt' })
                     } else {
