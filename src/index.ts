@@ -17,7 +17,7 @@ import autocompletehandler from './autocomplete'
 import uptimemonitoring from './uptimemonitoring'
 
 import './db'
-import './embeds'
+import embeds from './embeds'
 
 process.on('exit', async (code) => {
     let channel = await client.channels.fetch(config.logChannel)
@@ -54,9 +54,39 @@ Discord.ButtonInteraction.prototype.safeUpdate = async function (messageOptions:
     else return await this.update(messageOptions)
 }
 
-Discord.SelectMenuInteraction.prototype.safeUpdate = async function (messageOptions: Discord.InteractionUpdateOptions) {
+Discord.StringSelectMenuInteraction.prototype.safeUpdate = async function (messageOptions: Discord.InteractionUpdateOptions) {
     if (this.replied) return await this.editReply(messageOptions)
     else return await this.update(messageOptions)
+}
+
+//@ts-ignore
+Discord.CommandInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.success(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.ButtonInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.success(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.StringSelectMenuInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.success(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.CommandInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.error(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.ButtonInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.error(this, title, description, ephemeral, del)
+}
+
+//@ts-ignore
+Discord.StringSelectMenuInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    return await embeds.error(this, title, description, ephemeral, del)
 }
 
 

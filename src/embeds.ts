@@ -84,7 +84,7 @@ const exp = {
      * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
      * @returns {Promise <Discord.Interaction>} Die Interaction vom Anfang
      */
-    async error(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.SelectMenuInteraction, title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    async error(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.StringSelectMenuInteraction, title: string, description: string, ephemeral?: boolean, del?: boolean) {
         const color = ita.color || await getColors(ita.guild)
         let embeds = [new Discord.EmbedBuilder()
             .setColor(color.red)
@@ -130,7 +130,7 @@ const exp = {
      * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
      * @returns {Promise <Discord.Interaction>} Die Interaction vom Anfang
      */
-    async needperms(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.SelectMenuInteraction, permission: string, ephemeral?: boolean, del?: boolean) {
+    async needperms(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.StringSelectMenuInteraction, permission: string, ephemeral?: boolean, del?: boolean) {
         const color = ita.color || await getColors(ita.guild)
         permission = translatepermission(permission)
         let embeds = [new Discord.EmbedBuilder()
@@ -178,7 +178,7 @@ const exp = {
      * @param {boolean} [del] Ob die Nachricht am Ende gelöscht werden soll
      * @returns {Promise <Discord.Interaction>} Die Interaction vom Anfang
      */
-    async success(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.SelectMenuInteraction, title: string, description: string, ephemeral?: boolean, del?: boolean) {
+    async success(ita: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.StringSelectMenuInteraction, title: string, description: string, ephemeral?: boolean, del?: boolean) {
         const color = ita.color || await getColors(ita.guild)
         let embeds = [new Discord.EmbedBuilder()
             .setColor(color.lime)
@@ -207,7 +207,7 @@ Discord.ButtonInteraction.prototype.success = async function(title: string, desc
 }
 
 //@ts-ignore
-Discord.SelectMenuInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+Discord.StringSelectMenuInteraction.prototype.success = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
     return await exp.success(this, title, description, ephemeral, del)
 }
 
@@ -222,6 +222,6 @@ Discord.ButtonInteraction.prototype.error = async function(title: string, descri
 }
 
 //@ts-ignore
-Discord.SelectMenuInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
+Discord.StringSelectMenuInteraction.prototype.error = async function(title: string, description: string, ephemeral?: boolean, del?: boolean) {
     return await exp.error(this, title, description, ephemeral, del)
 }
