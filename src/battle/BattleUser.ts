@@ -43,7 +43,6 @@ export default class BattleUser {
 
     init() {
         //@ts-ignore TODO: Ausrüstung auf Werte anwenden
-        console.log(this.battle.stats.constructor.name)
         this.stats = this.battle.stats.mapValues((stat, name) => {
             return {
                 ...stat,
@@ -412,7 +411,7 @@ export default class BattleUser {
                     if(!items.length) embed.setDescription('Hier ist nichts')
                     let selectMenu = items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).length ? new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
                         .addComponents(
-                            new Discord.SelectMenuBuilder()
+                            new Discord.StringSelectMenuBuilder()
                                 .setCustomId('battle:user.exit.selectItem')
                                 .setPlaceholder('Item auswählen')
                                 .addOptions(items.slice(page * 25 - 25, page * 25).filter((i: any) => i.u).map((i: any) => {
