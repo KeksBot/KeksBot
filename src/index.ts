@@ -14,7 +14,7 @@ import config from './config.json'
 import commandhandler from './commandhandler'
 import eventhandler from './eventhandler'
 import autocompletehandler from './autocomplete'
-import uptimemonitoring from './uptimemonitoring'
+// import uptimemonitoring from './uptimemonitoring'
 
 import './db'
 import embeds from './embeds'
@@ -112,7 +112,7 @@ client.once('ready', async () => { //Status
     var start = Date.now()
     console.log(`[${client.user.username}]: Client geladen.`)
     console.log(`[${client.user.username}]: Monitoring wird aktiviert.`)
-    uptimemonitoring(config.uptimeurl, client)
+    // uptimemonitoring(config.uptimeurl, client)
     console.log(`[${client.user.username}]: System wird gestartet.`)
     client.setMaxListeners(0)
     console.log(`[${client.user.username}]: Verbindung zur Datenbank hergestellt.`)
